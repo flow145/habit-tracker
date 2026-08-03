@@ -1,0 +1,11 @@
+- Scheduling uses **rolling intervals** (e.g. **3 times/week** means **3 completions during the last 7 days**, includes today).
+- Supported schedule intervals: **days**, **weeks**, and **months**.
+- Month intervals are based on **calendar month offsets**, not a fixed number of days (e.g. on July 31, the start of the last month is June 30 using `subMonths`).
+- Schedules are evaluated in the **current device time zone**.
+- Completion model:
+    - At most **one completion per habit per day**.
+    - A completion can be added or removed. (Skipped days will be added in a future version.)
+- Once a habit reaches the required number of completions within the current interval, all remaining days in that interval are marked as **auto-completed**.
+- A habit becomes due again as soon as an older completion falls outside the rolling interval.
+- Users can still complete or uncomplete auto-completed days. Day statuses are recalculated immediately after each change.
+- Updating a habit's schedule or completion history immediately recalculates the status of all affected days.
