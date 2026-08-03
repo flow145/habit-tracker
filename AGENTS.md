@@ -20,3 +20,4 @@ A simple, cross-platform habit tracker with flexible scheduling and a focus on l
 - `pnpm check` - Runs Biome's formatter, linter and import sorting
 - `pnpm check:fix` - Apply Biome fixes
 - `pnpm typecheck` - Run the TypeScript compiler checks
+- `pnpm test` - Run tests

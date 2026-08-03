@@ -1,9 +1,12 @@
 pre-commit:
   commands:
     check:
-      run: pnpm check:fix --no-errors-on-unmatched {staged_files}
+      run: pnpm check:fix {staged_files}
       glob: "*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,json,jsonc,html,css}"
       stage_fixed: true
+    test:
+      run: pnpm vitest related --run --passWithNoTests {staged_files}
+      glob: "*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
 
 commit-msg:
   commands:
@@ -13,7 +16,9 @@ commit-msg:
 pre-push:
   parallel: true
   commands:
-    check:
-      run: pnpm check
     typecheck:
       run: pnpm typecheck
+    check:
+      run: pnpm check
+    test:
+      run: pnpm test --passWithNoTests
