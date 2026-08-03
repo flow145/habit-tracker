@@ -1,0 +1,38 @@
+{
+  "name": "habit-tracker",
+  "description": "A simple, cross-platform habit tracker with flexible scheduling and a focus on long-term consistency over streaks.",
+  "version": "1.0.0-alpha.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://github.com/flow145/habit-tracker#readme",
+  "bugs": "https://github.com/flow145/habit-tracker/issues",
+  "repository": "git@github.com:flow145/habit-tracker.git",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "biome format --reporter=summary",
+    "format:fix": "pnpm format --write",
+    "check": "biome check --reporter=summary",
+    "check:fix": "pnpm check --write",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "react": "~19.2.8",
+    "react-dom": "~19.2.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.6",
+    "@commitlint/cli": "~21.2.1",
+    "@commitlint/config-conventional": "~21.2.0",
+    "@types/node": "~24.12.4",
+    "@types/react": "~19.2.17",
+    "@types/react-dom": "~19.2.3",
+    "@vitejs/plugin-react": "~6.0.4",
+    "lefthook": "~2.1.10",
+    "typescript": "~7.0.2",
+    "vite": "~8.1.5",
+    "vite-plugin-mkcert": "~2.1.0"
+  }
+}

@@ -1,0 +1,19 @@
+pre-commit:
+  commands:
+    check:
+      run: pnpm check:fix --no-errors-on-unmatched {staged_files}
+      glob: "*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,json,jsonc,html,css}"
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}
+
+pre-push:
+  parallel: true
+  commands:
+    check:
+      run: pnpm check
+    typecheck:
+      run: pnpm typecheck
