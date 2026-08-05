@@ -1,0 +1,52 @@
+:root {
+  --family-sans: 'Geist Variable', system-ui, sans-serif;
+}
+
+.title {
+  font: 600 23px / 28px var(--family-sans);
+}
+
+.heading {
+  font: 500 20px / 24px var(--family-sans);
+}
+
+.subheading {
+  font: 500 18px / 22px var(--family-sans);
+}
+
+.body {
+  font: 400 16px / 22px var(--family-sans);
+}
+
+.body-sm {
+  font: 400 14px / 20px var(--family-sans);
+}
+
+.button {
+  font: 500 16px / 16px var(--family-sans);
+}
+
+.label {
+  font: 500 16px / 22px var(--family-sans);
+}
+
+.hint {
+  font: 500 13px / 16px var(--family-sans);
+}
+
+@media (width >= 600px) {
+  .title {
+    font-size: 26px;
+    line-height: 32px;
+  }
+
+  .heading {
+    font-size: 22px;
+    line-height: 26px;
+  }
+
+  .subheading {
+    font-size: 20px;
+    line-height: 24px;
+  }
+}

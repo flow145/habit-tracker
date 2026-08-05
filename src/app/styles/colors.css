@@ -1,0 +1,40 @@
+:root {
+  --neutral-1: var(--slate-1);
+  --neutral-2: var(--slate-2);
+  --neutral-3: var(--slate-3);
+  --neutral-4: var(--slate-4);
+  --neutral-5: var(--slate-5);
+  --neutral-6: var(--slate-6);
+  --neutral-7: var(--slate-7);
+  --neutral-8: var(--slate-8);
+  --neutral-9: var(--slate-9);
+  --neutral-10: var(--slate-10);
+  --neutral-11: var(--slate-11);
+  --neutral-12: var(--slate-12);
+
+  --danger-1: var(--red-1);
+  --danger-2: var(--red-2);
+  --danger-3: var(--red-3);
+  --danger-4: var(--red-4);
+  --danger-5: var(--red-5);
+  --danger-6: var(--red-6);
+  --danger-7: var(--red-7);
+  --danger-8: var(--red-8);
+  --danger-9: var(--red-9);
+  --danger-10: var(--red-10);
+  --danger-11: var(--red-11);
+  --danger-12: var(--red-12);
+
+  --disabled-1: var(--gray-1);
+  --disabled-2: var(--gray-2);
+  --disabled-3: var(--gray-3);
+  --disabled-4: var(--gray-4);
+  --disabled-5: var(--gray-5);
+  --disabled-6: var(--gray-6);
+  --disabled-7: var(--gray-7);
+  --disabled-8: var(--gray-8);
+  --disabled-9: var(--gray-9);
+  --disabled-10: var(--gray-10);
+  --disabled-11: var(--gray-11);
+  --disabled-12: var(--gray-12);
+}

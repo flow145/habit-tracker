@@ -1,7 +1,0 @@
-#root {
-  isolation: isolate;
-}
-
-body {
-  position: relative;
-}
