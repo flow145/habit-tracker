@@ -2,6 +2,11 @@
   isolation: isolate;
 }
 
+:root {
+  color-scheme: light dark;
+}
+
 body {
   position: relative;
+  font-family: var(--family-sans);
 }
