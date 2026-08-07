@@ -18,6 +18,12 @@ lerna-debug.log*
 *.sln
 *.sw?
 
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.template
+
 node_modules
 dist
 dist-ssr
