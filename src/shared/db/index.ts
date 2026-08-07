@@ -1,2 +1,2 @@
-export { closeDb, DB_NAME } from './client'
+export { closeDb } from './client'
 export { repositories } from './repositories'

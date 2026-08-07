@@ -3,7 +3,7 @@ import { userEvent } from '@testing-library/user-event'
 import { deleteDB } from 'idb'
 import type { ReactElement, ReactNode } from 'react'
 
-import { closeDb, DB_NAME } from '~/shared/db'
+import { closeDb } from '~/shared/db'
 
 interface ProvidersProps {
   children: ReactNode
@@ -20,6 +20,8 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
 
 export * from '@testing-library/react'
 export { customRender as render }
+
+const DB_NAME = import.meta.env.VITE_DB_NAME
 
 export const deleteTestDb = async () => {
   await closeDb()

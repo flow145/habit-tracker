@@ -2,7 +2,6 @@ import { type IDBPDatabase, openDB } from 'idb'
 
 import type { DBSchema } from './schema'
 
-export const DB_NAME = 'habit-tracker'
 export const DB_VERSION = 1
 
 let database: Promise<IDBPDatabase<DBSchema>> | null = null
@@ -10,7 +9,7 @@ let database: Promise<IDBPDatabase<DBSchema>> | null = null
 export const getDb = () => {
   if (database) return database
 
-  const opening = openDB<DBSchema>(DB_NAME, DB_VERSION, {
+  const opening = openDB<DBSchema>(import.meta.env.VITE_DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion, _newVersion, tx) {
       if (oldVersion < 1) {
         const habitStore = db.objectStoreNames.contains('habits')
