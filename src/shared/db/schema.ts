@@ -18,7 +18,6 @@ export interface Habit {
   schedule: Schedule
   createdAt: Date
   updatedAt: Date
-  deletedAt?: Date
 }
 
 export interface Completion {

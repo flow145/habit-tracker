@@ -57,8 +57,7 @@ export const repositories = {
 
     async findAll() {
       const db = await getDb()
-      const habits = await db.getAllFromIndex('habits', 'byCreatedAt')
-      return habits.filter((habit) => !habit.deletedAt)
+      return db.getAllFromIndex('habits', 'byCreatedAt')
     },
 
     async update({ id, name, description, schedule }: UpdateHabitParams) {
@@ -84,27 +83,7 @@ export const repositories = {
       return updated
     },
 
-    async markDeleted(id: string) {
-      const db = await getDb()
-      const tx = db.transaction('habits', 'readwrite')
-      const existing = await tx.store.get(id)
-
-      if (!existing) {
-        await tx.done
-        throw new RecordNotFoundError('Habit', id)
-      }
-
-      const updated: Habit = {
-        ...existing,
-        deletedAt: new Date(),
-      }
-
-      await tx.store.put(updated)
-      await tx.done
-      return updated
-    },
-
-    async deletePermanently(id: string) {
+    async delete(id: string) {
       const db = await getDb()
       const tx = db.transaction('habits', 'readwrite')
       const existing = await tx.store.get(id)

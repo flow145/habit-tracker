@@ -4,15 +4,11 @@ import { resetTestDb } from '~/shared/tests'
 import { getDb } from './client'
 import { RecordAlreadyExistsError, RecordNotFoundError, RepositoryError } from './errors'
 import { repositories } from './repositories'
-import type { Completion, Habit, Schedule } from './schema'
+import type { Completion, Schedule } from './schema'
 
 const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'day' }
 
 const createHabit = (name = 'Read') => repositories.habits.create({ name, schedule })
-
-const seedHabit = async (habit: Habit) => {
-  await (await getDb()).put('habits', habit)
-}
 
 const seedCompletion = async (completion: Completion) => {
   await (await getDb()).put('completions', completion)
@@ -48,22 +44,15 @@ describe('habit repository', () => {
     expect(habit.description).toBe('')
   })
 
-  it('returns active habits oldest first and hides soft-deleted habits', async () => {
+  it('returns habits oldest first', async () => {
     const oldestAt = new Date('2026-01-01T00:00:00.000Z')
-    const deletedAt = new Date('2026-01-02T00:00:00.000Z')
     const newestAt = new Date('2026-01-03T00:00:00.000Z')
     vi.setSystemTime(oldestAt)
     const oldest = await createHabit('Oldest')
-    vi.setSystemTime(deletedAt)
-    const deleted = await createHabit('Deleted')
     vi.setSystemTime(newestAt)
     const newest = await createHabit('Newest')
-    await repositories.habits.markDeleted(deleted.id)
 
     expect(await repositories.habits.findAll()).toEqual([oldest, newest])
-    const storedDeleted = await repositories.habits.findById(deleted.id)
-    expect(storedDeleted?.id).toBe(deleted.id)
-    expect(storedDeleted?.deletedAt).toEqual(newestAt)
   })
 
   it('updates only supplied fields and returns the updated habit', async () => {
@@ -74,14 +63,12 @@ describe('habit repository', () => {
       description: 'Before',
       schedule,
     })
-    const deletedAt = new Date('2026-01-02T00:00:00.000Z')
-    await seedHabit({ ...habit, deletedAt })
     const updatedAt = new Date('2026-01-03T00:00:00.000Z')
     vi.setSystemTime(updatedAt)
 
     const updated = await repositories.habits.update({ id: habit.id, description: '' })
 
-    expect(updated).toEqual({ ...habit, description: '', updatedAt, deletedAt })
+    expect(updated).toEqual({ ...habit, description: '', updatedAt })
     expect(await repositories.habits.findById(habit.id)).toEqual(updated)
   })
 
@@ -112,24 +99,6 @@ describe('habit repository', () => {
     expect(await repositories.habits.findById('missing')).toBeNull()
   })
 
-  it('soft-deletes a habit while retaining its completions', async () => {
-    const habit = await createHabit()
-    const completion = await repositories.completions.create({
-      habitId: habit.id,
-      date: '2026-01-01',
-    })
-    const deletedAt = new Date('2026-01-02T00:00:00.000Z')
-    vi.setSystemTime(deletedAt)
-
-    const deleted = await repositories.habits.markDeleted(habit.id)
-
-    expect(deleted).toEqual({ ...habit, deletedAt })
-    expect(await repositories.completions.findByHabit(habit.id)).toEqual([completion])
-    await expect(repositories.habits.markDeleted('missing')).rejects.toThrow(
-      new RecordNotFoundError('Habit', 'missing'),
-    )
-  })
-
   it('permanently deletes only the habit and returns its snapshot', async () => {
     const habit = await createHabit()
     const completion = await repositories.completions.create({
@@ -137,11 +106,11 @@ describe('habit repository', () => {
       date: '2026-01-01',
     })
 
-    expect(await repositories.habits.deletePermanently(habit.id)).toEqual(habit)
+    expect(await repositories.habits.delete(habit.id)).toEqual(habit)
     expect(await repositories.habits.findById(habit.id)).toBeNull()
     expect(await repositories.habits.findAll()).toEqual([])
     expect(await repositories.completions.findByHabit(habit.id)).toEqual([completion])
-    await expect(repositories.habits.deletePermanently('missing')).rejects.toThrow(
+    await expect(repositories.habits.delete('missing')).rejects.toThrow(
       new RecordNotFoundError('Habit', 'missing'),
     )
   })
