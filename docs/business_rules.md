@@ -5,6 +5,7 @@
 - Completion model:
     - At most **one completion per habit per day**.
     - A completion can be added or removed. (Skipped days will be added in a future version.)
+    - Future days can't be completed.
 - Once a habit reaches the required number of completions within the current interval, all remaining days in that interval are marked as **auto-completed**.
 - A habit becomes due again as soon as an older completion falls outside the rolling interval.
 - Users can still complete or uncomplete auto-completed days. Day statuses are recalculated immediately after each change.

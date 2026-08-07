@@ -40,21 +40,25 @@ export const repositories = {
       }
 
       try {
-        return await db.add('habits', habit)
+        await db.add('habits', habit)
+        return habit
       } catch (error) {
         if (error instanceof Error && error.name === 'ConstraintError')
           throw new RecordAlreadyExistsError('Habit', id, { cause: error })
+
+        throw error
       }
     },
 
     async findById(id: string) {
       const db = await getDb()
-      return db.get('habits', id)
+      return (await db.get('habits', id)) ?? null
     },
 
     async findAll() {
       const db = await getDb()
-      return db.getAllFromIndex('habits', 'byCreatedAt')
+      const habits = await db.getAllFromIndex('habits', 'byCreatedAt')
+      return habits.filter((habit) => !habit.deletedAt)
     },
 
     async update({ id, name, description, schedule }: UpdateHabitParams) {
@@ -75,9 +79,9 @@ export const repositories = {
         updatedAt: new Date(),
       }
 
-      const habitId = await tx.store.put(updated)
+      await tx.store.put(updated)
       await tx.done
-      return habitId
+      return updated
     },
 
     async markDeleted(id: string) {
@@ -95,14 +99,24 @@ export const repositories = {
         deletedAt: new Date(),
       }
 
-      const key = await tx.store.put(updated)
+      await tx.store.put(updated)
       await tx.done
-      return key
+      return updated
     },
 
     async deletePermanently(id: string) {
       const db = await getDb()
-      return db.delete('habits', id)
+      const tx = db.transaction('habits', 'readwrite')
+      const existing = await tx.store.get(id)
+
+      if (!existing) {
+        await tx.done
+        throw new RecordNotFoundError('Habit', id)
+      }
+
+      await tx.store.delete(id)
+      await tx.done
+      return existing
     },
   },
 
@@ -122,10 +136,13 @@ export const repositories = {
       }
 
       try {
-        return await db.add('completions', completion)
+        await db.add('completions', completion)
+        return completion
       } catch (error) {
         if (error instanceof Error && error.name === 'ConstraintError')
           throw new RecordAlreadyExistsError('Completion', id, { cause: error })
+
+        throw error
       }
     },
 
@@ -137,7 +154,7 @@ export const repositories = {
       const completions: Completion[] = []
       const range = IDBKeyRange.bound(
         [habitId, toISODate(new Date(0))],
-        [habitId, toISODate(new Date())],
+        [habitId, toISODate(new Date('3000-12-31'))],
       )
 
       let cursor = await index.openCursor(range, 'prev')
@@ -153,7 +170,17 @@ export const repositories = {
 
     async delete(id: string) {
       const db = await getDb()
-      return db.delete('completions', id)
+      const tx = db.transaction('completions', 'readwrite')
+      const existing = await tx.store.get(id)
+
+      if (!existing) {
+        await tx.done
+        throw new RecordNotFoundError('Completion', id)
+      }
+
+      await tx.store.delete(id)
+      await tx.done
+      return existing
     },
   },
 }

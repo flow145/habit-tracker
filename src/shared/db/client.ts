@@ -2,8 +2,8 @@ import { type IDBPDatabase, openDB } from 'idb'
 
 import type { DBSchema } from './schema'
 
-const DB_NAME = 'habit-tracker'
-const DB_VERSION = 1
+export const DB_NAME = 'habit-tracker'
+export const DB_VERSION = 1
 
 let database: Promise<IDBPDatabase<DBSchema>> | null = null
 
