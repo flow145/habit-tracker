@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { deleteTestDb } from '~/shared/tests'
+import { resetTestDb } from '~/shared/tests'
 import { getDb } from './client'
 import { RecordAlreadyExistsError, RecordNotFoundError, RepositoryError } from './errors'
 import { repositories } from './repositories'
@@ -20,7 +20,7 @@ const seedCompletion = async (completion: Completion) => {
 
 afterEach(async () => {
   vi.useRealTimers()
-  await deleteTestDb()
+  await resetTestDb()
 })
 
 describe('habit repository', () => {

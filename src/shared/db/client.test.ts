@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { deleteTestDb } from '~/shared/tests'
+import { resetTestDb } from '~/shared/tests'
 import { closeDb, getDb } from './client'
 
 afterEach(async () => {
   vi.useRealTimers()
-  await deleteTestDb()
+  await resetTestDb()
 })
 
 describe('database client', () => {

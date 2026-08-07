@@ -1,6 +1,6 @@
 import { type RenderOptions, render } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import { deleteDB } from 'idb'
+import { IDBFactory } from 'fake-indexeddb'
 import type { ReactElement, ReactNode } from 'react'
 
 import { closeDb } from '~/shared/db'
@@ -21,13 +21,7 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>
 export * from '@testing-library/react'
 export { customRender as render }
 
-const DB_NAME = import.meta.env.VITE_DB_NAME
-
-export const deleteTestDb = async () => {
+export const resetTestDb = async () => {
   await closeDb()
-  await deleteDB(DB_NAME, {
-    blocked() {
-      throw new Error(`Deleting ${DB_NAME} was blocked`)
-    },
-  })
+  window.indexedDB = new IDBFactory()
 }
