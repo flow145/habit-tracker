@@ -163,7 +163,7 @@ describe('completion repository', () => {
     expect(otherHabit.habitId).toBe('habit-2')
   })
 
-  it('lists all completions for one habit newest first, including future dates', async () => {
+  it('lists all completions for one habit oldest first, including future dates', async () => {
     const createdAt = new Date('2026-01-01T00:00:00.000Z')
     const pastCompletion: Completion = {
       id: 'past',
@@ -194,8 +194,8 @@ describe('completion repository', () => {
     await seedCompletion(otherHabitCompletion)
 
     expect(await repositories.completions.findByHabit('habit-1')).toEqual([
-      futureCompletion,
       pastCompletion,
+      futureCompletion,
     ])
     expect(await repositories.completions.findByHabit('missing')).toEqual([])
   })

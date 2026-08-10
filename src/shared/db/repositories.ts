@@ -127,24 +127,12 @@ export const repositories = {
 
     async findByHabit(habitId: string) {
       const db = await getDb()
-      const tx = db.transaction('completions')
-      const index = tx.store.index('byHabitAndDate')
-
-      const completions: Completion[] = []
       const range = IDBKeyRange.bound(
         [habitId, toISODate(new Date(0))],
         [habitId, toISODate(new Date('3000-12-31'))],
       )
 
-      let cursor = await index.openCursor(range, 'prev')
-
-      while (cursor) {
-        completions.push(cursor.value)
-        cursor = await cursor.continue()
-      }
-
-      await tx.done
-      return completions
+      return db.getAllFromIndex('completions', 'byHabitAndDate', range)
     },
 
     async delete(id: string) {
