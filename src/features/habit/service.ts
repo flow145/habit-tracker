@@ -8,7 +8,11 @@ import {
   type ISODate,
   type Schedule,
 } from '~/shared/db'
-import { isErrorNamed, toISODate } from '~/shared/lib'
+import { isErrorNamed } from '~/shared/lib'
+
+interface HabitWithCompletions extends Habit {
+  completions: Omit<Completion, 'habitId'>[]
+}
 
 export const addHabit = async ({
   name,
@@ -18,7 +22,7 @@ export const addHabit = async ({
   name: string
   description?: string
   schedule: Schedule
-}) => {
+}): Promise<void> => {
   const db = await getDb()
   const id = uuidv7()
   const now = new Date()
@@ -41,12 +45,12 @@ export const addHabit = async ({
   }
 }
 
-export const getHabitList = async () => {
+export const getHabitList = async (): Promise<HabitWithCompletions[]> => {
   const db = await getDb()
   const tx = db.transaction(['habits', 'completions'], 'readonly')
-
-  const habits = await tx.objectStore('habits').getAll()
+  const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
   const completions = await tx.objectStore('completions').getAll()
+
   const habitsWithCompletions = habits.map((habit) => ({
     ...habit,
     completions: completions
@@ -68,7 +72,7 @@ export const editHabit = async ({
   name?: string
   description?: string
   schedule?: Schedule
-}) => {
+}): Promise<void> => {
   const db = await getDb()
   const tx = db.transaction('habits', 'readwrite')
   const existing = await tx.store.get(id)
@@ -96,27 +100,27 @@ export const editHabit = async ({
   }
 }
 
-export const deleteHabit = async (id: string) => {
+export const deleteHabit = async (id: string): Promise<void> => {
   const db = await getDb()
   const tx = db.transaction(['habits', 'completions'], 'readwrite')
-  const existing = await tx.objectStore('habits').get(id)
+  const habitsStore = tx.objectStore('habits')
+  const completionsStore = tx.objectStore('completions')
+  const existing = await habitsStore.get(id)
 
   if (!existing) {
     await tx.done
     throw new EntityNotFoundError('Habit', id)
   }
 
-  const completions = await tx
-    .objectStore('completions')
-    .index('byHabitAndDate')
-    .getAll(
-      IDBKeyRange.bound([id, toISODate(new Date(0))], [id, toISODate(new Date('3000-12-31'))]),
-    )
-  const completionDeleteOps = completions.map((completion) =>
-    tx.objectStore('completions').delete(completion.id),
+  const habitCompletions = (await completionsStore.getAll()).filter(
+    (completion) => completion.habitId === id,
   )
 
-  await Promise.all([...completionDeleteOps, tx.objectStore('habits').delete(id), tx.done])
+  await Promise.all([
+    ...habitCompletions.map((completion) => completionsStore.delete(completion.id)),
+    habitsStore.delete(id),
+    tx.done,
+  ])
 }
 
 export const setCompletionStatus = async ({
@@ -127,7 +131,7 @@ export const setCompletionStatus = async ({
   habitId: string
   date: ISODate
   status: 'complete' | 'incomplete'
-}) => {
+}): Promise<void> => {
   const db = await getDb()
 
   if (status === 'complete') {
