@@ -1,12 +1,15 @@
-- Scheduling uses **rolling intervals** (e.g. **3 times/week** means **3 completions during the last 7 days**, includes today).
-- Supported schedule intervals: **days**, **weeks**, and **months**.
-- Month intervals are based on **calendar month offsets**, not a fixed number of days (e.g. on July 31, the start of the last month is June 30 using `subMonths`).
-- Schedules are evaluated in the **current device time zone**.
-- Completion model:
-    - At most **one completion per habit per day**.
-    - A completion can be added or removed. (Skipped days will be added in a future version.)
-    - Future days can't be completed.
-- Once a habit reaches the required number of completions within the current interval, all remaining days in that interval are marked as **auto-completed**.
-- A habit becomes due again as soon as an older completion falls outside the rolling interval.
-- Users can still complete or uncomplete auto-completed days. Day statuses are recalculated immediately after each change.
-- Updating a habit's schedule or completion history immediately recalculates the status of all affected days.
+- A schedule defines a target frequency, interval length, and interval unit.
+- Scheduling uses rolling intervals. For example, three times per week means three user-completed days during the preceding seven-day period, including today.
+- Supported interval units are days, weeks, and months.
+- Month-based intervals use calendar-month offsets rather than a fixed number of days. For example, on July 31, the start of the preceding one-month interval is June 30.
+- Schedules are evaluated in the current device's time zone.
+- A habit can have at most one completion per calendar day.
+- Each habit day has a status calculated from the rolling-interval schedule and the user's completion history:
+    - **incomplete**: the user has not marked the day complete, and the schedule currently requires a completion.
+    - **not required**: the user has not marked the day complete, and the schedule does not currently require a completion.
+    - **complete**: the user marked the day complete, regardless of whether the schedule requires it.
+- Once a habit reaches the required number of user-completed days in the current interval, all remaining days in that interval are marked **not required** unless the user completes them.
+- Habit-day statuses are recalculated immediately after a day status change, schedule update, or transition to a new day.
+- Future days cannot be marked complete.
+- Users may mark a **not required** day complete. Removing that completion recalculates the day's status as **incomplete** or **not required**, as appropriate.
+- Deleting a habit permanently deletes all of its completions.
