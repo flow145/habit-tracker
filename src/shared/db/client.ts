@@ -23,8 +23,8 @@ export const getDb = () => {
           ? tx.objectStore('completions')
           : db.createObjectStore('completions', { keyPath: 'id' })
 
-        if (!completionStore.indexNames.contains('byHabitAndDate'))
-          completionStore.createIndex('byHabitAndDate', ['habitId', 'date'], { unique: true })
+        if (!completionStore.indexNames.contains('byHabitAndDay'))
+          completionStore.createIndex('byHabitAndDay', ['habitId', 'day'], { unique: true })
       }
     },
 

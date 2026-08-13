@@ -5,7 +5,6 @@ import {
   EntityNotFoundError,
   getDb,
   type Habit,
-  type ISODate,
   type Schedule,
 } from '~/shared/db'
 import { isErrorNamed } from '~/shared/lib'
@@ -125,11 +124,11 @@ export const deleteHabit = async (id: string): Promise<void> => {
 
 export const setCompletionStatus = async ({
   habitId,
-  date,
+  day,
   status,
 }: {
   habitId: string
-  date: ISODate
+  day: Date
   status: 'complete' | 'incomplete'
 }): Promise<void> => {
   const db = await getDb()
@@ -142,7 +141,7 @@ export const setCompletionStatus = async ({
       id,
       habitId,
       status: 'complete',
-      date,
+      day,
       createdAt: now,
       updatedAt: now,
     }
@@ -157,7 +156,7 @@ export const setCompletionStatus = async ({
 
   if (status === 'incomplete') {
     const tx = db.transaction('completions', 'readwrite')
-    const existing = await tx.store.index('byHabitAndDate').get([habitId, date])
+    const existing = await tx.store.index('byHabitAndDay').get([habitId, day])
 
     if (!existing) {
       await tx.done

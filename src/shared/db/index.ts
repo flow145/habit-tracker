@@ -5,6 +5,5 @@ export type {
   CompletionStatus,
   Habit,
   InvtervalUnit,
-  ISODate,
   Schedule,
 } from './schema'

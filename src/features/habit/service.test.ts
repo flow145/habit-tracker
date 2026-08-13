@@ -31,13 +31,13 @@ const seedCompletion = async (completion: Completion) => {
 const completion = (
   id: string,
   habitId: string,
-  date: string,
+  day: Date,
   createdAt = new Date('2026-01-01'),
 ): Completion => ({
   id,
   habitId,
   status: 'complete',
-  date,
+  day,
   createdAt,
   updatedAt: createdAt,
 })
@@ -112,9 +112,13 @@ describe('getHabitList', () => {
   it('joins only matching completions and omits habitId from exposed records', async () => {
     const first = await createHabit('First')
     const second = await createHabit('Second')
-    const firstCompletion = completion('first-completion', first.id, '2026-01-01')
-    const secondCompletion = completion('second-completion', second.id, '2026-01-02')
-    const unrelatedCompletion = completion('unrelated-completion', 'missing', '2026-01-03')
+    const firstCompletion = completion('first-completion', first.id, new Date('2026-01-01'))
+    const secondCompletion = completion('second-completion', second.id, new Date('2026-01-02'))
+    const unrelatedCompletion = completion(
+      'unrelated-completion',
+      'missing',
+      new Date('2026-01-03'),
+    )
     await seedCompletion(firstCompletion)
     await seedCompletion(secondCompletion)
     await seedCompletion(unrelatedCompletion)
@@ -126,7 +130,7 @@ describe('getHabitList', () => {
           {
             id: firstCompletion.id,
             status: 'complete',
-            date: firstCompletion.date,
+            day: firstCompletion.day,
             createdAt: firstCompletion.createdAt,
             updatedAt: firstCompletion.updatedAt,
           },
@@ -138,7 +142,7 @@ describe('getHabitList', () => {
           {
             id: secondCompletion.id,
             status: 'complete',
-            date: secondCompletion.date,
+            day: secondCompletion.day,
             createdAt: secondCompletion.createdAt,
             updatedAt: secondCompletion.updatedAt,
           },
@@ -225,10 +229,10 @@ describe('deleteHabit', () => {
     const deleted = await createHabit('Delete')
     const kept = await createHabit('Keep')
     const deletedCompletions = [
-      completion('before-1970', deleted.id, '0001-01-01'),
-      completion('after-3000', deleted.id, '9999-12-31'),
+      completion('before-1970', deleted.id, new Date('0001-01-01')),
+      completion('after-3000', deleted.id, new Date('9999-12-31')),
     ]
-    const keptCompletion = completion('kept-completion', kept.id, '2026-01-01')
+    const keptCompletion = completion('kept-completion', kept.id, new Date('2026-01-01'))
     for (const record of [...deletedCompletions, keptCompletion]) await seedCompletion(record)
 
     expect(await deleteHabit(deleted.id)).toBeUndefined()
@@ -244,7 +248,7 @@ describe('deleteHabit', () => {
 
   it('rejects an unknown habit without affecting existing records', async () => {
     const habit = await createHabit()
-    const record = completion('completion', habit.id, '2026-01-01')
+    const record = completion('completion', habit.id, new Date('2026-01-01'))
     await seedCompletion(record)
 
     await expect(deleteHabit('missing')).rejects.toThrow(
@@ -262,10 +266,15 @@ describe('deleteHabit', () => {
 describe('setCompletionStatus', () => {
   it('creates a complete completion with generated fields', async () => {
     const createdAt = new Date('2026-01-01T10:00:00.000Z')
+    const day = new Date('2026-01-01')
     vi.setSystemTime(createdAt)
 
     expect(
-      await setCompletionStatus({ habitId: 'habit-1', date: '2026-01-01', status: 'complete' }),
+      await setCompletionStatus({
+        habitId: 'habit-1',
+        day,
+        status: 'complete',
+      }),
     ).toBeUndefined()
 
     expect(await (await getDb()).getAll('completions')).toEqual([
@@ -273,7 +282,7 @@ describe('setCompletionStatus', () => {
         id: expect.any(String),
         habitId: 'habit-1',
         status: 'complete',
-        date: '2026-01-01',
+        day,
         createdAt,
         updatedAt: createdAt,
       },
@@ -281,40 +290,56 @@ describe('setCompletionStatus', () => {
   })
 
   it('is idempotent for a duplicate completion and preserves the original record', async () => {
-    const existing = completion('existing', 'habit-1', '2026-01-01')
+    const existing = completion('existing', 'habit-1', new Date('2026-01-01'))
     await seedCompletion(existing)
 
     expect(
-      await setCompletionStatus({ habitId: 'habit-1', date: '2026-01-01', status: 'complete' }),
+      await setCompletionStatus({
+        habitId: 'habit-1',
+        day: new Date('2026-01-01'),
+        status: 'complete',
+      }),
     ).toBeUndefined()
     expect(await (await getDb()).getAll('completions')).toEqual([existing])
   })
 
   it('removes an existing completion for incomplete', async () => {
-    const existing = completion('existing', 'habit-1', '2026-01-01')
+    const existing = completion('existing', 'habit-1', new Date('2026-01-01'))
     await seedCompletion(existing)
 
     expect(
-      await setCompletionStatus({ habitId: 'habit-1', date: '2026-01-01', status: 'incomplete' }),
+      await setCompletionStatus({
+        habitId: 'habit-1',
+        day: new Date('2026-01-01'),
+        status: 'incomplete',
+      }),
     ).toBeUndefined()
     expect(await (await getDb()).getAll('completions')).toEqual([])
   })
 
   it('treats incomplete for a missing date as a no-op', async () => {
     expect(
-      await setCompletionStatus({ habitId: 'missing', date: '2026-01-01', status: 'incomplete' }),
+      await setCompletionStatus({
+        habitId: 'missing',
+        day: new Date('2026-01-01'),
+        status: 'incomplete',
+      }),
     ).toBeUndefined()
   })
 
   it('isolates completion changes by habit and date', async () => {
     const records = [
-      completion('same-habit-other-date', 'habit-1', '2026-01-02'),
-      completion('other-habit', 'habit-2', '2026-01-01'),
-      completion('target', 'habit-1', '2026-01-01'),
+      completion('same-habit-other-date', 'habit-1', new Date('2026-01-02')),
+      completion('other-habit', 'habit-2', new Date('2026-01-01')),
+      completion('target', 'habit-1', new Date('2026-01-01')),
     ]
     for (const record of records) await seedCompletion(record)
 
-    await setCompletionStatus({ habitId: 'habit-1', date: '2026-01-01', status: 'incomplete' })
+    await setCompletionStatus({
+      habitId: 'habit-1',
+      day: new Date('2026-01-01'),
+      status: 'incomplete',
+    })
 
     expect(await (await getDb()).getAll('completions')).toEqual(
       expect.arrayContaining([records[0], records[1]]),
