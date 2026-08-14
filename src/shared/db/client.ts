@@ -25,6 +25,8 @@ export const getDb = () => {
 
         if (!completionStore.indexNames.contains('byHabitAndDay'))
           completionStore.createIndex('byHabitAndDay', ['habitId', 'day'], { unique: true })
+        if (!completionStore.indexNames.contains('byDay'))
+          completionStore.createIndex('byDay', 'day')
       }
     },
 

@@ -1,8 +1,18 @@
-import { format } from 'date-fns'
-
-export const toISODate = (date: Date) => format(date, 'yyyy-MM-dd')
-
 export const isErrorNamed = (error: unknown, name: string) => {
   if (typeof error !== 'object' || error === null) return false
   return 'name' in error && error.name === name
+}
+
+export function groupBy<T, K>(items: T[], getKey: (item: T) => K): Map<K, T[]> {
+  const groups = new Map<K, T[]>()
+
+  for (const item of items) {
+    const key = getKey(item)
+    const group = groups.get(key)
+
+    if (group) group.push(item)
+    else groups.set(key, [item])
+  }
+
+  return groups
 }
