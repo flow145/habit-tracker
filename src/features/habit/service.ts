@@ -21,7 +21,7 @@ export const addHabit = async ({
   name: string
   description?: string
   schedule: Schedule
-}): Promise<void> => {
+}): Promise<Habit> => {
   const db = await getDb()
   const id = uuidv7()
   const now = new Date()
@@ -42,6 +42,8 @@ export const addHabit = async ({
       throw new EntityConflictError('Habit', { id }, { cause: error })
     throw error
   }
+
+  return habit
 }
 
 export const getHabitList = async (): Promise<HabitWithCompletions[]> => {
@@ -71,7 +73,7 @@ export const editHabit = async ({
   name?: string
   description?: string
   schedule?: Schedule
-}): Promise<void> => {
+}): Promise<Habit> => {
   const db = await getDb()
   const tx = db.transaction('habits', 'readwrite')
   const existing = await tx.store.get(id)
@@ -97,6 +99,8 @@ export const editHabit = async ({
       throw new EntityConflictError('Habit', { id }, { cause: error })
     throw error
   }
+
+  return updated
 }
 
 export const deleteHabit = async (id: string): Promise<void> => {

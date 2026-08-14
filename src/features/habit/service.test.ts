@@ -1,7 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  type Completion,
+  type CompletionStatus,
   EntityConflictError,
   EntityNotFoundError,
   getDb,
@@ -10,41 +10,59 @@ import {
 import { resetTestDb } from '~/shared/tests'
 import { addHabit, deleteHabit, editHabit, getHabitList, setCompletionStatus } from './service'
 
+const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'day' }
+
+const seedHabit = async (data?: {
+  id?: string
+  name?: string
+  description?: string
+  schedule?: Schedule
+  createdAt?: string
+  updatedAt?: string
+}) => {
+  const habit = {
+    id: data?.id ?? '1',
+    name: data?.name ?? 'Read',
+    description: data?.description ?? '',
+    schedule: data?.schedule ?? schedule,
+    createdAt: new Date(data?.createdAt ?? '2026-01-01'),
+    updatedAt: new Date(data?.updatedAt ?? '2026-01-01'),
+  }
+  ;(await getDb()).add('habits', habit)
+  return habit
+}
+
+const seedCompletion = async (data: {
+  id?: string
+  habitId?: string
+  status?: CompletionStatus
+  day?: string
+  createdAt?: string
+  updatedAt?: string
+}) => {
+  const completion = {
+    id: data?.id ?? '1',
+    habitId: data?.habitId ?? '1',
+    status: data?.status ?? 'complete',
+    day: new Date(data?.day ?? '2026-01-01'),
+    createdAt: new Date(data?.createdAt ?? '2026-01-01'),
+    updatedAt: new Date(data?.updatedAt ?? '2026-01-01'),
+  }
+  ;(await getDb()).put('completions', completion)
+  return completion
+}
+
+const getHabit = async (id: string) => (await getDb()).get('habits', id)
+const getAllHabits = async () => (await getDb()).getAll('habits')
+const getAllCompletions = async () => (await getDb()).getAll('completions')
+
 vi.mock('uuid', async (importOriginal) => {
   const actual = await importOriginal<typeof import('uuid')>()
   return { ...actual, v7: vi.fn(actual.v7) }
 })
 
-const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'day' }
-
-const createHabit = async (name = 'Read', description?: string) => {
-  await addHabit({ name, description, schedule })
-  const habit = (await getHabitList()).find((item) => item.name === name)
-  if (!habit) throw new Error(`Habit ${name} was not created`)
-  return habit
-}
-
-const seedCompletion = async (completion: Completion) => {
-  await (await getDb()).put('completions', completion)
-}
-
-const completion = (
-  id: string,
-  habitId: string,
-  day: Date,
-  createdAt = new Date('2026-01-01'),
-): Completion => ({
-  id,
-  habitId,
-  status: 'complete',
-  day,
-  createdAt,
-  updatedAt: createdAt,
-})
-
 afterEach(async () => {
   vi.useRealTimers()
-  vi.mocked(uuidv7).mockClear()
   await resetTestDb()
 })
 
@@ -53,29 +71,27 @@ describe('addHabit', () => {
     const createdAt = new Date('2026-01-01T10:00:00.000Z')
     vi.setSystemTime(createdAt)
 
-    expect(await addHabit({ name: 'Read', schedule })).toBeUndefined()
+    const expected = {
+      id: expect.any(String),
+      name: 'Read',
+      description: '',
+      schedule,
+      createdAt,
+      updatedAt: createdAt,
+    }
 
-    expect(await getHabitList()).toEqual([
-      {
-        id: expect.any(String),
-        name: 'Read',
-        description: '',
-        schedule,
-        createdAt,
-        updatedAt: createdAt,
-        completions: [],
-      },
-    ])
+    expect(await addHabit({ name: 'Read', schedule })).toEqual(expected)
+    expect(await getAllHabits()).toEqual([expected])
   })
 
   it('preserves an explicitly empty description', async () => {
-    await addHabit({ name: 'Read', description: '', schedule })
+    const { id } = await addHabit({ name: 'Read', description: '', schedule })
 
-    expect((await getHabitList())[0]?.description).toBe('')
+    expect((await getHabit(id))?.description).toBe('')
   })
 
   it('maps a database constraint failure to EntityConflictError', async () => {
-    const id = 'habit-conflict'
+    const id = 'conflict'
     const generateId = (() => id) as typeof uuidv7
     vi.mocked(uuidv7).mockImplementationOnce(generateId).mockImplementationOnce(generateId)
 
@@ -87,6 +103,8 @@ describe('addHabit', () => {
       message: `Habit with id:${id} already exists`,
       cause: expect.objectContaining({ name: 'ConstraintError' }),
     })
+
+    vi.mocked(uuidv7).mockClear()
   })
 })
 
@@ -96,57 +114,42 @@ describe('getHabitList', () => {
   })
 
   it('returns habits oldest first with empty completion arrays', async () => {
-    const oldestAt = new Date('2026-01-01T00:00:00.000Z')
-    const newestAt = new Date('2026-01-03T00:00:00.000Z')
-    vi.setSystemTime(oldestAt)
-    await addHabit({ name: 'Oldest', schedule })
-    vi.setSystemTime(newestAt)
-    await addHabit({ name: 'Newest', schedule })
+    const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: '2026-01-01' })
+    const second = await seedHabit({ id: '2', name: 'Newest', createdAt: '2026-01-03' })
 
     expect(await getHabitList()).toEqual([
-      expect.objectContaining({ name: 'Oldest', createdAt: oldestAt, completions: [] }),
-      expect.objectContaining({ name: 'Newest', createdAt: newestAt, completions: [] }),
+      { ...first, completions: [] },
+      { ...second, completions: [] },
     ])
   })
 
   it('joins only matching completions and omits habitId from exposed records', async () => {
-    const first = await createHabit('First')
-    const second = await createHabit('Second')
-    const firstCompletion = completion('first-completion', first.id, new Date('2026-01-01'))
-    const secondCompletion = completion('second-completion', second.id, new Date('2026-01-02'))
-    const unrelatedCompletion = completion(
-      'unrelated-completion',
-      'missing',
-      new Date('2026-01-03'),
-    )
-    await seedCompletion(firstCompletion)
-    await seedCompletion(secondCompletion)
-    await seedCompletion(unrelatedCompletion)
+    const firstHabit = await seedHabit({ id: '1', name: 'First' })
+    const secondHabit = await seedHabit({ id: '2', name: 'Second' })
+    const { habitId: _, ...firstCompletion } = await seedCompletion({
+      id: '1',
+      habitId: firstHabit.id,
+      day: '2026-01-01',
+    })
+    const { habitId: __, ...secondCompletion } = await seedCompletion({
+      id: '2',
+      habitId: secondHabit.id,
+      day: '2026-01-02',
+    })
+    await seedCompletion({
+      id: '3',
+      habitId: 'missing',
+      day: '2026-01-03',
+    })
 
     expect(await getHabitList()).toEqual([
       expect.objectContaining({
-        id: first.id,
-        completions: [
-          {
-            id: firstCompletion.id,
-            status: 'complete',
-            day: firstCompletion.day,
-            createdAt: firstCompletion.createdAt,
-            updatedAt: firstCompletion.updatedAt,
-          },
-        ],
+        id: firstHabit.id,
+        completions: [firstCompletion],
       }),
       expect.objectContaining({
-        id: second.id,
-        completions: [
-          {
-            id: secondCompletion.id,
-            status: 'complete',
-            day: secondCompletion.day,
-            createdAt: secondCompletion.createdAt,
-            updatedAt: secondCompletion.updatedAt,
-          },
-        ],
+        id: secondHabit.id,
+        completions: [secondCompletion],
       }),
     ])
   })
@@ -154,64 +157,56 @@ describe('getHabitList', () => {
 
 describe('editHabit', () => {
   it('updates only supplied fields, including an empty description', async () => {
-    const createdAt = new Date('2026-01-01T00:00:00.000Z')
-    const updatedAt = new Date('2026-01-03T00:00:00.000Z')
-    vi.setSystemTime(createdAt)
-    const habit = await createHabit('Read', 'Before')
+    const habit = await seedHabit({ name: 'Read', description: 'Before', createdAt: '2026-01-01' })
+    const updatedAt = new Date('2026-01-03')
     vi.setSystemTime(updatedAt)
 
-    expect(await editHabit({ id: habit.id, description: '' })).toBeUndefined()
-
-    expect((await getHabitList())[0]).toEqual({
+    expect(await editHabit({ id: habit.id, description: '' })).toEqual({
       ...habit,
       description: '',
-      createdAt,
       updatedAt,
-      completions: [],
     })
   })
 
   it('updates all editable fields', async () => {
     const updatedSchedule: Schedule = { frequency: 3, interval: 1, intervalUnit: 'week' }
-    const habit = await createHabit()
-    const updatedAt = new Date('2026-01-03T00:00:00.000Z')
+    const habit = await seedHabit()
+    const updatedAt = new Date('2026-01-03')
     vi.setSystemTime(updatedAt)
 
-    await editHabit({
-      id: habit.id,
-      name: 'Exercise',
-      description: 'Daily',
-      schedule: updatedSchedule,
-    })
-
-    expect((await getHabitList())[0]).toEqual({
+    expect(
+      await editHabit({
+        id: habit.id,
+        name: 'Exercise',
+        description: 'Daily',
+        schedule: updatedSchedule,
+      }),
+    ).toEqual({
       ...habit,
       name: 'Exercise',
       description: 'Daily',
       schedule: updatedSchedule,
       updatedAt,
-      completions: [],
     })
   })
 
   it('rejects an unknown habit without changing the database', async () => {
-    const habit = await createHabit()
+    const habit = await seedHabit()
 
-    await expect(editHabit({ id: 'missing', name: 'Nope' })).rejects.toThrow(
+    await expect(editHabit({ id: 'missing', name: 'Missing' })).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
     )
-    expect((await getHabitList())[0]).toEqual(expect.objectContaining(habit))
+    expect(await getHabit(habit.id)).toEqual(habit)
   })
 
   it('maps an injected put constraint failure to EntityConflictError', async () => {
-    const habit = await createHabit()
+    const habit = await seedHabit()
     const failure = new DOMException('duplicate', 'ConstraintError')
     const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
       throw failure
     })
 
     try {
-      await addHabit(habit)
       const result = editHabit({ id: habit.id, name: 'Changed' })
       await expect(result).rejects.toThrow(EntityConflictError)
       await expect(result).rejects.toMatchObject({
@@ -226,40 +221,31 @@ describe('editHabit', () => {
 
 describe('deleteHabit', () => {
   it('deletes the habit and all completions without affecting another habit', async () => {
-    const deleted = await createHabit('Delete')
-    const kept = await createHabit('Keep')
-    const deletedCompletions = [
-      completion('before-1970', deleted.id, new Date('0001-01-01')),
-      completion('after-3000', deleted.id, new Date('9999-12-31')),
-    ]
-    const keptCompletion = completion('kept-completion', kept.id, new Date('2026-01-01'))
-    for (const record of [...deletedCompletions, keptCompletion]) await seedCompletion(record)
+    const deleted = await seedHabit({ id: '1', name: 'Delete' })
+    const kept = await seedHabit({ id: '2', name: 'Keep' })
+    await seedCompletion({ id: '1', habitId: deleted.id, day: '0001-01-01' })
+    await seedCompletion({ id: '2', habitId: deleted.id, day: '9999-12-31' })
+    const keptCompletion = await seedCompletion({
+      id: '3',
+      habitId: kept.id,
+      day: '2026-01-01',
+    })
 
     expect(await deleteHabit(deleted.id)).toBeUndefined()
-
-    expect(await getHabitList()).toEqual([
-      expect.objectContaining({
-        id: kept.id,
-        completions: [expect.objectContaining({ id: keptCompletion.id })],
-      }),
-    ])
-    expect(await (await getDb()).get('habits', deleted.id)).toBeUndefined()
+    expect(await getAllHabits()).toEqual([kept])
+    expect(await getAllCompletions()).toEqual([keptCompletion])
+    expect(await getHabit(deleted.id)).toBeUndefined()
   })
 
   it('rejects an unknown habit without affecting existing records', async () => {
-    const habit = await createHabit()
-    const record = completion('completion', habit.id, new Date('2026-01-01'))
-    await seedCompletion(record)
+    const habit = await seedHabit()
+    const completion = await seedCompletion({ habitId: habit.id, day: '2026-01-01' })
 
     await expect(deleteHabit('missing')).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
     )
-    expect(await getHabitList()).toEqual([
-      expect.objectContaining({
-        id: habit.id,
-        completions: [expect.objectContaining({ id: record.id })],
-      }),
-    ])
+    expect(await getAllHabits()).toEqual([habit])
+    expect(await getAllCompletions()).toEqual([completion])
   })
 })
 
@@ -269,18 +255,11 @@ describe('setCompletionStatus', () => {
     const day = new Date('2026-01-01')
     vi.setSystemTime(createdAt)
 
-    expect(
-      await setCompletionStatus({
-        habitId: 'habit-1',
-        day,
-        status: 'complete',
-      }),
-    ).toBeUndefined()
-
-    expect(await (await getDb()).getAll('completions')).toEqual([
+    expect(await setCompletionStatus({ habitId: '1', day, status: 'complete' })).toBeUndefined()
+    expect(await getAllCompletions()).toEqual([
       {
         id: expect.any(String),
-        habitId: 'habit-1',
+        habitId: '1',
         status: 'complete',
         day,
         createdAt,
@@ -290,31 +269,29 @@ describe('setCompletionStatus', () => {
   })
 
   it('is idempotent for a duplicate completion and preserves the original record', async () => {
-    const existing = completion('existing', 'habit-1', new Date('2026-01-01'))
-    await seedCompletion(existing)
+    const existing = await seedCompletion({ habitId: '1', day: '2026-01-01' })
 
     expect(
       await setCompletionStatus({
-        habitId: 'habit-1',
+        habitId: '1',
         day: new Date('2026-01-01'),
         status: 'complete',
       }),
     ).toBeUndefined()
-    expect(await (await getDb()).getAll('completions')).toEqual([existing])
+    expect(await getAllCompletions()).toEqual([existing])
   })
 
   it('removes an existing completion for incomplete', async () => {
-    const existing = completion('existing', 'habit-1', new Date('2026-01-01'))
-    await seedCompletion(existing)
+    await seedCompletion({ habitId: '1', day: '2026-01-01' })
 
     expect(
       await setCompletionStatus({
-        habitId: 'habit-1',
+        habitId: '1',
         day: new Date('2026-01-01'),
         status: 'incomplete',
       }),
     ).toBeUndefined()
-    expect(await (await getDb()).getAll('completions')).toEqual([])
+    expect(await getAllCompletions()).toEqual([])
   })
 
   it('treats incomplete for a missing date as a no-op', async () => {
@@ -328,21 +305,24 @@ describe('setCompletionStatus', () => {
   })
 
   it('isolates completion changes by habit and date', async () => {
-    const records = [
-      completion('same-habit-other-date', 'habit-1', new Date('2026-01-02')),
-      completion('other-habit', 'habit-2', new Date('2026-01-01')),
-      completion('target', 'habit-1', new Date('2026-01-01')),
-    ]
-    for (const record of records) await seedCompletion(record)
+    const first = await seedCompletion({
+      id: '1',
+      habitId: '1',
+      day: '2026-01-02',
+    })
+    const second = await seedCompletion({
+      id: '2',
+      habitId: '2',
+      day: '2026-01-01',
+    })
+    await seedCompletion({ id: '3', habitId: '1', day: '2026-01-01' })
 
     await setCompletionStatus({
-      habitId: 'habit-1',
+      habitId: '1',
       day: new Date('2026-01-01'),
       status: 'incomplete',
     })
 
-    expect(await (await getDb()).getAll('completions')).toEqual(
-      expect.arrayContaining([records[0], records[1]]),
-    )
+    expect(await getAllCompletions()).toEqual([first, second])
   })
 })
