@@ -25,8 +25,8 @@ const seedHabit = async (data?: {
     name: data?.name ?? 'Read',
     description: data?.description ?? '',
     schedule: data?.schedule ?? schedule,
-    createdAt: new Date(data?.createdAt ?? '2026-01-01'),
-    updatedAt: new Date(data?.updatedAt ?? '2026-01-01'),
+    createdAt: new Date(data?.createdAt ?? '2026-01-01T00:00:00'),
+    updatedAt: new Date(data?.updatedAt ?? '2026-01-01T00:00:00'),
   }
   ;(await getDb()).add('habits', habit)
   return habit
@@ -44,9 +44,9 @@ const seedCompletion = async (data: {
     id: data?.id ?? '1',
     habitId: data?.habitId ?? '1',
     status: data?.status ?? 'complete',
-    day: new Date(data?.day ?? '2026-01-01'),
-    createdAt: new Date(data?.createdAt ?? '2026-01-01'),
-    updatedAt: new Date(data?.updatedAt ?? '2026-01-01'),
+    day: new Date(data?.day ?? '2026-01-01T00:00:00'),
+    createdAt: new Date(data?.createdAt ?? '2026-01-01T00:00:00'),
+    updatedAt: new Date(data?.updatedAt ?? '2026-01-01T00:00:00'),
   }
   ;(await getDb()).put('completions', completion)
   return completion
@@ -114,8 +114,8 @@ describe('getHabitList', () => {
   })
 
   it.todo('returns habits oldest first with empty completion arrays', async () => {
-    const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: '2026-01-01' })
-    const second = await seedHabit({ id: '2', name: 'Newest', createdAt: '2026-01-03' })
+    const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: '2026-01-01T00:00:00' })
+    const second = await seedHabit({ id: '2', name: 'Newest', createdAt: '2026-01-03T00:00:00' })
 
     expect(await getHabitList()).toEqual([
       { ...first, completions: [] },
@@ -129,17 +129,17 @@ describe('getHabitList', () => {
     const { habitId: _, ...firstCompletion } = await seedCompletion({
       id: '1',
       habitId: firstHabit.id,
-      day: '2026-01-01',
+      day: '2026-01-01T00:00:00',
     })
     const { habitId: __, ...secondCompletion } = await seedCompletion({
       id: '2',
       habitId: secondHabit.id,
-      day: '2026-01-02',
+      day: '2026-01-02T00:00:00',
     })
     await seedCompletion({
       id: '3',
       habitId: 'missing',
-      day: '2026-01-03',
+      day: '2026-01-03T00:00:00',
     })
 
     expect(await getHabitList()).toEqual([
@@ -157,8 +157,12 @@ describe('getHabitList', () => {
 
 describe('editHabit', () => {
   it('updates only supplied fields, including an empty description', async () => {
-    const habit = await seedHabit({ name: 'Read', description: 'Before', createdAt: '2026-01-01' })
-    const updatedAt = new Date('2026-01-03')
+    const habit = await seedHabit({
+      name: 'Read',
+      description: 'Before',
+      createdAt: '2026-01-01T00:00:00',
+    })
+    const updatedAt = new Date('2026-01-03T00:00:00')
     vi.setSystemTime(updatedAt)
 
     expect(await editHabit({ id: habit.id, description: '' })).toEqual({
@@ -171,7 +175,7 @@ describe('editHabit', () => {
   it('updates all editable fields', async () => {
     const updatedSchedule: Schedule = { frequency: 3, interval: 1, intervalUnit: 'weeks' }
     const habit = await seedHabit()
-    const updatedAt = new Date('2026-01-03')
+    const updatedAt = new Date('2026-01-03T00:00:00')
     vi.setSystemTime(updatedAt)
 
     expect(
@@ -223,12 +227,12 @@ describe('deleteHabit', () => {
   it('deletes the habit and all completions without affecting another habit', async () => {
     const deleted = await seedHabit({ id: '1', name: 'Delete' })
     const kept = await seedHabit({ id: '2', name: 'Keep' })
-    await seedCompletion({ id: '1', habitId: deleted.id, day: '0001-01-01' })
-    await seedCompletion({ id: '2', habitId: deleted.id, day: '9999-12-31' })
+    await seedCompletion({ id: '1', habitId: deleted.id, day: '0001-01-01T00:00:00' })
+    await seedCompletion({ id: '2', habitId: deleted.id, day: '9999-12-31T00:00:00' })
     const keptCompletion = await seedCompletion({
       id: '3',
       habitId: kept.id,
-      day: '2026-01-01',
+      day: '2026-01-01T00:00:00',
     })
 
     expect(await deleteHabit(deleted.id)).toBeUndefined()
@@ -239,7 +243,7 @@ describe('deleteHabit', () => {
 
   it('rejects an unknown habit without affecting existing records', async () => {
     const habit = await seedHabit()
-    const completion = await seedCompletion({ habitId: habit.id, day: '2026-01-01' })
+    const completion = await seedCompletion({ habitId: habit.id, day: '2026-01-01T00:00:00' })
 
     await expect(deleteHabit('missing')).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
@@ -252,7 +256,7 @@ describe('deleteHabit', () => {
 describe('setCompletionStatus', () => {
   it('creates a complete completion with generated fields', async () => {
     const createdAt = new Date('2026-01-01T10:00:00.000Z')
-    const day = new Date('2026-01-01')
+    const day = new Date('2026-01-01T00:00:00')
     vi.setSystemTime(createdAt)
 
     expect(await setCompletionStatus({ habitId: '1', day, status: 'complete' })).toBeUndefined()
@@ -269,12 +273,12 @@ describe('setCompletionStatus', () => {
   })
 
   it('is idempotent for a duplicate completion and preserves the original record', async () => {
-    const existing = await seedCompletion({ habitId: '1', day: '2026-01-01' })
+    const existing = await seedCompletion({ habitId: '1', day: '2026-01-01T00:00:00' })
 
     expect(
       await setCompletionStatus({
         habitId: '1',
-        day: new Date('2026-01-01'),
+        day: new Date('2026-01-01T00:00:00'),
         status: 'complete',
       }),
     ).toBeUndefined()
@@ -282,12 +286,12 @@ describe('setCompletionStatus', () => {
   })
 
   it('removes an existing completion for incomplete', async () => {
-    await seedCompletion({ habitId: '1', day: '2026-01-01' })
+    await seedCompletion({ habitId: '1', day: '2026-01-01T00:00:00' })
 
     expect(
       await setCompletionStatus({
         habitId: '1',
-        day: new Date('2026-01-01'),
+        day: new Date('2026-01-01T00:00:00'),
         status: 'incomplete',
       }),
     ).toBeUndefined()
@@ -298,7 +302,7 @@ describe('setCompletionStatus', () => {
     expect(
       await setCompletionStatus({
         habitId: 'missing',
-        day: new Date('2026-01-01'),
+        day: new Date('2026-01-01T00:00:00'),
         status: 'incomplete',
       }),
     ).toBeUndefined()
@@ -308,18 +312,18 @@ describe('setCompletionStatus', () => {
     const first = await seedCompletion({
       id: '1',
       habitId: '1',
-      day: '2026-01-02',
+      day: '2026-01-02T00:00:00',
     })
     const second = await seedCompletion({
       id: '2',
       habitId: '2',
-      day: '2026-01-01',
+      day: '2026-01-01T00:00:00',
     })
-    await seedCompletion({ id: '3', habitId: '1', day: '2026-01-01' })
+    await seedCompletion({ id: '3', habitId: '1', day: '2026-01-01T00:00:00' })
 
     await setCompletionStatus({
       habitId: '1',
-      day: new Date('2026-01-01'),
+      day: new Date('2026-01-01T00:00:00'),
       status: 'incomplete',
     })
 

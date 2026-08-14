@@ -19,5 +19,8 @@ export default defineConfig({
     environment: 'happy-dom',
     fileParallelism: false,
     setupFiles: ['src/shared/tests/setup.ts'],
+    env: {
+      TZ: 'America/New_York',
+    },
   },
 })
