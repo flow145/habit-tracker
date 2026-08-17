@@ -10,12 +10,12 @@ export interface HabitDay {
   status: DayStatus
 }
 
-const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) => {
+export const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) => {
   const firstDayAfterWindow = add(date, { [intervalUnit]: interval })
   return sub(firstDayAfterWindow, { days: 1 })
 }
 
-const isSameDayOrBefore = (date: Date, dateToCompare: Date) =>
+export const isSameDayOrBefore = (date: Date, dateToCompare: Date) =>
   isSameDay(date, dateToCompare) || isBefore(date, dateToCompare)
 
 const toCalendarDate = (date: Date) => format(date, 'yyyy-MM-dd') as CalendarDate
@@ -28,7 +28,7 @@ export const buildHabitDays = ({
 }: {
   start: Date
   end: Date
-  completions: Completion[]
+  completions: Pick<Completion, 'day' | 'status'>[]
   schedule: Schedule
 }): HabitDay[] => {
   const statusByDate = new Map(
