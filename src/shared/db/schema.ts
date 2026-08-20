@@ -1,7 +1,7 @@
 import type { DBSchema as IDBSchema } from 'idb'
 
 export type InvtervalUnit = 'days' | 'weeks' | 'months'
-export type CompletionStatus = 'complete'
+export type Status = 'complete'
 
 export interface Schedule {
   frequency: number
@@ -18,10 +18,10 @@ export interface Habit {
   updatedAt: Date
 }
 
-export interface Completion {
+export interface Entry {
   id: string
   habitId: string
-  status: CompletionStatus
+  status: Status
   day: Date
   createdAt: Date
   updatedAt: Date
@@ -35,9 +35,9 @@ export interface DBSchema extends IDBSchema {
       byCreatedAt: string
     }
   }
-  completions: {
+  entries: {
     key: string
-    value: Completion
+    value: Entry
     indexes: {
       byDay: Date
       byHabitAndDay: [string, Date]

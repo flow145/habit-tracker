@@ -1,4 +1,4 @@
-type Entity = 'Habit' | 'Completion'
+type Entity = 'Habit' | 'Entry'
 
 export class EntityNotFoundError extends Error {
   constructor(entity: Entity, id: string, options?: ErrorOptions) {

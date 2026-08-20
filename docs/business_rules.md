@@ -3,14 +3,14 @@
 - Supported interval units are days, weeks, and months.
 - Month-based intervals use calendar-month offsets rather than a fixed number of days. For example, on July 31, the start of the preceding one-month interval is June 30.
 - Schedules are evaluated in the current device's time zone.
-- A habit can have at most one completion per calendar day.
-- Each habit day has a status calculated from the rolling-interval schedule and the user's completion history:
+- A habit can have at most one entry per calendar day.
+- Each computed entry has a status calculated from the rolling-interval schedule and the user's entry history:
     - **incomplete**: the user has not marked the day complete, and the schedule currently requires a completion.
     - **not required**: the user has not marked the day complete, and the schedule does not currently require a completion.
     - **complete**: the user marked the day complete, regardless of whether the schedule requires it.
 - Once a habit reaches the required number of user-completed days in the current interval, all remaining days in that interval are marked **not required** unless the user completes them.
-- Habit-day statuses are recalculated immediately after a day status change, schedule update, or transition to a new day.
+- Computed entry statuses are recalculated immediately after a day status change, schedule update, or transition to a new day.
 - Future days cannot be marked complete.
-- Users may mark a **not required** day complete. Removing that completion recalculates the day's status as **incomplete** or **not required**, as appropriate.
-- Deleting a habit permanently deletes all of its completions.
-- All habits share a timeline ending at the later of the current local date and the latest stored completion date, so habit rows align under the same date columns.
+- Users may mark a **not required** day complete. Removing that entry recalculates the day's status as **incomplete** or **not required**, as appropriate.
+- Deleting a habit permanently deletes all of its entries.
+- All habits share a timeline ending at the later of the current local date and the latest stored entry date, so habit rows align under the same date columns.

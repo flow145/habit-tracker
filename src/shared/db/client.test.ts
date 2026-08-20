@@ -17,17 +17,17 @@ describe('database client', () => {
     const db = await getDb()
 
     expect(db.version).toBe(1)
-    expect([...db.objectStoreNames]).toEqual(['completions', 'habits'])
+    expect([...db.objectStoreNames]).toEqual(['entries', 'habits'])
 
-    const tx = db.transaction(['habits', 'completions'])
+    const tx = db.transaction(['habits', 'entries'])
     const habits = tx.objectStore('habits')
-    const completions = tx.objectStore('completions')
+    const entries = tx.objectStore('entries')
 
     expect(habits.keyPath).toBe('id')
     expect(habits.index('byCreatedAt').keyPath).toBe('createdAt')
-    expect(completions.keyPath).toBe('id')
-    expect(completions.index('byHabitAndDay').keyPath).toEqual(['habitId', 'day'])
-    expect(completions.index('byHabitAndDay').unique).toBe(true)
+    expect(entries.keyPath).toBe('id')
+    expect(entries.index('byHabitAndDay').keyPath).toEqual(['habitId', 'day'])
+    expect(entries.index('byHabitAndDay').unique).toBe(true)
   })
 
   it('caches an open connection and can close and reopen it', async () => {

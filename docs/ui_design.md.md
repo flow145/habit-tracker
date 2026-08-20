@@ -42,9 +42,9 @@ Instead:
 
 Target maximum content width: **800px**
 
-## Habit completion
+## Habit entries
 
-Icons for different completion states: 
+Icons for different entry statuses:
 - Squircle outline for incomplete days (Fits the overall rounded-rectangle design language better than circles)
 - Checkmark for completed
 - Muted checkmark for auto-completed days
@@ -65,4 +65,4 @@ Icons for different completion states:
 
 ## Accessibility
 
-Habit completion controls should be implemented as accessible toggle-like controls that can cycle through completion states while remaining keyboard accessible.
+Habit entry controls should be implemented as accessible toggle-like controls that can cycle through statuses while remaining keyboard accessible.
