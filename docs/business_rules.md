@@ -13,3 +13,4 @@
 - Future days cannot be marked complete.
 - Users may mark a **not required** day complete. Removing that completion recalculates the day's status as **incomplete** or **not required**, as appropriate.
 - Deleting a habit permanently deletes all of its completions.
+- All habits share a timeline ending at the later of the current local date and the latest stored completion date, so habit rows align under the same date columns.

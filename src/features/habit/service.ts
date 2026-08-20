@@ -1,3 +1,4 @@
+import { max } from 'date-fns'
 import { v7 as uuidv7 } from 'uuid'
 import {
   type Completion,
@@ -5,13 +6,13 @@ import {
   EntityNotFoundError,
   getDb,
   type Habit,
-  type ISODate,
   type Schedule,
 } from '~/shared/db'
-import { isErrorNamed } from '~/shared/lib'
+import { groupBy, isErrorNamed } from '~/shared/lib'
+import { buildHabitDays, type HabitDay } from './scheduling'
 
-interface HabitWithCompletions extends Habit {
-  completions: Omit<Completion, 'habitId'>[]
+interface HabitWithDays extends Habit {
+  days: HabitDay[]
 }
 
 export const addHabit = async ({
@@ -22,7 +23,7 @@ export const addHabit = async ({
   name: string
   description?: string
   schedule: Schedule
-}): Promise<void> => {
+}): Promise<Habit> => {
   const db = await getDb()
   const id = uuidv7()
   const now = new Date()
@@ -43,23 +44,32 @@ export const addHabit = async ({
       throw new EntityConflictError('Habit', { id }, { cause: error })
     throw error
   }
+
+  return habit
 }
 
-export const getHabitList = async (): Promise<HabitWithCompletions[]> => {
+export const getHabitList = async (): Promise<HabitWithDays[]> => {
   const db = await getDb()
   const tx = db.transaction(['habits', 'completions'], 'readonly')
   const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
-  const completions = await tx.objectStore('completions').getAll()
+  const completions = await tx.objectStore('completions').index('byDay').getAll()
 
-  const habitsWithCompletions = habits.map((habit) => ({
+  const completionsByHabit = groupBy(completions, (completion) => completion.habitId)
+  const lastCompletionDate = completions.at(-1)?.day
+  const end = lastCompletionDate ? max([new Date(), new Date(lastCompletionDate)]) : new Date()
+
+  const habitsWithDays = habits.map((habit) => ({
     ...habit,
-    completions: completions
-      .filter((completion) => completion.habitId === habit.id)
-      .map(({ habitId, ...completion }) => completion),
+    days: buildHabitDays({
+      start: habit.createdAt,
+      end,
+      completions: completionsByHabit.get(habit.id) ?? [],
+      schedule: habit.schedule,
+    }),
   }))
 
   await tx.done
-  return habitsWithCompletions
+  return habitsWithDays
 }
 
 export const editHabit = async ({
@@ -72,7 +82,7 @@ export const editHabit = async ({
   name?: string
   description?: string
   schedule?: Schedule
-}): Promise<void> => {
+}): Promise<Habit> => {
   const db = await getDb()
   const tx = db.transaction('habits', 'readwrite')
   const existing = await tx.store.get(id)
@@ -98,6 +108,8 @@ export const editHabit = async ({
       throw new EntityConflictError('Habit', { id }, { cause: error })
     throw error
   }
+
+  return updated
 }
 
 export const deleteHabit = async (id: string): Promise<void> => {
@@ -125,11 +137,11 @@ export const deleteHabit = async (id: string): Promise<void> => {
 
 export const setCompletionStatus = async ({
   habitId,
-  date,
+  day,
   status,
 }: {
   habitId: string
-  date: ISODate
+  day: Date
   status: 'complete' | 'incomplete'
 }): Promise<void> => {
   const db = await getDb()
@@ -142,7 +154,7 @@ export const setCompletionStatus = async ({
       id,
       habitId,
       status: 'complete',
-      date,
+      day,
       createdAt: now,
       updatedAt: now,
     }
@@ -157,7 +169,7 @@ export const setCompletionStatus = async ({
 
   if (status === 'incomplete') {
     const tx = db.transaction('completions', 'readwrite')
-    const existing = await tx.store.index('byHabitAndDate').get([habitId, date])
+    const existing = await tx.store.index('byHabitAndDay').get([habitId, day])
 
     if (!existing) {
       await tx.done

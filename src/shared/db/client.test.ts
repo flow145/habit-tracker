@@ -26,8 +26,8 @@ describe('database client', () => {
     expect(habits.keyPath).toBe('id')
     expect(habits.index('byCreatedAt').keyPath).toBe('createdAt')
     expect(completions.keyPath).toBe('id')
-    expect(completions.index('byHabitAndDate').keyPath).toEqual(['habitId', 'date'])
-    expect(completions.index('byHabitAndDate').unique).toBe(true)
+    expect(completions.index('byHabitAndDay').keyPath).toEqual(['habitId', 'day'])
+    expect(completions.index('byHabitAndDay').unique).toBe(true)
   })
 
   it('caches an open connection and can close and reopen it', async () => {
@@ -43,13 +43,13 @@ describe('database client', () => {
 
   it('preserves data across close and reopen', async () => {
     const db = await getDb()
-    const createdAt = new Date('2026-01-01T00:00:00.000Z')
-    const updatedAt = new Date('2026-01-02T00:00:00.000Z')
+    const createdAt = new Date('2026-01-01T00:00:00')
+    const updatedAt = new Date('2026-01-02T00:00:00')
     const record = {
       id: 'habit-persistence',
       name: 'Persistence',
       description: '',
-      schedule: { frequency: 1, interval: 1, intervalUnit: 'day' as const },
+      schedule: { frequency: 1, interval: 1, intervalUnit: 'days' as const },
       createdAt,
       updatedAt,
     }
