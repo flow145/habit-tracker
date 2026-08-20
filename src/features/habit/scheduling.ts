@@ -2,7 +2,7 @@ import { add, eachDayOfInterval, format, isBefore, isSameDay, min, sub } from 'd
 
 import type { Completion, CompletionStatus, Schedule } from '~/shared/db'
 
-type DayStatus = CompletionStatus | 'incomplete' | 'not-required'
+export type DayStatus = CompletionStatus | 'incomplete' | 'not-required'
 type CalendarDate = `${number}-${number}-${number}`
 
 export interface HabitDay {
@@ -31,6 +31,8 @@ export const buildHabitDays = ({
   completions: Pick<Completion, 'day' | 'status'>[]
   schedule: Schedule
 }): HabitDay[] => {
+  if (!isSameDayOrBefore(start, end)) return []
+
   const statusByDate = new Map(
     completions.map((completion) => [toCalendarDate(completion.day), completion.status]),
   )
