@@ -19,14 +19,13 @@ export const getDb = () => {
         if (!habitStore.indexNames.contains('byCreatedAt'))
           habitStore.createIndex('byCreatedAt', 'createdAt')
 
-        const completionStore = db.objectStoreNames.contains('completions')
-          ? tx.objectStore('completions')
-          : db.createObjectStore('completions', { keyPath: 'id' })
+        const entryStore = db.objectStoreNames.contains('entries')
+          ? tx.objectStore('entries')
+          : db.createObjectStore('entries', { keyPath: 'id' })
 
-        if (!completionStore.indexNames.contains('byHabitAndDay'))
-          completionStore.createIndex('byHabitAndDay', ['habitId', 'day'], { unique: true })
-        if (!completionStore.indexNames.contains('byDay'))
-          completionStore.createIndex('byDay', 'day')
+        if (!entryStore.indexNames.contains('byHabitAndDay'))
+          entryStore.createIndex('byHabitAndDay', ['habitId', 'day'], { unique: true })
+        if (!entryStore.indexNames.contains('byDay')) entryStore.createIndex('byDay', 'day')
       }
     },
 

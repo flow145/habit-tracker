@@ -1,13 +1,13 @@
 import { add, eachDayOfInterval, format, isBefore, isSameDay, min, sub } from 'date-fns'
 
-import type { Completion, CompletionStatus, Schedule } from '~/shared/db'
+import type { Entry, Schedule, Status } from '~/shared/db'
 
-export type DayStatus = CompletionStatus | 'incomplete' | 'not-required'
+export type ComputedStatus = Status | 'incomplete' | 'not-required'
 type CalendarDate = `${number}-${number}-${number}`
 
-export interface HabitDay {
+export interface ComputedEntry {
   day: Date
-  status: DayStatus
+  status: ComputedStatus
 }
 
 export const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) => {
@@ -20,26 +20,24 @@ export const isSameDayOrBefore = (date: Date, dateToCompare: Date) =>
 
 const toCalendarDate = (date: Date) => format(date, 'yyyy-MM-dd') as CalendarDate
 
-export const buildHabitDays = ({
+export const buildComputedEntries = ({
   start,
   end,
-  completions,
+  entries,
   schedule,
 }: {
   start: Date
   end: Date
-  completions: Pick<Completion, 'day' | 'status'>[]
+  entries: Pick<Entry, 'day' | 'status'>[]
   schedule: Schedule
-}): HabitDay[] => {
+}): ComputedEntry[] => {
   if (!isSameDayOrBefore(start, end)) return []
 
-  const statusByDate = new Map(
-    completions.map((completion) => [toCalendarDate(completion.day), completion.status]),
-  )
+  const statusByDate = new Map(entries.map((entry) => [toCalendarDate(entry.day), entry.status]))
 
-  const habitDays: HabitDay[] = []
+  const computedEntries: ComputedEntry[] = []
 
-  let completionCount = 0
+  let entryCount = 0
   let windowStart = start
   let windowEnd = getWindowEnd(windowStart, schedule)
 
@@ -49,25 +47,25 @@ export const buildHabitDays = ({
     isSameDayOrBefore(date, min([windowEnd, end]));
     date = add(date, { days: 1 })
   ) {
-    if (statusByDate.get(toCalendarDate(date)) === 'complete') completionCount += 1
+    if (statusByDate.get(toCalendarDate(date)) === 'complete') entryCount += 1
   }
 
   // Sliding window phase: advance the window start one day at a time,
-  // recalculate the window end and completion count, and derive day statuses
+  // recalculate the window end and entry count, and derive computed statuses
   while (isSameDayOrBefore(windowEnd, end)) {
     const explicitStatus = statusByDate.get(toCalendarDate(windowStart))
-    const derivedStatus = completionCount >= schedule.frequency ? 'not-required' : 'incomplete'
+    const computedStatus = entryCount >= schedule.frequency ? 'not-required' : 'incomplete'
 
-    habitDays.push({ day: windowStart, status: explicitStatus ?? derivedStatus })
+    computedEntries.push({ day: windowStart, status: explicitStatus ?? computedStatus })
 
-    if (explicitStatus === 'complete') completionCount -= 1
+    if (explicitStatus === 'complete') entryCount -= 1
     windowStart = add(windowStart, { days: 1 })
 
     const nextWindowEnd = getWindowEnd(windowStart, schedule)
     eachDayOfInterval({ start: windowEnd, end: nextWindowEnd })
       .slice(1)
       .forEach((date) => {
-        if (statusByDate.get(toCalendarDate(date)) === 'complete') completionCount += 1
+        if (statusByDate.get(toCalendarDate(date)) === 'complete') entryCount += 1
       })
     windowEnd = nextWindowEnd
   }
@@ -75,13 +73,13 @@ export const buildHabitDays = ({
   // Trailing phase: the final window cannot slide further,
   // so mark all remaining incomplete days as not required when the schedule is satisfied
   if (!isSameDayOrBefore(windowEnd, end)) {
-    const derivedStatus = completionCount >= schedule.frequency ? 'not-required' : 'incomplete'
+    const computedStatus = entryCount >= schedule.frequency ? 'not-required' : 'incomplete'
 
     eachDayOfInterval({ start: windowStart, end }).forEach((date) => {
       const explicitStatus = statusByDate.get(toCalendarDate(date))
-      habitDays.push({ day: date, status: explicitStatus ?? derivedStatus })
+      computedEntries.push({ day: date, status: explicitStatus ?? computedStatus })
     })
   }
 
-  return habitDays
+  return computedEntries
 }

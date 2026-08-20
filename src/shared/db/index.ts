@@ -1,9 +1,9 @@
 export { closeDb, getDb } from './client'
 export { EntityConflictError, EntityNotFoundError } from './errors'
 export type {
-  Completion,
-  CompletionStatus,
+  Entry,
   Habit,
   InvtervalUnit,
   Schedule,
+  Status,
 } from './schema'

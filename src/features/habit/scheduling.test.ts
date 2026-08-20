@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Completion, CompletionStatus, Schedule } from '~/shared/db'
-import { buildHabitDays, getWindowEnd, isSameDayOrBefore } from './scheduling'
+import type { Entry, Schedule, Status } from '~/shared/db'
+import { buildComputedEntries, getWindowEnd, isSameDayOrBefore } from './computed-entries'
 
-type TestCompletion = Pick<Completion, 'day' | 'status'>
+type TestEntry = Pick<Entry, 'day' | 'status'>
 
-interface BuildHabitDaysTestCase {
+interface BuildComputedEntriesTestCase {
   start: Date
   end: Date
   schedule: Schedule
-  completions: TestCompletion[]
+  entries: TestEntry[]
   expected: { statuses: string[]; firstDay: Date; lastDay: Date }
 }
 
@@ -20,7 +20,7 @@ interface BuildHabitDaysTestCase {
 const date = (day: number, month = 1, hour = 0, minute = 0) =>
   new Date(2026, month - 1, day, hour, minute)
 
-export const completion = (day: Date, status: CompletionStatus = 'complete'): TestCompletion => ({
+export const entry = (day: Date, status: Status = 'complete'): TestEntry => ({
   day,
   status,
 })
@@ -69,31 +69,31 @@ describe('isSameDayOrBefore', () => {
   })
 })
 
-describe('buildHabitDays', () => {
+describe('buildComputedEntries', () => {
   it('returns an empty list when end is before start', () => {
     expect(
-      buildHabitDays({
+      buildComputedEntries({
         start: date(3),
         end: date(2),
-        completions: [],
+        entries: [],
         schedule: { frequency: 1, interval: 1, intervalUnit: 'days' },
       }),
     ).toEqual([])
   })
 
-  it.each<BuildHabitDaysTestCase>([
+  it.each<BuildComputedEntriesTestCase>([
     {
       start: date(1),
       end: date(1),
       schedule: { frequency: 1, interval: 2, intervalUnit: 'days' },
-      completions: [],
+      entries: [],
       expected: { statuses: ['incomplete'], firstDay: date(1), lastDay: date(1) },
     },
     {
       start: date(1),
       end: date(7),
       schedule: { frequency: 1, interval: 2, intervalUnit: 'weeks' },
-      completions: [],
+      entries: [],
       expected: {
         statuses: Array(7).fill('incomplete'),
         firstDay: date(1),
@@ -104,7 +104,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(31),
       schedule: { frequency: 1, interval: 2, intervalUnit: 'months' },
-      completions: [],
+      entries: [],
       expected: {
         statuses: Array(31).fill('incomplete'),
         firstDay: date(1),
@@ -115,7 +115,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(3),
       schedule: { frequency: 1, interval: 1, intervalUnit: 'weeks' },
-      completions: [],
+      entries: [],
       expected: {
         statuses: Array(3).fill('incomplete'),
         firstDay: date(1),
@@ -126,7 +126,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(3),
       schedule: { frequency: 1, interval: 4, intervalUnit: 'days' },
-      completions: [completion(date(2))],
+      entries: [entry(date(2))],
       expected: {
         statuses: ['not-required', 'complete', 'not-required'],
         firstDay: date(1),
@@ -137,7 +137,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(3),
       schedule: { frequency: 2, interval: 4, intervalUnit: 'days' },
-      completions: [completion(date(2))],
+      entries: [entry(date(2))],
       expected: {
         statuses: ['incomplete', 'complete', 'incomplete'],
         firstDay: date(1),
@@ -148,22 +148,22 @@ describe('buildHabitDays', () => {
     start,
     end,
     schedule,
-    completions,
+    entries,
     expected,
   }) => {
-    const days = buildHabitDays({ start, end, completions, schedule })
+    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
 
-    expect(days.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(days[0]?.day).toEqual(expected.firstDay)
-    expect(days.at(-1)?.day).toEqual(expected.lastDay)
+    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
   })
 
-  it.each<BuildHabitDaysTestCase>([
+  it.each<BuildComputedEntriesTestCase>([
     {
       start: date(1),
       end: date(3),
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
-      completions: [],
+      entries: [],
       expected: {
         statuses: Array(3).fill('incomplete'),
         firstDay: date(1),
@@ -174,7 +174,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(3),
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
-      completions: [completion(date(2))],
+      entries: [entry(date(2))],
       expected: {
         statuses: ['not-required', 'complete', 'not-required'],
         firstDay: date(1),
@@ -185,7 +185,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(3),
       schedule: { frequency: 2, interval: 3, intervalUnit: 'days' },
-      completions: [completion(date(2))],
+      entries: [entry(date(2))],
       expected: {
         statuses: ['incomplete', 'complete', 'incomplete'],
         firstDay: date(1),
@@ -196,7 +196,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(3),
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
-      completions: [completion(date(2)), completion(date(3))],
+      entries: [entry(date(2)), entry(date(3))],
       expected: {
         statuses: ['not-required', 'complete', 'complete'],
         firstDay: date(1),
@@ -207,22 +207,22 @@ describe('buildHabitDays', () => {
     start,
     end,
     schedule,
-    completions,
+    entries,
     expected,
   }) => {
-    const days = buildHabitDays({ start, end, completions, schedule })
+    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
 
-    expect(days.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(days[0]?.day).toEqual(expected.firstDay)
-    expect(days.at(-1)?.day).toEqual(expected.lastDay)
+    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
   })
 
-  it.todo.each<BuildHabitDaysTestCase>([
+  it.todo.each<BuildComputedEntriesTestCase>([
     {
       start: date(1),
       end: date(4),
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
-      completions: [completion(date(1))],
+      entries: [entry(date(1))],
       expected: {
         statuses: ['complete', 'not-required', 'not-required', 'incomplete'],
         firstDay: date(1),
@@ -233,7 +233,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(4),
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
-      completions: [completion(date(3))],
+      entries: [entry(date(3))],
       expected: {
         statuses: ['incomplete', 'incomplete', 'complete', 'not-required'],
         firstDay: date(1),
@@ -244,7 +244,7 @@ describe('buildHabitDays', () => {
       start: date(1),
       end: date(5),
       schedule: { frequency: 2, interval: 3, intervalUnit: 'days' },
-      completions: [completion(date(1)), completion(date(3))],
+      entries: [entry(date(1)), entry(date(3))],
       expected: {
         statuses: ['complete', 'not-required', 'complete', 'incomplete', 'incomplete'],
         firstDay: date(1),
@@ -255,24 +255,24 @@ describe('buildHabitDays', () => {
     start,
     end,
     schedule,
-    completions,
+    entries,
     expected,
   }) => {
-    const days = buildHabitDays({ start, end, completions, schedule })
+    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
 
-    expect(days.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(days[0]?.day).toEqual(expected.firstDay)
-    expect(days.at(-1)?.day).toEqual(expected.lastDay)
+    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
   })
 
-  it.todo('ignores completions outside the range', () => {
-    const days = buildHabitDays({
+  it.todo('ignores entries outside the range', () => {
+    const computedEntries = buildComputedEntries({
       start: date(2),
       end: date(4),
-      completions: [completion(date(1)), completion(date(5))],
+      entries: [entry(date(1)), entry(date(5))],
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
     })
 
-    expect(days.map(({ status }) => status)).toEqual(Array(3).fill('incomplete'))
+    expect(computedEntries.map(({ status }) => status)).toEqual(Array(3).fill('incomplete'))
   })
 })

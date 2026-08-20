@@ -3,5 +3,5 @@ export {
   deleteHabit,
   editHabit,
   getHabitList,
-  setCompletionStatus,
+  setStatus,
 } from './service'
