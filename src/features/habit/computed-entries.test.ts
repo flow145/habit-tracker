@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Entry, Schedule, Status } from '~/shared/db'
-import { buildComputedEntries, getWindowEnd, isSameDayOrBefore } from './computed-entries'
+import { buildComputedEntries, getWindowEnd } from './computed-entries'
 
 type TestEntry = Pick<Entry, 'day' | 'status'>
 
@@ -54,18 +54,6 @@ describe('getWindowEnd', () => {
     const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'days' }
 
     expect(getWindowEnd(start, schedule)).toEqual(date(1, 1, 15, 30))
-  })
-})
-
-describe('isSameDayOrBefore', () => {
-  it.each`
-    date              | dateToCompare     | expected
-    ${date(1, 1, 9)}  | ${date(1, 1, 17)} | ${true}
-    ${date(1, 1, 17)} | ${date(1, 1, 9)}  | ${true}
-    ${date(1)}        | ${date(2)}        | ${true}
-    ${date(2)}        | ${date(1)}        | ${false}
-  `('returns the expected comparison result (%$)', ({ date, dateToCompare, expected }) => {
-    expect(isSameDayOrBefore(date, dateToCompare)).toBe(expected)
   })
 })
 

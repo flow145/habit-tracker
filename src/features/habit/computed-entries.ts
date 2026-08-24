@@ -1,13 +1,4 @@
-import {
-  add,
-  differenceInCalendarDays,
-  eachDayOfInterval,
-  format,
-  isBefore,
-  isSameDay,
-  min,
-  sub,
-} from 'date-fns'
+import { add, differenceInCalendarDays, eachDayOfInterval, format, min, sub } from 'date-fns'
 
 import type { Entry, Schedule, Status } from '~/shared/db'
 
@@ -24,9 +15,6 @@ export const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) =
   return sub(firstDayAfterWindow, { days: 1 })
 }
 
-export const isSameDayOrBefore = (date: Date, dateToCompare: Date) =>
-  isSameDay(date, dateToCompare) || isBefore(date, dateToCompare)
-
 const toCalendarDate = (date: Date) => format(date, 'yyyy-MM-dd') as CalendarDate
 
 export const buildComputedEntries = ({
@@ -40,7 +28,7 @@ export const buildComputedEntries = ({
   entries: Pick<Entry, 'day' | 'status'>[]
   schedule: Schedule
 }): ComputedEntry[] => {
-  if (!isSameDayOrBefore(start, end)) return []
+  if (differenceInCalendarDays(end, start) < 0) return []
 
   const statusByDate = new Map(entries.map((entry) => [toCalendarDate(entry.day), entry.status]))
 
@@ -58,7 +46,7 @@ export const buildComputedEntries = ({
   // Accumulating phase: count completed days for the first sliding window
   for (
     let date = windowStart;
-    isSameDayOrBefore(date, min([windowEnd, end]));
+    differenceInCalendarDays(min([windowEnd, end]), date) >= 0;
     date = add(date, { days: 1 })
   ) {
     if (statusByDate.get(toCalendarDate(date)) === 'complete') completedCount += 1
