@@ -1,7 +1,7 @@
 ## Alpha 1 (MVP)
 
 - [ ] create habits (only yes/no, name, description)
-- [ ] habit frequency (X times in Y days/weeks/months/years)
+- [ ] habit frequency (X times in Y days/weeks/months)
 - [ ] list of habits with a couple recent days' statuses (expanded view: 2-row card)
 - [ ] mark habits complete or not (in the list)
 - [ ] automatically determine today's entry status from habit history and schedule
