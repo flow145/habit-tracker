@@ -128,7 +128,7 @@ describe('buildComputedEntries', () => {
       schedule: { frequency: 1, interval: 4, intervalUnit: 'days' },
       entries: [entry(date(2))],
       expected: {
-        statuses: ['not-required', 'complete', 'not-required'],
+        statuses: ['incomplete', 'complete', 'not-required'],
         firstDay: date(1),
         lastDay: date(3),
       },
@@ -176,7 +176,7 @@ describe('buildComputedEntries', () => {
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
       entries: [entry(date(2))],
       expected: {
-        statuses: ['not-required', 'complete', 'not-required'],
+        statuses: ['incomplete', 'complete', 'not-required'],
         firstDay: date(1),
         lastDay: date(3),
       },
@@ -198,7 +198,7 @@ describe('buildComputedEntries', () => {
       schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
       entries: [entry(date(2)), entry(date(3))],
       expected: {
-        statuses: ['not-required', 'complete', 'complete'],
+        statuses: ['incomplete', 'complete', 'complete'],
         firstDay: date(1),
         lastDay: date(3),
       },
@@ -217,7 +217,7 @@ describe('buildComputedEntries', () => {
     expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
   })
 
-  it.todo.each<BuildComputedEntriesTestCase>([
+  it.each<BuildComputedEntriesTestCase>([
     {
       start: date(1),
       end: date(4),
@@ -265,7 +265,7 @@ describe('buildComputedEntries', () => {
     expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
   })
 
-  it.todo('ignores entries outside the range', () => {
+  it('ignores entries outside the range', () => {
     const computedEntries = buildComputedEntries({
       start: date(2),
       end: date(4),

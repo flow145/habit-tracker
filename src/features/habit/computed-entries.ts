@@ -1,4 +1,13 @@
-import { add, eachDayOfInterval, format, isBefore, isSameDay, min, sub } from 'date-fns'
+import {
+  add,
+  differenceInCalendarDays,
+  eachDayOfInterval,
+  format,
+  isBefore,
+  isSameDay,
+  min,
+  sub,
+} from 'date-fns'
 
 import type { Entry, Schedule, Status } from '~/shared/db'
 
@@ -35,51 +44,57 @@ export const buildComputedEntries = ({
 
   const statusByDate = new Map(entries.map((entry) => [toCalendarDate(entry.day), entry.status]))
 
-  const computedEntries: ComputedEntry[] = []
-
-  let entryCount = 0
+  let completedCount = 0
   let windowStart = start
   let windowEnd = getWindowEnd(windowStart, schedule)
+  let windowStartIndex = 0
+  let windowEndIndex = -1
 
-  // Accumulating phase: build the first complete sliding window
+  const computedEntries: ComputedEntry[] = eachDayOfInterval({ start, end }).map((date) => ({
+    day: date,
+    status: 'incomplete',
+  }))
+
+  // Accumulating phase: count completed days for the first sliding window
   for (
     let date = windowStart;
     isSameDayOrBefore(date, min([windowEnd, end]));
     date = add(date, { days: 1 })
   ) {
-    if (statusByDate.get(toCalendarDate(date)) === 'complete') entryCount += 1
+    if (statusByDate.get(toCalendarDate(date)) === 'complete') completedCount += 1
+    windowEndIndex += 1
   }
 
   // Sliding window phase: advance the window start one day at a time,
-  // recalculate the window end and entry count, and derive computed statuses
-  while (isSameDayOrBefore(windowEnd, end)) {
-    const explicitStatus = statusByDate.get(toCalendarDate(windowStart))
-    const computedStatus = entryCount >= schedule.frequency ? 'not-required' : 'incomplete'
+  // recalculate the window end and completed count, and assign not-required statuses
+  while (differenceInCalendarDays(end, windowStart) >= 1) {
+    const windowStartExplicitStatus = statusByDate.get(toCalendarDate(windowStart))
 
-    computedEntries.push({ day: windowStart, status: explicitStatus ?? computedStatus })
+    if (windowStartExplicitStatus === 'complete' && completedCount >= schedule.frequency)
+      for (let i = windowStartIndex; i <= windowEndIndex; i += 1) {
+        const entry = computedEntries[i]
+        if (entry) entry.status = 'not-required'
+      }
 
-    if (explicitStatus === 'complete') entryCount -= 1
+    if (windowStartExplicitStatus === 'complete') completedCount -= 1
     windowStart = add(windowStart, { days: 1 })
+    windowStartIndex += 1
 
     const nextWindowEnd = getWindowEnd(windowStart, schedule)
     eachDayOfInterval({ start: windowEnd, end: nextWindowEnd })
       .slice(1)
       .forEach((date) => {
-        if (statusByDate.get(toCalendarDate(date)) === 'complete') entryCount += 1
+        if (statusByDate.get(toCalendarDate(date)) === 'complete') completedCount += 1
+        windowEndIndex += 1
       })
     windowEnd = nextWindowEnd
   }
 
-  // Trailing phase: the final window cannot slide further,
-  // so mark all remaining incomplete days as not required when the schedule is satisfied
-  if (!isSameDayOrBefore(windowEnd, end)) {
-    const computedStatus = entryCount >= schedule.frequency ? 'not-required' : 'incomplete'
-
-    eachDayOfInterval({ start: windowStart, end }).forEach((date) => {
-      const explicitStatus = statusByDate.get(toCalendarDate(date))
-      computedEntries.push({ day: date, status: explicitStatus ?? computedStatus })
-    })
-  }
+  // Assign explicit statuses over computedEntries
+  computedEntries.forEach((entry) => {
+    const explicitStatus = statusByDate.get(toCalendarDate(entry.day))
+    if (explicitStatus) entry.status = explicitStatus
+  })
 
   return computedEntries
 }

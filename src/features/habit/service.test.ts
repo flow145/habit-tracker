@@ -113,25 +113,33 @@ describe('getHabitList', () => {
     expect(await getHabitList()).toEqual([])
   })
 
-  it.todo('returns habits oldest first with empty entry arrays', async () => {
+  it('returns habits oldest first with incomplete entries', async () => {
     const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: '2026-01-01T00:00:00' })
     const second = await seedHabit({ id: '2', name: 'Newest', createdAt: '2026-01-03T00:00:00' })
+    vi.setSystemTime(new Date('2026-01-03T00:00:00'))
 
     expect(await getHabitList()).toEqual([
-      { ...first, entries: [] },
-      { ...second, entries: [] },
+      {
+        ...first,
+        entries: [
+          { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
+          { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
+          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+        ],
+      },
+      { ...second, entries: [{ day: new Date('2026-01-03T00:00:00'), status: 'incomplete' }] },
     ])
   })
 
-  it.todo('joins only matching entries and omits habitId from exposed records', async () => {
+  it('joins only matching entries and omits habitId from exposed records', async () => {
     const firstHabit = await seedHabit({ id: '1', name: 'First' })
     const secondHabit = await seedHabit({ id: '2', name: 'Second' })
-    const { habitId: _, ...firstEntry } = await seedEntry({
+    const firstEntry = await seedEntry({
       id: '1',
       habitId: firstHabit.id,
       day: '2026-01-01T00:00:00',
     })
-    const { habitId: __, ...secondEntry } = await seedEntry({
+    const secondEntry = await seedEntry({
       id: '2',
       habitId: secondHabit.id,
       day: '2026-01-02T00:00:00',
@@ -141,15 +149,24 @@ describe('getHabitList', () => {
       habitId: 'missing',
       day: '2026-01-03T00:00:00',
     })
+    vi.setSystemTime(new Date('2026-01-03T00:00:00'))
 
     expect(await getHabitList()).toEqual([
       expect.objectContaining({
         id: firstHabit.id,
-        entries: [firstEntry],
+        entries: [
+          { day: firstEntry.day, status: 'complete' },
+          { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
+          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+        ],
       }),
       expect.objectContaining({
         id: secondHabit.id,
-        entries: [secondEntry],
+        entries: [
+          { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
+          { day: secondEntry.day, status: 'complete' },
+          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+        ],
       }),
     ])
   })
