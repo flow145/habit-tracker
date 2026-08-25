@@ -1,0 +1,124 @@
+.button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 40px;
+  padding: 12px 24px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 8px;
+  transition:
+    color 150ms,
+    background-color 150ms,
+    border-color 150ms,
+    translate 150ms;
+
+  &:active {
+    translate: 0 1px;
+  }
+
+  &[data-disabled] {
+    color: var(--neutral-8);
+    cursor: auto;
+    translate: none;
+  }
+}
+
+.icon {
+  display: inline-flex;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.filled {
+  color: var(--inverse);
+
+  &:where(.neutral) {
+    background-color: var(--neutral-9);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--neutral-10);
+      }
+    }
+  }
+
+  &:where(.danger) {
+    background-color: var(--danger-9);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--danger-10);
+      }
+    }
+  }
+
+  &[data-disabled] {
+    background-color: var(--neutral-3);
+  }
+}
+
+.muted {
+  border: 2px solid;
+
+  &:where(.neutral) {
+    color: var(--neutral-12);
+    background-color: var(--neutral-2);
+    border-color: var(--neutral-8);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--neutral-3);
+      }
+    }
+  }
+
+  &:where(.danger) {
+    color: var(--danger-11);
+    background-color: var(--danger-2);
+    border-color: var(--danger-7);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--danger-3);
+      }
+    }
+  }
+
+  &[data-disabled] {
+    background-color: var(--neutral-2);
+    border-color: var(--disabled-4);
+  }
+}
+
+.ghost {
+  background-color: transparent;
+
+  &:where(.neutral) {
+    color: var(--neutral-12);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--neutral-3);
+      }
+    }
+  }
+
+  &:where(.danger) {
+    color: var(--danger-11);
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--danger-3);
+      }
+    }
+  }
+
+  &[data-disabled] {
+    background-color: transparent;
+  }
+}
