@@ -1,6 +1,4 @@
-*,
-*::before,
-*::after {
+:where(*, *::before, *::after) {
   box-sizing: border-box;
   margin: 0;
 }
@@ -19,40 +17,27 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-img,
-picture,
-video,
-canvas,
-svg {
+:where(img, picture, video, canvas, svg) {
   display: block;
   max-inline-size: 100%;
   block-size: auto;
 }
 
-input,
-button,
-textarea,
-select {
+:where(input, button, textarea, select) {
   font: inherit;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+:where(h1, h2, h3, h4, h5, h6) {
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 
-p {
+:where(p) {
   text-wrap: pretty;
   overflow-wrap: break-word;
 }
 
-ul,
-ol {
+:where(ul, ol) {
   padding: 0;
   list-style: none;
 }
