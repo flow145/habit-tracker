@@ -14,10 +14,12 @@ A simple, cross-platform habit tracker with flexible scheduling and a focus on l
 
 ## Common commands
 
-- `pnpm build` - Build the application for production
-- `pnpm format` - Check formatting with Biome
-- `pnpm format:fix` - Format files with Biome
-- `pnpm check` - Runs Biome's formatter, linter and import sorting
-- `pnpm check:fix` - Apply Biome fixes
-- `pnpm typecheck` - Run the TypeScript compiler checks
-- `pnpm test` - Run tests
+- `pnpm build`: `vite build`
+- `pnpm format`: `biome format --reporter=summary`
+- `pnpm format:fix`: `pnpm format --write`
+- `pnpm check`: `biome check --reporter=summary`
+- `pnpm check:fix`: `pnpm check --write`
+- `pnpm typecheck`: `tsc -b`
+- `pnpm test`: `vitest run`
+
+Add options to these pnpm commmands if needed instead of running vitest/biome/etc directly.
