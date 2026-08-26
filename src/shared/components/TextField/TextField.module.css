@@ -23,6 +23,7 @@
   min-block-size: 46px;
   padding: 10px 14px;
   color: var(--neutral-12);
+  resize: none;
   background-color: var(--neutral-2);
   border: 2px solid var(--neutral-7);
   border-radius: 8px;
