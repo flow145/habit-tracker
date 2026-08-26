@@ -1,4 +1,4 @@
-import { Button as BaseButton, type ButtonProps as BaseButtonProps } from '@base-ui/react/button'
+import { Button as BaseButton } from '@base-ui/react/button'
 import { clsx } from 'clsx'
 import type { ReactNode } from 'react'
 
@@ -7,7 +7,7 @@ import styles from './Button.module.css'
 export type ButtonVariant = 'filled' | 'muted' | 'ghost'
 export type ButtonColor = 'neutral' | 'danger'
 
-export interface ButtonProps extends BaseButtonProps {
+export interface ButtonProps extends BaseButton.Props {
   variant?: ButtonVariant
   color?: ButtonColor
   icon?: ReactNode

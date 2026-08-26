@@ -1,4 +1,4 @@
-import { Field, type FieldControlProps, type FieldRootProps } from '@base-ui/react/field'
+import { Field } from '@base-ui/react/field'
 import { clsx } from 'clsx'
 
 import styles from './TextField.module.css'
@@ -6,8 +6,8 @@ import styles from './TextField.module.css'
 export type TextFieldComponent = 'input' | 'textarea'
 
 export interface TextFieldProps
-  extends Pick<FieldRootProps, 'dirty' | 'touched' | 'disabled' | 'invalid' | 'className'>,
-    Omit<FieldControlProps, 'className' | 'style' | 'render'> {
+  extends Pick<Field.Root.Props, 'dirty' | 'touched' | 'disabled' | 'invalid' | 'className'>,
+    Omit<Field.Control.Props, 'className' | 'style' | 'render'> {
   component?: TextFieldComponent
   label: string
   error?: string
