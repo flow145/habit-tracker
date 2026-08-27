@@ -1,0 +1,51 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  min-height: 100dvh;
+  background-color: var(--white-alpha-10);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition: opacity 150ms;
+
+  /* iOS 26+: Ensure the backdrop covers the entire visible viewport. */
+  @supports (-webkit-touch-callout: none) {
+    position: absolute;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.popup {
+  position: relative;
+  inline-size: 100%;
+  max-inline-size: 500px;
+  max-block-size: 100%;
+  padding: 32px;
+  overflow: auto;
+  color: var(--neutral-12);
+  background-color: var(--neutral-2);
+  border: 2px solid var(--neutral-7);
+  border-radius: 8px;
+  box-shadow: var(--shadow-400);
+  transition:
+    opacity 150ms,
+    scale 150ms;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
