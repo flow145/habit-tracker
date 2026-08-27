@@ -37,4 +37,10 @@
   --disabled-10: var(--gray-10);
   --disabled-11: var(--gray-11);
   --disabled-12: var(--gray-12);
+
+  --inverse: var(--white);
+}
+
+:root[data-theme='dark'] {
+  --inverse: var(--black);
 }
