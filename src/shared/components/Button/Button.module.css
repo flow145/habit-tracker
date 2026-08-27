@@ -13,16 +13,16 @@
     background-color 150ms,
     border-color 150ms,
     translate 150ms;
+}
 
-  &:active {
-    translate: 0 1px;
-  }
+.button:active {
+  translate: 0 1px;
+}
 
-  &[data-disabled] {
-    color: var(--neutral-8);
-    cursor: auto;
-    translate: none;
-  }
+.button[data-disabled] {
+  color: var(--neutral-8);
+  cursor: auto;
+  translate: none;
 }
 
 .icon {
@@ -36,89 +36,89 @@
 
 .filled {
   color: var(--inverse);
+}
 
-  &:where(.neutral) {
-    background-color: var(--neutral-9);
+.filled:where(.neutral) {
+  background-color: var(--neutral-9);
+}
 
-    @media (hover: hover) {
-      &:hover {
-        background-color: var(--neutral-10);
-      }
-    }
+@media (hover: hover) {
+  .filled:where(.neutral):hover {
+    background-color: var(--neutral-10);
   }
+}
 
-  &:where(.danger) {
-    background-color: var(--danger-9);
+.filled:where(.danger) {
+  background-color: var(--danger-9);
+}
 
-    @media (hover: hover) {
-      &:hover {
-        background-color: var(--danger-10);
-      }
-    }
+@media (hover: hover) {
+  .filled:where(.danger):hover {
+    background-color: var(--danger-10);
   }
+}
 
-  &[data-disabled] {
-    background-color: var(--neutral-3);
-  }
+.filled[data-disabled] {
+  background-color: var(--neutral-3);
 }
 
 .muted {
   border: 2px solid;
+}
 
-  &:where(.neutral) {
-    color: var(--neutral-12);
-    background-color: var(--neutral-2);
-    border-color: var(--neutral-8);
+.muted:where(.neutral) {
+  color: var(--neutral-12);
+  background-color: var(--neutral-2);
+  border-color: var(--neutral-8);
+}
 
-    @media (hover: hover) {
-      &:hover {
-        background-color: var(--neutral-3);
-      }
-    }
+@media (hover: hover) {
+  .muted:where(.neutral):hover {
+    background-color: var(--neutral-3);
   }
+}
 
-  &:where(.danger) {
-    color: var(--danger-11);
-    background-color: var(--danger-2);
-    border-color: var(--danger-7);
+.muted:where(.danger) {
+  color: var(--danger-11);
+  background-color: var(--danger-2);
+  border-color: var(--danger-7);
+}
 
-    @media (hover: hover) {
-      &:hover {
-        background-color: var(--danger-3);
-      }
-    }
+@media (hover: hover) {
+  .muted:where(.danger):hover {
+    background-color: var(--danger-3);
   }
+}
 
-  &[data-disabled] {
-    background-color: var(--neutral-2);
-    border-color: var(--disabled-4);
-  }
+.muted[data-disabled] {
+  background-color: var(--neutral-2);
+  border-color: var(--disabled-4);
 }
 
 .ghost {
   background-color: transparent;
+}
 
-  &:where(.neutral) {
-    color: var(--neutral-12);
+.ghost:where(.neutral) {
+  color: var(--neutral-12);
+}
 
-    @media (hover: hover) {
-      &:hover {
-        background-color: var(--neutral-3);
-      }
-    }
+@media (hover: hover) {
+  .ghost:where(.neutral):hover {
+    background-color: var(--neutral-3);
   }
+}
 
-  &:where(.danger) {
-    color: var(--danger-11);
+.ghost:where(.danger) {
+  color: var(--danger-11);
+}
 
-    @media (hover: hover) {
-      &:hover {
-        background-color: var(--danger-3);
-      }
-    }
+@media (hover: hover) {
+  .ghost:where(.danger):hover {
+    background-color: var(--danger-3);
   }
+}
 
-  &[data-disabled] {
-    background-color: transparent;
-  }
+.ghost[data-disabled] {
+  background-color: transparent;
 }

@@ -6,10 +6,10 @@
 
 .label {
   color: var(--neutral-12);
+}
 
-  &[data-disabled] {
-    color: var(--neutral-8);
-  }
+.label[data-disabled] {
+  color: var(--neutral-8);
 }
 
 .group {
@@ -28,30 +28,30 @@
   border: 2px solid var(--neutral-7);
   border-radius: 8px;
   transition: border-color 150ms;
+}
 
-  &::placeholder {
-    font: 400 16px / 22px var(--family-sans);
-    color: var(--neutral-9);
-  }
+.control::placeholder {
+  font: 400 16px / 22px var(--family-sans);
+  color: var(--neutral-9);
+}
 
-  &[data-invalid] {
-    border-color: var(--danger-7);
-  }
+.control[data-invalid] {
+  border-color: var(--danger-7);
+}
 
-  &[data-disabled] {
-    color: var(--neutral-8);
-    border-color: var(--disabled-4);
+.control[data-disabled] {
+  color: var(--neutral-8);
+  border-color: var(--disabled-4);
+}
 
-    &::placeholder {
-      color: var(--neutral-8);
-    }
-  }
+.control[data-disabled]::placeholder {
+  color: var(--neutral-8);
 }
 
 .error {
   color: var(--danger-11);
+}
 
-  &[data-disabled] {
-    color: var(--neutral-8);
-  }
+.error[data-disabled] {
+  color: var(--neutral-8);
 }
