@@ -1,0 +1,34 @@
+.header {
+  padding-block-start: 24px;
+  padding-inline: 12px;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  max-inline-size: 800px;
+  margin-inline: auto;
+}
+
+.slot {
+  display: flex;
+  gap: 12px;
+}
+
+.slot:last-of-type {
+  justify-content: end;
+}
+
+@media (width >= 425px) {
+  .header {
+    padding-inline: 24px;
+  }
+}
+
+@media (width >= 600px) {
+  .container {
+    padding-block: 20px;
+  }
+}

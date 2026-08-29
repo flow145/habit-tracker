@@ -6,6 +6,10 @@
   color-scheme: light dark;
 }
 
+body {
+  background-color: var(--neutral-1);
+}
+
 .visually-hidden {
   position: absolute;
   inline-size: 1px;
