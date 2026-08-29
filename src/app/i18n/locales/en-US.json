@@ -1,0 +1,12 @@
+{
+  "app": {
+    "title": "Habit tracker"
+  },
+  "navigation": {},
+  "errors": {},
+  "home": {
+    "title": "Habits",
+    "addHabit": "Add habit",
+    "settings": "Settings"
+  }
+}
