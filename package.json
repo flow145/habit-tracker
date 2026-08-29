@@ -32,7 +32,8 @@
     "react-dom": "~19.2.8",
     "react-i18next": "~17.0.12",
     "uuid": "~14.0.1",
-    "wouter": "~3.10.0"
+    "wouter": "~3.10.0",
+    "zustand": "~5.0.15"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.1",

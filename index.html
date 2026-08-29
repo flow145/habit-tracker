@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Habit tracker</title>
+    <script>
+      ;(() => {
+        try {
+          const { state } = JSON.parse(localStorage.getItem('habit-tracker-theme') ?? '{}')
+          const savedPreference = state?.themePreference ?? 'system'
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          if (savedPreference === 'dark' || (savedPreference === 'system' && prefersDark))
+            document.documentElement.setAttribute('data-theme', 'dark')
+        } catch {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
