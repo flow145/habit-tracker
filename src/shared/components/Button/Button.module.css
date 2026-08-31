@@ -5,6 +5,7 @@
   justify-content: center;
   min-block-size: 40px;
   padding: 8px 24px;
+  text-decoration: none;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
@@ -21,9 +22,9 @@
   translate: 0 1px;
 }
 
-.button[data-disabled] {
+.button:disabled {
   color: var(--neutral-8);
-  cursor: auto;
+  cursor: default;
   translate: none;
 }
 
@@ -38,24 +39,24 @@
   aspect-ratio: 1;
 }
 
-.button[data-type='icon'] {
+.button[data-appearance='icon'] {
   padding: 4px;
 }
 
-.button[data-type='icon'] :where(.icon) {
+.button[data-appearance='icon'] :where(.icon) {
   inline-size: 32px;
 }
 
 @media (width < 600px) {
-  .button[data-type='icon-text'] {
+  .button[data-appearance='icon-text'] {
     padding: 4px;
   }
 
-  .button[data-type='icon-text'] :where(.icon) {
+  .button[data-appearance='icon-text'] :where(.icon) {
     inline-size: 32px;
   }
 
-  .button[data-type='icon-text'] :where(.text) {
+  .button[data-appearance='icon-text'] :where(.text) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
@@ -92,7 +93,7 @@
   }
 }
 
-.filled[data-disabled] {
+.filled:disabled {
   background-color: var(--neutral-3);
 }
 
@@ -124,7 +125,7 @@
   }
 }
 
-.muted[data-disabled] {
+.muted:disabled {
   background-color: var(--neutral-2);
   border-color: var(--disabled-4);
 }
@@ -153,6 +154,6 @@
   }
 }
 
-.ghost[data-disabled] {
+.ghost:disabled {
   background-color: transparent;
 }
