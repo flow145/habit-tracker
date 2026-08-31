@@ -1,29 +1,17 @@
 import { Button as BaseButton } from '@base-ui/react/button'
 import { clsx } from 'clsx'
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement } from 'react'
 
 import styles from './Button.module.css'
 
 export type ButtonVariant = 'filled' | 'muted' | 'ghost'
 export type ButtonColor = 'neutral' | 'danger'
 
-interface CommonButtonProps extends Omit<BaseButton.Props, 'children'> {
+export interface ButtonProps extends BaseButton.Props {
   variant?: ButtonVariant
   color?: ButtonColor
-}
-
-interface TextButtonProps extends CommonButtonProps {
   icon?: ReactElement
-  children: ReactNode
 }
-
-interface IconButtonProps extends CommonButtonProps {
-  icon: ReactElement
-  'aria-label': string
-  children?: undefined
-}
-
-export type ButtonProps = TextButtonProps | IconButtonProps
 
 export const Button = ({
   variant = 'filled',
