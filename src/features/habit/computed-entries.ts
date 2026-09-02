@@ -10,12 +10,17 @@ export interface ComputedEntry {
   status: ComputedStatus
 }
 
+const toCalendarDate = (date: Date) => format(date, 'yyyy-MM-dd') as CalendarDate
+
 export const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) => {
   const firstDayAfterWindow = add(date, { [intervalUnit]: interval })
   return sub(firstDayAfterWindow, { days: 1 })
 }
 
-const toCalendarDate = (date: Date) => format(date, 'yyyy-MM-dd') as CalendarDate
+export const getWindowStart = (date: Date, { interval, intervalUnit }: Schedule) => {
+  const firstDayAfterWindow = add(date, { days: 1 })
+  return sub(firstDayAfterWindow, { [intervalUnit]: interval })
+}
 
 export const buildComputedEntries = ({
   start,
@@ -28,17 +33,23 @@ export const buildComputedEntries = ({
   entries: Pick<Entry, 'day' | 'status'>[]
   schedule: Schedule
 }): ComputedEntry[] => {
-  if (differenceInCalendarDays(end, start) < 0) return []
+  const dayCount = differenceInCalendarDays(end, start) + 1
+  if (dayCount < 1) return []
+
+  const effectiveStart = getWindowStart(start, schedule)
 
   const statusByDate = new Map(entries.map((entry) => [toCalendarDate(entry.day), entry.status]))
 
   let completedCount = 0
-  let windowStart = start
+  let windowStart = effectiveStart
   let windowEnd = getWindowEnd(windowStart, schedule)
   let windowStartIndex = 0
   let windowEndIndex = -1
 
-  const computedEntries: ComputedEntry[] = eachDayOfInterval({ start, end }).map((date) => ({
+  const computedEntries: ComputedEntry[] = eachDayOfInterval({
+    start: effectiveStart,
+    end,
+  }).map((date) => ({
     day: date,
     status: 'incomplete',
   }))
@@ -84,5 +95,5 @@ export const buildComputedEntries = ({
     if (explicitStatus) entry.status = explicitStatus
   })
 
-  return computedEntries
+  return computedEntries.slice(-dayCount)
 }

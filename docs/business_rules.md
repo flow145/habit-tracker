@@ -46,5 +46,6 @@
 
 ## Timeline
 
-- All habits share a display timeline ending at the later of the current local date and the latest stored entry date.
-- Shared timelines ensure that habit rows align under the same date columns.
+- All habits in one list share the same timeline range, so habit rows align under the same date columns.
+- The habit list page ends the timeline at the current local date.
+- The timeline may include days before a habit's creation date. Such days have no special treatment and follow the regular schedule and status rules.
