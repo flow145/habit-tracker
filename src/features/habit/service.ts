@@ -11,7 +11,7 @@ import {
 import { groupBy, isErrorNamed } from '~/shared/lib'
 import { buildComputedEntries, type ComputedEntry, getWindowStart } from './computed-entries'
 
-interface HabitWithEntries extends Habit {
+export interface HabitWithEntries extends Habit {
   entries: ComputedEntry[]
 }
 

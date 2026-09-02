@@ -2,3 +2,10 @@
   padding-block-start: 24px;
   padding-inline: 12px;
 }
+
+.habitList {
+  display: grid;
+  gap: 16px;
+  max-inline-size: 800px;
+  margin-inline: auto;
+}

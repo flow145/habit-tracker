@@ -1,0 +1,95 @@
+.habit {
+  display: grid;
+  grid-template-columns: auto;
+  gap: 16px;
+  padding: 16px;
+  overflow: hidden;
+  background-color: var(--neutral-3);
+  border: 2px solid var(--neutral-7);
+  border-radius: 8px;
+}
+
+.name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: var(--neutral-12);
+}
+
+.dayList {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  container-type: inline-size;
+}
+
+.dayItem {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.dayToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 4px;
+  color: var(--neutral-11);
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  transition: color 150ms;
+}
+
+@media (hover: hover) {
+  .day:hover {
+    color: var(--neutral-12);
+  }
+}
+
+.day:active {
+  color: var(--neutral-8);
+}
+
+.dayToggle svg {
+  inline-size: 100%;
+}
+
+@media (width >= 600px) {
+  .habit {
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+    align-items: center;
+    min-block-size: 104px;
+    padding-block: 24px;
+    padding-inline: 32px;
+  }
+}
+
+@container (width <= 440px) {
+  .dayItem:nth-child(1) {
+    display: none;
+  }
+}
+
+@container (width <= 400px) {
+  .dayItem:nth-child(2) {
+    display: none;
+  }
+}
+
+@container (width <= 360px) {
+  .dayItem:nth-child(3) {
+    display: none;
+  }
+}
+
+@container (width <= 320px) {
+  .dayItem:nth-child(4) {
+    display: none;
+  }
+}
