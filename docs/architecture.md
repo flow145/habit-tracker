@@ -17,4 +17,4 @@
 
 ## Rules
 
-- Always use day dates from the same generator `buildComputedEntries()`
+- Always use days from the same generator `buildComputedEntries()`

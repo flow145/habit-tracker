@@ -5,7 +5,7 @@
 
 ## View and complete habits
 
-- As a user, I want to see all my habits with their completion status in one place so that I know what I should do today
+- As a user, I want to see all my habits with their statuses in one place so that I know what I should do today
 - As a user, I want to see the last few days of each habit so that
     - I remember whether I've recently completed it
     - I am inspired by my progress
