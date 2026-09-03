@@ -3,9 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   EntityConflictError,
   EntityNotFoundError,
+  type ExplicitStatus,
   getDb,
   type Schedule,
-  type Status,
 } from '~/shared/db'
 import { resetTestDb } from '~/shared/tests'
 import { addHabit, deleteHabit, editHabit, getHabitList, setStatus } from './service'
@@ -35,7 +35,7 @@ const seedHabit = async (data?: {
 const seedEntry = async (data: {
   id?: string
   habitId?: string
-  status?: Status
+  status?: ExplicitStatus
   day?: string
   createdAt?: string
   updatedAt?: string
@@ -125,7 +125,7 @@ describe('getHabitList', () => {
     expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
       {
         ...first,
-        entries: [
+        computedEntries: [
           { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -133,7 +133,7 @@ describe('getHabitList', () => {
       },
       {
         ...second,
-        entries: [
+        computedEntries: [
           { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -164,7 +164,7 @@ describe('getHabitList', () => {
     expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
       expect.objectContaining({
         id: firstHabit.id,
-        entries: [
+        computedEntries: [
           { day: firstEntry.day, status: 'complete' },
           { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -172,7 +172,7 @@ describe('getHabitList', () => {
       }),
       expect.objectContaining({
         id: secondHabit.id,
-        entries: [
+        computedEntries: [
           { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
           { day: secondEntry.day, status: 'complete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -280,7 +280,7 @@ describe('deleteHabit', () => {
   })
 })
 
-describe('setEntryStatus', () => {
+describe('setStatus', () => {
   it('creates a complete entry with generated fields', async () => {
     const createdAt = new Date('2026-01-01T10:00:00.000Z')
     const day = new Date('2026-01-01T00:00:00')

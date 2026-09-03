@@ -1,8 +1,10 @@
 import { add, differenceInCalendarDays, eachDayOfInterval, format, min, sub } from 'date-fns'
 
-import type { Entry, Schedule, Status } from '~/shared/db'
+import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
 
-export type ComputedStatus = Status | 'incomplete' | 'not-required'
+type DerivedStatus = 'incomplete' | 'not-required'
+
+export type ComputedStatus = ExplicitStatus | DerivedStatus
 type CalendarDate = `${number}-${number}-${number}`
 
 export interface ComputedEntry {
@@ -71,8 +73,8 @@ export const buildComputedEntries = ({
 
     if (windowStartExplicitStatus === 'complete' && completedCount >= schedule.frequency)
       for (let i = windowStartIndex; i <= windowEndIndex; i += 1) {
-        const entry = computedEntries[i]
-        if (entry) entry.status = 'not-required'
+        const computedEntry = computedEntries[i]
+        if (computedEntry) computedEntry.status = 'not-required'
       }
 
     if (windowStartExplicitStatus === 'complete') completedCount -= 1
@@ -90,9 +92,9 @@ export const buildComputedEntries = ({
   }
 
   // Assign explicit statuses over computedEntries
-  computedEntries.forEach((entry) => {
-    const explicitStatus = statusByDate.get(toCalendarDate(entry.day))
-    if (explicitStatus) entry.status = explicitStatus
+  computedEntries.forEach((computedEntry) => {
+    const explicitStatus = statusByDate.get(toCalendarDate(computedEntry.day))
+    if (explicitStatus) computedEntry.status = explicitStatus
   })
 
   return computedEntries.slice(-dayCount)
