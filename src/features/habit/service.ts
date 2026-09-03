@@ -9,13 +9,19 @@ import {
   type Schedule,
 } from '~/shared/db'
 import { groupBy, isErrorNamed } from '~/shared/lib'
-import { buildComputedEntries, type ComputedEntry, getWindowStart } from './computed-entries'
-
-export type ToggleStatus = 'complete' | 'incomplete'
+import {
+  buildComputedEntries,
+  type ComputedEntry,
+  type ComputedStatus,
+  getWindowStart,
+} from './computed-entries'
 
 export interface HabitWithComputedEntries extends Habit {
   computedEntries: ComputedEntry[]
 }
+
+export const getNextStatus = (status: ComputedStatus) =>
+  status === 'complete' ? 'incomplete' : 'complete'
 
 export const addHabit = async ({
   name,
@@ -152,15 +158,16 @@ export const deleteHabit = async (id: string): Promise<void> => {
   ])
 }
 
-export const setStatus = async ({
+export const toggleDay = async ({
   habitId,
   day,
-  status,
+  currentStatus,
 }: {
   habitId: string
   day: Date
-  status: ToggleStatus
+  currentStatus: ComputedStatus
 }): Promise<void> => {
+  const status = getNextStatus(currentStatus)
   const db = await getDb()
 
   if (status === 'complete') {

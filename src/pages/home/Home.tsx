@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
+  type ComputedStatus,
   getHabitList,
   type HabitWithComputedEntries,
-  setStatus,
-  type ToggleStatus,
+  toggleDay,
 } from '~/features/habit'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
@@ -26,8 +26,8 @@ export const Home = () => {
 
   usePageTitle(t('Home.title'))
 
-  const handleToggleDay = (habitId: string) => async (day: Date, status: ToggleStatus) => {
-    await setStatus({ habitId, day, status })
+  const handleToggleDay = (habitId: string) => async (day: Date, currentStatus: ComputedStatus) => {
+    await toggleDay({ habitId, day, currentStatus })
     setHabits(await getHabitList({ start: getTimelineStart() }))
   }
 

@@ -4,7 +4,8 @@ import { Check, Squircle } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { ComputedStatus, HabitWithComputedEntries, ToggleStatus } from '~/features/habit'
+import type { ComputedStatus, HabitWithComputedEntries } from '~/features/habit'
+import { getNextStatus } from '~/features/habit'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
 import styles from './HabitItem.module.css'
 
@@ -14,12 +15,9 @@ const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; key: string }>
   'not-required': { icon: <SquircleCheckIcon />, key: 'notRequired' },
 }
 
-const getNextStatus = (status: ComputedStatus): ToggleStatus =>
-  status === 'complete' ? 'incomplete' : 'complete'
-
 export interface HabitItemProps {
   habit: HabitWithComputedEntries
-  onToggleDay: (day: Date, nextStatus: ToggleStatus) => void
+  onToggleDay: (day: Date, currentStatus: ComputedStatus) => void
 }
 
 export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
@@ -43,7 +41,7 @@ export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
                   currentStatus: t(`HabitItem.dayStatus.${STATUS_CONFIG[status].key}`),
                   nextStatus: t(`HabitItem.dayStatus.${nextStatus}`),
                 })}
-                onClick={() => onToggleDay(day, nextStatus)}
+                onClick={() => onToggleDay(day, status)}
               >
                 {STATUS_CONFIG[status].icon}
               </button>
