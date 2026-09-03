@@ -14,3 +14,7 @@
 - testing: mostly integration (Vitest, Testing Library) and some e2e (Playwright)
 - i18n: just English for now but use i18next to organize strings and pluralization
 - date and time: date-fns
+
+## Rules
+
+- Always use day dates from the same generator `buildComputedEntries()`
