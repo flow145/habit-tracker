@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
+import { date } from '~/shared/tests'
 import { buildComputedEntries, getWindowEnd, getWindowStart } from './computed-entries'
 
 type TestEntry = Pick<Entry, 'day' | 'status'>
@@ -18,13 +19,6 @@ const every3Days: Schedule = { frequency: 1, interval: 3, intervalUnit: 'days' }
 const twoIn3Days: Schedule = { frequency: 2, interval: 3, intervalUnit: 'days' }
 const threeIn1Week: Schedule = { frequency: 3, interval: 1, intervalUnit: 'weeks' }
 const everyMonth: Schedule = { frequency: 1, interval: 1, intervalUnit: 'months' }
-
-/**
- * @param [month=1] 1-12
- * @returns local date
- */
-const date = (day: number, month = 1, hour = 0, minute = 0) =>
-  new Date(2026, month - 1, day, hour, minute)
 
 export const entry = (day: Date, status: ExplicitStatus = 'complete'): TestEntry => ({
   day,

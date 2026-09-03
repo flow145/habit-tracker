@@ -7,7 +7,7 @@ import {
   getDb,
   type Schedule,
 } from '~/shared/db'
-import { resetTestDb } from '~/shared/tests'
+import { date, resetTestDb } from '~/shared/tests'
 import { addHabit, deleteHabit, editHabit, getHabitList, getNextStatus, toggleDay } from './service'
 
 const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'days' }
@@ -17,16 +17,16 @@ const seedHabit = async (data?: {
   name?: string
   description?: string
   schedule?: Schedule
-  createdAt?: string
-  updatedAt?: string
+  createdAt?: Date
+  updatedAt?: Date
 }) => {
   const habit = {
     id: data?.id ?? '1',
     name: data?.name ?? 'Read',
     description: data?.description ?? '',
     schedule: data?.schedule ?? schedule,
-    createdAt: new Date(data?.createdAt ?? '2026-01-01T00:00:00'),
-    updatedAt: new Date(data?.updatedAt ?? '2026-01-01T00:00:00'),
+    createdAt: data?.createdAt ?? date(1),
+    updatedAt: data?.updatedAt ?? date(1),
   }
   ;(await getDb()).add('habits', habit)
   return habit
@@ -36,17 +36,17 @@ const seedEntry = async (data: {
   id?: string
   habitId?: string
   status?: ExplicitStatus
-  day?: string
-  createdAt?: string
-  updatedAt?: string
+  day?: Date
+  createdAt?: Date
+  updatedAt?: Date
 }) => {
   const entry = {
     id: data?.id ?? '1',
     habitId: data?.habitId ?? '1',
     status: data?.status ?? 'complete',
-    day: new Date(data?.day ?? '2026-01-01T00:00:00'),
-    createdAt: new Date(data?.createdAt ?? '2026-01-01T00:00:00'),
-    updatedAt: new Date(data?.updatedAt ?? '2026-01-01T00:00:00'),
+    day: data?.day ?? date(1),
+    createdAt: data?.createdAt ?? date(1),
+    updatedAt: data?.updatedAt ?? date(1),
   }
   ;(await getDb()).put('entries', entry)
   return entry
@@ -68,7 +68,7 @@ afterEach(async () => {
 
 describe('addHabit', () => {
   it('creates a habit with defaults and matching timestamps', async () => {
-    const createdAt = new Date('2026-01-01T10:00:00.000Z')
+    const createdAt = date(1, 1, 10)
     vi.setSystemTime(createdAt)
 
     const expected = {
@@ -109,34 +109,29 @@ describe('addHabit', () => {
 })
 
 describe('getHabitList', () => {
-  const range = (start: string, end: string) => ({
-    start: new Date(start),
-    end: new Date(end),
-  })
-
   it('returns an empty array when there are no habits', async () => {
-    expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([])
+    expect(await getHabitList({ start: date(1), end: date(3) })).toEqual([])
   })
 
   it('returns habits oldest first with entries for the requested range', async () => {
-    const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: '2026-01-01T00:00:00' })
-    const second = await seedHabit({ id: '2', name: 'Newest', createdAt: '2026-01-03T00:00:00' })
+    const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: date(1) })
+    const second = await seedHabit({ id: '2', name: 'Newest', createdAt: date(3) })
 
-    expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
+    expect(await getHabitList({ start: date(1), end: date(3) })).toEqual([
       {
         ...first,
         computedEntries: [
-          { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
-          { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
-          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+          { day: date(1), status: 'incomplete' },
+          { day: date(2), status: 'incomplete' },
+          { day: date(3), status: 'incomplete' },
         ],
       },
       {
         ...second,
         computedEntries: [
-          { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
-          { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
-          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+          { day: date(1), status: 'incomplete' },
+          { day: date(2), status: 'incomplete' },
+          { day: date(3), status: 'incomplete' },
         ],
       },
     ])
@@ -148,34 +143,34 @@ describe('getHabitList', () => {
     const firstEntry = await seedEntry({
       id: '1',
       habitId: firstHabit.id,
-      day: '2026-01-01T00:00:00',
+      day: date(1),
     })
     const secondEntry = await seedEntry({
       id: '2',
       habitId: secondHabit.id,
-      day: '2026-01-02T00:00:00',
+      day: date(2),
     })
     await seedEntry({
       id: '3',
       habitId: 'missing',
-      day: '2026-01-03T00:00:00',
+      day: date(3),
     })
 
-    expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
+    expect(await getHabitList({ start: date(1), end: date(3) })).toEqual([
       expect.objectContaining({
         id: firstHabit.id,
         computedEntries: [
           { day: firstEntry.day, status: 'complete' },
-          { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
-          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+          { day: date(2), status: 'incomplete' },
+          { day: date(3), status: 'incomplete' },
         ],
       }),
       expect.objectContaining({
         id: secondHabit.id,
         computedEntries: [
-          { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
+          { day: date(1), status: 'incomplete' },
           { day: secondEntry.day, status: 'complete' },
-          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+          { day: date(3), status: 'incomplete' },
         ],
       }),
     ])
@@ -187,9 +182,9 @@ describe('editHabit', () => {
     const habit = await seedHabit({
       name: 'Read',
       description: 'Before',
-      createdAt: '2026-01-01T00:00:00',
+      createdAt: date(1),
     })
-    const updatedAt = new Date('2026-01-03T00:00:00')
+    const updatedAt = date(3)
     vi.setSystemTime(updatedAt)
 
     expect(await editHabit({ id: habit.id, description: '' })).toEqual({
@@ -202,7 +197,7 @@ describe('editHabit', () => {
   it('updates all editable fields', async () => {
     const updatedSchedule: Schedule = { frequency: 3, interval: 1, intervalUnit: 'weeks' }
     const habit = await seedHabit()
-    const updatedAt = new Date('2026-01-03T00:00:00')
+    const updatedAt = date(3)
     vi.setSystemTime(updatedAt)
 
     expect(
@@ -254,12 +249,12 @@ describe('deleteHabit', () => {
   it('deletes the habit and all entries without affecting another habit', async () => {
     const deleted = await seedHabit({ id: '1', name: 'Delete' })
     const kept = await seedHabit({ id: '2', name: 'Keep' })
-    await seedEntry({ id: '1', habitId: deleted.id, day: '0001-01-01T00:00:00' })
-    await seedEntry({ id: '2', habitId: deleted.id, day: '9999-12-31T00:00:00' })
+    await seedEntry({ id: '1', habitId: deleted.id, day: new Date('0001-01-01T00:00:00') })
+    await seedEntry({ id: '2', habitId: deleted.id, day: new Date('9999-12-31T00:00:00') })
     const keptEntry = await seedEntry({
       id: '3',
       habitId: kept.id,
-      day: '2026-01-01T00:00:00',
+      day: date(1),
     })
 
     expect(await deleteHabit(deleted.id)).toBeUndefined()
@@ -270,7 +265,7 @@ describe('deleteHabit', () => {
 
   it('rejects an unknown habit without affecting existing records', async () => {
     const habit = await seedHabit()
-    const entry = await seedEntry({ habitId: habit.id, day: '2026-01-01T00:00:00' })
+    const entry = await seedEntry({ habitId: habit.id, day: date(1) })
 
     await expect(deleteHabit('missing')).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
@@ -293,8 +288,8 @@ describe('getNextStatus', () => {
 
 describe('toggleDay', () => {
   it('creates a complete entry with generated fields', async () => {
-    const createdAt = new Date('2026-01-01T10:00:00.000Z')
-    const day = new Date('2026-01-01T00:00:00')
+    const createdAt = date(1, 1, 10)
+    const day = date(1)
     vi.setSystemTime(createdAt)
 
     expect(await toggleDay({ habitId: '1', day, currentStatus: 'incomplete' })).toBeUndefined()
@@ -311,7 +306,7 @@ describe('toggleDay', () => {
   })
 
   it('marks a not-required day complete', async () => {
-    const day = new Date('2026-01-01T00:00:00')
+    const day = date(1)
 
     expect(await toggleDay({ habitId: '1', day, currentStatus: 'not-required' })).toBeUndefined()
     expect(await getAllEntries()).toEqual([
@@ -320,12 +315,12 @@ describe('toggleDay', () => {
   })
 
   it('is idempotent for a duplicate entry and preserves the original record', async () => {
-    const existing = await seedEntry({ habitId: '1', day: '2026-01-01T00:00:00' })
+    const existing = await seedEntry({ habitId: '1', day: date(1) })
 
     expect(
       await toggleDay({
         habitId: '1',
-        day: new Date('2026-01-01T00:00:00'),
+        day: date(1),
         currentStatus: 'incomplete',
       }),
     ).toBeUndefined()
@@ -333,12 +328,12 @@ describe('toggleDay', () => {
   })
 
   it('removes an existing entry when toggled from complete', async () => {
-    await seedEntry({ habitId: '1', day: '2026-01-01T00:00:00' })
+    await seedEntry({ habitId: '1', day: date(1) })
 
     expect(
       await toggleDay({
         habitId: '1',
-        day: new Date('2026-01-01T00:00:00'),
+        day: date(1),
         currentStatus: 'complete',
       }),
     ).toBeUndefined()
@@ -349,7 +344,7 @@ describe('toggleDay', () => {
     expect(
       await toggleDay({
         habitId: 'missing',
-        day: new Date('2026-01-01T00:00:00'),
+        day: date(1),
         currentStatus: 'complete',
       }),
     ).toBeUndefined()
@@ -359,18 +354,18 @@ describe('toggleDay', () => {
     const first = await seedEntry({
       id: '1',
       habitId: '1',
-      day: '2026-01-02T00:00:00',
+      day: date(2),
     })
     const second = await seedEntry({
       id: '2',
       habitId: '2',
-      day: '2026-01-01T00:00:00',
+      day: date(1),
     })
-    await seedEntry({ id: '3', habitId: '1', day: '2026-01-01T00:00:00' })
+    await seedEntry({ id: '3', habitId: '1', day: date(1) })
 
     await toggleDay({
       habitId: '1',
-      day: new Date('2026-01-01T00:00:00'),
+      day: date(1),
       currentStatus: 'complete',
     })
 

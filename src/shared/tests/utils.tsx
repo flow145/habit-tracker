@@ -5,6 +5,13 @@ import type { ReactElement, ReactNode } from 'react'
 
 import { closeDb } from '~/shared/db'
 
+/**
+ * @param [month=1] 1-12
+ * @returns local date
+ */
+export const date = (day: number, month = 1, hour = 0, minute = 0) =>
+  new Date(2026, month - 1, day, hour, minute)
+
 interface ProvidersProps {
   children: ReactNode
 }
