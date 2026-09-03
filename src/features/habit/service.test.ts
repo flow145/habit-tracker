@@ -3,12 +3,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   EntityConflictError,
   EntityNotFoundError,
+  type ExplicitStatus,
   getDb,
   type Schedule,
-  type Status,
 } from '~/shared/db'
 import { resetTestDb } from '~/shared/tests'
-import { addHabit, deleteHabit, editHabit, getHabitList, setStatus } from './service'
+import { addHabit, deleteHabit, editHabit, getHabitList, getNextStatus, toggleDay } from './service'
 
 const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'days' }
 
@@ -35,7 +35,7 @@ const seedHabit = async (data?: {
 const seedEntry = async (data: {
   id?: string
   habitId?: string
-  status?: Status
+  status?: ExplicitStatus
   day?: string
   createdAt?: string
   updatedAt?: string
@@ -125,7 +125,7 @@ describe('getHabitList', () => {
     expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
       {
         ...first,
-        entries: [
+        computedEntries: [
           { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -133,7 +133,7 @@ describe('getHabitList', () => {
       },
       {
         ...second,
-        entries: [
+        computedEntries: [
           { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -164,7 +164,7 @@ describe('getHabitList', () => {
     expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
       expect.objectContaining({
         id: firstHabit.id,
-        entries: [
+        computedEntries: [
           { day: firstEntry.day, status: 'complete' },
           { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -172,7 +172,7 @@ describe('getHabitList', () => {
       }),
       expect.objectContaining({
         id: secondHabit.id,
-        entries: [
+        computedEntries: [
           { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
           { day: secondEntry.day, status: 'complete' },
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
@@ -280,13 +280,24 @@ describe('deleteHabit', () => {
   })
 })
 
-describe('setEntryStatus', () => {
+describe('getNextStatus', () => {
+  it('cycles complete to incomplete', () => {
+    expect(getNextStatus('complete')).toBe('incomplete')
+  })
+
+  it('cycles every other status to complete', () => {
+    expect(getNextStatus('incomplete')).toBe('complete')
+    expect(getNextStatus('not-required')).toBe('complete')
+  })
+})
+
+describe('toggleDay', () => {
   it('creates a complete entry with generated fields', async () => {
     const createdAt = new Date('2026-01-01T10:00:00.000Z')
     const day = new Date('2026-01-01T00:00:00')
     vi.setSystemTime(createdAt)
 
-    expect(await setStatus({ habitId: '1', day, status: 'complete' })).toBeUndefined()
+    expect(await toggleDay({ habitId: '1', day, currentStatus: 'incomplete' })).toBeUndefined()
     expect(await getAllEntries()).toEqual([
       {
         id: expect.any(String),
@@ -299,38 +310,47 @@ describe('setEntryStatus', () => {
     ])
   })
 
+  it('marks a not-required day complete', async () => {
+    const day = new Date('2026-01-01T00:00:00')
+
+    expect(await toggleDay({ habitId: '1', day, currentStatus: 'not-required' })).toBeUndefined()
+    expect(await getAllEntries()).toEqual([
+      expect.objectContaining({ habitId: '1', status: 'complete', day }),
+    ])
+  })
+
   it('is idempotent for a duplicate entry and preserves the original record', async () => {
     const existing = await seedEntry({ habitId: '1', day: '2026-01-01T00:00:00' })
 
     expect(
-      await setStatus({
+      await toggleDay({
         habitId: '1',
         day: new Date('2026-01-01T00:00:00'),
-        status: 'complete',
+        currentStatus: 'incomplete',
       }),
     ).toBeUndefined()
     expect(await getAllEntries()).toEqual([existing])
   })
 
-  it('removes an existing entry for incomplete status', async () => {
+  it('removes an existing entry when toggled from complete', async () => {
     await seedEntry({ habitId: '1', day: '2026-01-01T00:00:00' })
 
     expect(
-      await setStatus({
+      await toggleDay({
         habitId: '1',
         day: new Date('2026-01-01T00:00:00'),
-        status: 'incomplete',
+        currentStatus: 'complete',
       }),
     ).toBeUndefined()
     expect(await getAllEntries()).toEqual([])
   })
 
-  it('treats incomplete for a missing date as a no-op', async () => {
+  it('treats toggling from complete for a missing date as a no-op', async () => {
     expect(
-      await setStatus({
+      await toggleDay({
         habitId: 'missing',
         day: new Date('2026-01-01T00:00:00'),
-        status: 'incomplete',
+        currentStatus: 'complete',
       }),
     ).toBeUndefined()
   })
@@ -348,10 +368,10 @@ describe('setEntryStatus', () => {
     })
     await seedEntry({ id: '3', habitId: '1', day: '2026-01-01T00:00:00' })
 
-    await setStatus({
+    await toggleDay({
       habitId: '1',
       day: new Date('2026-01-01T00:00:00'),
-      status: 'incomplete',
+      currentStatus: 'complete',
     })
 
     expect(await getAllEntries()).toEqual([first, second])

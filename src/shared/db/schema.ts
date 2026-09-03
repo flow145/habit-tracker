@@ -1,12 +1,12 @@
 import type { DBSchema as IDBSchema } from 'idb'
 
-export type InvtervalUnit = 'days' | 'weeks' | 'months'
-export type Status = 'complete'
+export type IntervalUnit = 'days' | 'weeks' | 'months'
+export type ExplicitStatus = 'complete'
 
 export interface Schedule {
   frequency: number
   interval: number
-  intervalUnit: InvtervalUnit
+  intervalUnit: IntervalUnit
 }
 
 export interface Habit {
@@ -21,7 +21,7 @@ export interface Habit {
 export interface Entry {
   id: string
   habitId: string
-  status: Status
+  status: ExplicitStatus
   day: Date
   createdAt: Date
   updatedAt: Date

@@ -9,11 +9,19 @@ import {
   type Schedule,
 } from '~/shared/db'
 import { groupBy, isErrorNamed } from '~/shared/lib'
-import { buildComputedEntries, type ComputedEntry, getWindowStart } from './computed-entries'
+import {
+  buildComputedEntries,
+  type ComputedEntry,
+  type ComputedStatus,
+  getWindowStart,
+} from './computed-entries'
 
-export interface HabitWithEntries extends Habit {
-  entries: ComputedEntry[]
+export interface HabitWithComputedEntries extends Habit {
+  computedEntries: ComputedEntry[]
 }
+
+export const getNextStatus = (status: ComputedStatus) =>
+  status === 'complete' ? 'incomplete' : 'complete'
 
 export const addHabit = async ({
   name,
@@ -54,7 +62,7 @@ export const getHabitList = async ({
 }: {
   start: Date
   end?: Date
-}): Promise<HabitWithEntries[]> => {
+}): Promise<HabitWithComputedEntries[]> => {
   const db = await getDb()
   const tx = db.transaction(['habits', 'entries'], 'readonly')
   const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
@@ -63,7 +71,7 @@ export const getHabitList = async ({
 
   if (habits.length === 0 || dayCount <= 0) {
     await tx.done
-    return habits.map((habit) => ({ ...habit, entries: [] }))
+    return habits.map((habit) => ({ ...habit, computedEntries: [] }))
   }
 
   const earliestEffectiveStart = min(habits.map((habit) => getWindowStart(start, habit.schedule)))
@@ -77,7 +85,7 @@ export const getHabitList = async ({
 
   const list = habits.map((habit) => ({
     ...habit,
-    entries: buildComputedEntries({
+    computedEntries: buildComputedEntries({
       start,
       end,
       entries: entriesByHabit.get(habit.id) ?? [],
@@ -150,15 +158,16 @@ export const deleteHabit = async (id: string): Promise<void> => {
   ])
 }
 
-export const setStatus = async ({
+export const toggleDay = async ({
   habitId,
   day,
-  status,
+  currentStatus,
 }: {
   habitId: string
   day: Date
-  status: 'complete' | 'incomplete'
+  currentStatus: ComputedStatus
 }): Promise<void> => {
+  const status = getNextStatus(currentStatus)
   const db = await getDb()
 
   if (status === 'complete') {

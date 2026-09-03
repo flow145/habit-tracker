@@ -4,6 +4,7 @@ export {
   deleteHabit,
   editHabit,
   getHabitList,
-  type HabitWithEntries,
-  setStatus,
+  getNextStatus,
+  type HabitWithComputedEntries,
+  toggleDay,
 } from './service'

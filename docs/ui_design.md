@@ -42,12 +42,12 @@ Instead:
 
 Target maximum content width: **800px**
 
-## Habit entries
+## Day statuses
 
-Icons for different entry statuses:
+Icons for different statuses:
 - Squircle outline for incomplete days (Fits the overall rounded-rectangle design language better than circles)
-- Checkmark for completed
-- Muted checkmark for auto-completed days
+- Checkmark for completed days
+- Muted checkmark for `not-required` days
 - Minus/dash for skipped days
 
 ## Colors
@@ -65,4 +65,4 @@ Icons for different entry statuses:
 
 ## Accessibility
 
-Habit entry controls should be implemented as accessible toggle-like controls that can cycle through statuses while remaining keyboard accessible.
+Habit day controls should be implemented as accessible toggle-like controls that can cycle through statuses while remaining keyboard accessible.

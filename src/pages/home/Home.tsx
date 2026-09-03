@@ -2,31 +2,34 @@ import { Plus, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { getHabitList, type HabitWithEntries, setStatus } from '~/features/habit'
+import {
+  type ComputedStatus,
+  getHabitList,
+  type HabitWithComputedEntries,
+  toggleDay,
+} from '~/features/habit'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { usePageTitle } from '~/shared/hooks'
 
-import { getDateRange } from './dates'
 import { HabitItem } from './HabitItem'
 import styles from './Home.module.css'
-import { Timeline } from './Timeline'
+import { getTimelineStart, Timeline } from './Timeline'
 
 export const Home = () => {
   const { t } = useTranslation()
-  const [habits, setHabits] = useState<HabitWithEntries[]>([])
+  const [habits, setHabits] = useState<HabitWithComputedEntries[]>([])
 
   useEffect(() => {
-    getHabitList(getDateRange()).then(setHabits)
+    getHabitList({ start: getTimelineStart() }).then(setHabits)
   }, [])
 
   usePageTitle(t('Home.title'))
 
-  const handleToggleDay =
-    (habitId: string) => async (day: Date, status: 'complete' | 'incomplete') => {
-      await setStatus({ habitId, day, status })
-      setHabits(await getHabitList(getDateRange()))
-    }
+  const handleToggleDay = (habitId: string) => async (day: Date, currentStatus: ComputedStatus) => {
+    await toggleDay({ habitId, day, currentStatus })
+    setHabits(await getHabitList({ start: getTimelineStart() }))
+  }
 
   return (
     <>

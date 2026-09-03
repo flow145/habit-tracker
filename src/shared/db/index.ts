@@ -2,8 +2,8 @@ export { closeDb, getDb } from './client'
 export { EntityConflictError, EntityNotFoundError } from './errors'
 export type {
   Entry,
+  ExplicitStatus,
   Habit,
-  InvtervalUnit,
+  IntervalUnit,
   Schedule,
-  Status,
 } from './schema'

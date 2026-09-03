@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Entry, Schedule, Status } from '~/shared/db'
+import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
 import { buildComputedEntries, getWindowEnd, getWindowStart } from './computed-entries'
 
 type TestEntry = Pick<Entry, 'day' | 'status'>
@@ -26,7 +26,7 @@ const everyMonth: Schedule = { frequency: 1, interval: 1, intervalUnit: 'months'
 const date = (day: number, month = 1, hour = 0, minute = 0) =>
   new Date(2026, month - 1, day, hour, minute)
 
-export const entry = (day: Date, status: Status = 'complete'): TestEntry => ({
+export const entry = (day: Date, status: ExplicitStatus = 'complete'): TestEntry => ({
   day,
   status,
 })
