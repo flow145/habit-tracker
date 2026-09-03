@@ -1,4 +1,3 @@
-import { subDays } from 'date-fns'
 import { Plus, Settings } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,12 +7,10 @@ import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { usePageTitle } from '~/shared/hooks'
 
+import { getDateRange } from './dates'
 import { HabitItem } from './HabitItem'
 import styles from './Home.module.css'
-
-const MAX_DAYS = 10
-
-const getDateRange = () => ({ start: subDays(new Date(), MAX_DAYS - 1) })
+import { Timeline } from './Timeline'
 
 export const Home = () => {
   const { t } = useTranslation()
@@ -43,6 +40,7 @@ export const Home = () => {
         }
       />
       <main className={styles.main}>
+        {habits.length > 0 && <Timeline />}
         <ul className={styles.habitList}>
           {habits.map((habit) => (
             <li key={habit.id}>

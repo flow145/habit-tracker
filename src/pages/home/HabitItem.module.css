@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: auto;
   gap: 16px;
-  padding: 16px;
+  padding: 14px;
   overflow: hidden;
   background-color: var(--neutral-3);
   border: 2px solid var(--neutral-7);
@@ -42,6 +42,7 @@
   cursor: pointer;
   background-color: transparent;
   border: 0;
+  border-radius: 8px;
   transition: color 150ms;
 }
 
@@ -51,12 +52,12 @@
   }
 }
 
-.day:active {
-  color: var(--neutral-8);
-}
-
 .dayToggle svg {
   inline-size: 100%;
+}
+
+.muted {
+  color: var(--neutral-8);
 }
 
 @media (width >= 600px) {
@@ -66,7 +67,7 @@
     align-items: center;
     min-block-size: 104px;
     padding-block: 24px;
-    padding-inline: 32px;
+    padding-inline: 30px;
   }
 }
 

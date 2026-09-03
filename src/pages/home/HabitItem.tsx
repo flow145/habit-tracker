@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 
 import type { ComputedStatus, HabitWithEntries } from '~/features/habit'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
-
 import styles from './HabitItem.module.css'
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; key: string }> = {
@@ -30,22 +29,23 @@ export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
     <article className={styles.habit}>
       <h2 className={clsx(styles.name, 'subheading')}>{habit.name}</h2>
       <ol className={styles.dayList}>
-        {habit.entries.map((entry) => {
-          const nextStatus = getNextStatus(entry.status)
+        {habit.entries.map(({ day, status }) => {
+          const nextStatus = getNextStatus(status)
+          const isMuted = status === 'incomplete' || status === 'not-required'
 
           return (
-            <li key={entry.day.toISOString()} className={styles.dayItem}>
+            <li key={day.toISOString()} className={styles.dayItem}>
               <button
                 type='button'
-                className={styles.dayToggle}
+                className={clsx(styles.dayToggle, isMuted && styles.muted)}
                 aria-label={t('HabitItem.dayToggle', {
-                  date: format(entry.day, 'MMMM d'),
-                  currentStatus: t(`HabitItem.dayStatus.${STATUS_CONFIG[entry.status].key}`),
+                  date: format(day, 'MMMM d'),
+                  currentStatus: t(`HabitItem.dayStatus.${STATUS_CONFIG[status].key}`),
                   nextStatus: t(`HabitItem.dayStatus.${nextStatus}`),
                 })}
-                onClick={() => onToggleDay(entry.day, nextStatus)}
+                onClick={() => onToggleDay(day, nextStatus)}
               >
-                {STATUS_CONFIG[entry.status].icon}
+                {STATUS_CONFIG[status].icon}
               </button>
             </li>
           )
