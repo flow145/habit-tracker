@@ -109,16 +109,20 @@ describe('addHabit', () => {
 })
 
 describe('getHabitList', () => {
-  it('returns an empty array when there are no habits', async () => {
-    expect(await getHabitList()).toEqual([])
+  const range = (start: string, end: string) => ({
+    start: new Date(start),
+    end: new Date(end),
   })
 
-  it('returns habits oldest first with incomplete entries', async () => {
+  it('returns an empty array when there are no habits', async () => {
+    expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([])
+  })
+
+  it('returns habits oldest first with entries for the requested range', async () => {
     const first = await seedHabit({ id: '1', name: 'Oldest', createdAt: '2026-01-01T00:00:00' })
     const second = await seedHabit({ id: '2', name: 'Newest', createdAt: '2026-01-03T00:00:00' })
-    vi.setSystemTime(new Date('2026-01-03T00:00:00'))
 
-    expect(await getHabitList()).toEqual([
+    expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
       {
         ...first,
         entries: [
@@ -127,7 +131,14 @@ describe('getHabitList', () => {
           { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
         ],
       },
-      { ...second, entries: [{ day: new Date('2026-01-03T00:00:00'), status: 'incomplete' }] },
+      {
+        ...second,
+        entries: [
+          { day: new Date('2026-01-01T00:00:00'), status: 'incomplete' },
+          { day: new Date('2026-01-02T00:00:00'), status: 'incomplete' },
+          { day: new Date('2026-01-03T00:00:00'), status: 'incomplete' },
+        ],
+      },
     ])
   })
 
@@ -149,9 +160,8 @@ describe('getHabitList', () => {
       habitId: 'missing',
       day: '2026-01-03T00:00:00',
     })
-    vi.setSystemTime(new Date('2026-01-03T00:00:00'))
 
-    expect(await getHabitList()).toEqual([
+    expect(await getHabitList(range('2026-01-01T00:00:00', '2026-01-03T00:00:00'))).toEqual([
       expect.objectContaining({
         id: firstHabit.id,
         entries: [

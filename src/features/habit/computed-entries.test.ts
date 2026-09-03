@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { Entry, Schedule, Status } from '~/shared/db'
-import { buildComputedEntries, getWindowEnd } from './computed-entries'
+import { buildComputedEntries, getWindowEnd, getWindowStart } from './computed-entries'
 
 type TestEntry = Pick<Entry, 'day' | 'status'>
 
@@ -14,6 +14,7 @@ interface BuildComputedEntriesTestCase {
 }
 
 const everyDay: Schedule = { frequency: 1, interval: 1, intervalUnit: 'days' }
+const every3Days: Schedule = { frequency: 1, interval: 3, intervalUnit: 'days' }
 const twoIn3Days: Schedule = { frequency: 2, interval: 3, intervalUnit: 'days' }
 const threeIn1Week: Schedule = { frequency: 3, interval: 1, intervalUnit: 'weeks' }
 const everyMonth: Schedule = { frequency: 1, interval: 1, intervalUnit: 'months' }
@@ -58,6 +59,34 @@ describe('getWindowEnd', () => {
     const start = date(1, 1, 15, 30)
 
     expect(getWindowEnd(start, everyDay)).toEqual(date(1, 1, 15, 30))
+  })
+})
+
+describe('getWindowStart', () => {
+  it.each`
+    endDate        | interval | intervalUnit | expectedDate
+    ${date(1)}     | ${1}     | ${'days'}    | ${date(1)}
+    ${date(2)}     | ${2}     | ${'days'}    | ${date(1)}
+    ${date(7)}     | ${7}     | ${'days'}    | ${date(1)}
+    ${date(1, 2)}  | ${1}     | ${'weeks'}   | ${date(26)}
+    ${date(10, 3)} | ${2}     | ${'weeks'}   | ${date(25, 2)}
+    ${date(14, 2)} | ${1}     | ${'months'}  | ${date(15)}
+    ${date(14, 3)} | ${2}     | ${'months'}  | ${date(15)}
+    ${date(27, 2)} | ${1}     | ${'months'}  | ${date(28)}
+    ${date(30, 3)} | ${2}     | ${'months'}  | ${date(31)}
+  `(
+    'returns the inclusive window start (%$)',
+    ({ endDate, interval, intervalUnit, expectedDate }) => {
+      const schedule: Schedule = { frequency: 1, interval, intervalUnit }
+
+      expect(getWindowStart(endDate, schedule)).toEqual(expectedDate)
+    },
+  )
+
+  it('preserves the time of day', () => {
+    const end = date(1, 1, 15, 30)
+
+    expect(getWindowStart(end, everyDay)).toEqual(date(1, 1, 15, 30))
   })
 })
 
@@ -537,12 +566,39 @@ describe('buildComputedEntries', () => {
     expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
   })
 
-  it('ignores entries outside the range', () => {
+  it('derives not-required from entries before the range within the schedule margin', () => {
     const computedEntries = buildComputedEntries({
       start: date(2),
       end: date(4),
-      entries: [entry(date(1)), entry(date(5))],
-      schedule: { frequency: 1, interval: 3, intervalUnit: 'days' },
+      entries: [entry(date(1))],
+      schedule: every3Days,
+    })
+
+    expect(computedEntries.map(({ status }) => status)).toEqual([
+      'not-required',
+      'not-required',
+      'incomplete',
+    ])
+    expect(computedEntries[0]?.day).toEqual(date(2))
+  })
+
+  it('ignores entries older than the schedule margin', () => {
+    const computedEntries = buildComputedEntries({
+      start: date(4),
+      end: date(6),
+      entries: [entry(date(1))],
+      schedule: every3Days,
+    })
+
+    expect(computedEntries.map(({ status }) => status)).toEqual(Array(3).fill('incomplete'))
+  })
+
+  it('ignores entries after the range', () => {
+    const computedEntries = buildComputedEntries({
+      start: date(1),
+      end: date(3),
+      entries: [entry(date(4))],
+      schedule: every3Days,
     })
 
     expect(computedEntries.map(({ status }) => status)).toEqual(Array(3).fill('incomplete'))

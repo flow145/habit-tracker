@@ -1,4 +1,4 @@
-import { max } from 'date-fns'
+import { differenceInCalendarDays, min } from 'date-fns'
 import { v7 as uuidv7 } from 'uuid'
 import {
   EntityConflictError,
@@ -9,9 +9,9 @@ import {
   type Schedule,
 } from '~/shared/db'
 import { groupBy, isErrorNamed } from '~/shared/lib'
-import { buildComputedEntries, type ComputedEntry } from './computed-entries'
+import { buildComputedEntries, type ComputedEntry, getWindowStart } from './computed-entries'
 
-interface HabitWithEntries extends Habit {
+export interface HabitWithEntries extends Habit {
   entries: ComputedEntry[]
 }
 
@@ -48,20 +48,37 @@ export const addHabit = async ({
   return habit
 }
 
-export const getHabitList = async (): Promise<HabitWithEntries[]> => {
+export const getHabitList = async ({
+  start,
+  end = new Date(),
+}: {
+  start: Date
+  end?: Date
+}): Promise<HabitWithEntries[]> => {
   const db = await getDb()
   const tx = db.transaction(['habits', 'entries'], 'readonly')
   const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
-  const entries = await tx.objectStore('entries').index('byDay').getAll()
+
+  const dayCount = differenceInCalendarDays(end, start) + 1
+
+  if (habits.length === 0 || dayCount <= 0) {
+    await tx.done
+    return habits.map((habit) => ({ ...habit, entries: [] }))
+  }
+
+  const earliestEffectiveStart = min(habits.map((habit) => getWindowStart(start, habit.schedule)))
+
+  const entries = await tx
+    .objectStore('entries')
+    .index('byDay')
+    .getAll(IDBKeyRange.bound(earliestEffectiveStart, end))
 
   const entriesByHabit = groupBy(entries, (entry) => entry.habitId)
-  const lastEntryDate = entries.at(-1)?.day
-  const end = lastEntryDate ? max([new Date(), new Date(lastEntryDate)]) : new Date()
 
   const list = habits.map((habit) => ({
     ...habit,
     entries: buildComputedEntries({
-      start: habit.createdAt,
+      start,
       end,
       entries: entriesByHabit.get(habit.id) ?? [],
       schedule: habit.schedule,

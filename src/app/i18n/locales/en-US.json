@@ -1,0 +1,20 @@
+{
+  "app": {
+    "title": "Habit tracker"
+  },
+  "navigation": {},
+  "errors": {},
+  "Home": {
+    "title": "Habits",
+    "addHabit": "Add habit",
+    "settings": "Settings"
+  },
+  "HabitItem": {
+    "dayToggle": "{{date}}: {{currentStatus}}. Press to mark {{nextStatus}}.",
+    "dayStatus": {
+      "complete": "complete",
+      "incomplete": "incomplete",
+      "notRequired": "not required"
+    }
+  }
+}

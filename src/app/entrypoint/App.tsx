@@ -1,6 +1,17 @@
-import '@fontsource-variable/geist/wght.css'
-import '../styles/index.css'
+import { Route, Switch } from 'wouter'
+
+import { Home } from '~/pages/home'
+import { ThemeSynchronizer } from '../theme'
 
 export const App = () => {
-  return <h1>Habit tracker</h1>
+  return (
+    <>
+      <ThemeSynchronizer />
+      <Switch>
+        <Route path='/' component={Home} />
+        {/* TODO */}
+        <Route>404: No such page!</Route>
+      </Switch>
+    </>
+  )
 }

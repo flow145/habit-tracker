@@ -22,4 +22,4 @@ A simple, cross-platform habit tracker with flexible scheduling and a focus on l
 - `pnpm typecheck`: `tsc -b`
 - `pnpm test`: `vitest run`
 
-Add options to these pnpm commmands if needed instead of running vitest/biome/etc directly.
+Add options to these pnpm commmands if needed instead of running vitest/biome/etc directly. Example: `pnpm exec biome check src/app/entrypoint/App.tsx` -> `pnpm check src/app/entrypoint/App.tsx`.

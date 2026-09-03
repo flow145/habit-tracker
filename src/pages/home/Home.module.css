@@ -1,0 +1,18 @@
+.main {
+  padding-block-start: 24px;
+  padding-inline: 12px;
+}
+
+.habitList {
+  display: grid;
+  gap: 16px;
+  max-inline-size: 800px;
+  margin-block-start: 16px;
+  margin-inline: auto;
+}
+
+@media (width >= 600px) {
+  .habitList {
+    margin-block-start: 20px;
+  }
+}

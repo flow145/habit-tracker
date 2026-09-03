@@ -2,8 +2,8 @@
   isolation: isolate;
 }
 
-:root {
-  color-scheme: light dark;
+body {
+  background-color: var(--neutral-1);
 }
 
 .visually-hidden {

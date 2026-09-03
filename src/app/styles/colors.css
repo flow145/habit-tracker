@@ -39,8 +39,12 @@
   --disabled-12: var(--gray-12);
 
   --inverse: var(--white);
+
+  color-scheme: light;
 }
 
 :root[data-theme='dark'] {
   --inverse: var(--black);
+
+  color-scheme: dark;
 }

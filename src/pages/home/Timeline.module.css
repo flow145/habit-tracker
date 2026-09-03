@@ -1,0 +1,57 @@
+.timeline {
+  max-inline-size: 800px;
+  padding-inline: 16px;
+  margin-inline: auto;
+}
+
+.grid {
+  display: grid;
+  grid-auto-columns: 40px;
+  grid-auto-flow: column;
+  gap: 4px;
+  justify-content: space-between;
+  container-type: inline-size;
+}
+
+.cell {
+  color: var(--neutral-12);
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (width >= 600px) {
+  .timeline {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+    padding-inline: 32px;
+  }
+
+  .grid {
+    grid-column: 2;
+  }
+}
+
+@container (width <= 440px) {
+  .cell:nth-child(1) {
+    display: none;
+  }
+}
+
+@container (width <= 400px) {
+  .cell:nth-child(2) {
+    display: none;
+  }
+}
+
+@container (width <= 360px) {
+  .cell:nth-child(3) {
+    display: none;
+  }
+}
+
+@container (width <= 320px) {
+  .cell:nth-child(4) {
+    display: none;
+  }
+}
