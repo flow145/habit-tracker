@@ -24,6 +24,7 @@ export interface NumberFieldProps
       | 'max'
       | 'min'
       | 'onValueChange'
+      | 'onValueCommitted'
       | 'readOnly'
       | 'required'
       | 'step'

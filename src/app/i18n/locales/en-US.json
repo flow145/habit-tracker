@@ -32,11 +32,6 @@
       "weeks_other": "Weeks",
       "months_one": "Month",
       "months_other": "Months"
-    },
-    "errors": {
-      "invalidNumberOfTimes": "Number of times must be a positive whole number",
-      "invalidInterval": "Interval must be a positive whole number",
-      "frequencyOverInterval": "Number of times must be less than or equal to the interval ({{max}} days)"
     }
   }
 }

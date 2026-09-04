@@ -24,15 +24,6 @@
   color: var(--neutral-12);
 }
 
-.errors {
-  display: grid;
-  gap: 6px;
-}
-
-.errors:empty {
-  display: none;
-}
-
 @media (width >= 400px) {
   .row {
     grid-template-columns: 63px auto 63px 1fr;
