@@ -1,0 +1,47 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label {
+  color: var(--neutral-12);
+}
+
+.label[data-disabled] {
+  color: var(--neutral-8);
+}
+
+.control {
+  inline-size: 100%;
+  min-block-size: 46px;
+  padding: 10px 14px;
+  color: var(--neutral-12);
+  background-color: var(--neutral-2);
+  border: 2px solid var(--neutral-7);
+  border-radius: 8px;
+  transition: border-color 150ms;
+}
+
+.control[data-invalid] {
+  border-color: var(--danger-7);
+}
+
+.control[data-disabled] {
+  color: var(--neutral-8);
+  border-color: var(--disabled-4);
+}
+
+.error {
+  color: var(--danger-11);
+}
+
+.error[data-disabled] {
+  color: var(--neutral-8);
+}
