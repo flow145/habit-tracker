@@ -16,5 +16,27 @@
       "incomplete": "incomplete",
       "notRequired": "not required"
     }
+  },
+  "Schedule": {
+    "legend": "Schedule",
+    "timesIn": "times in",
+    "labels": {
+      "frequency": "Times",
+      "interval": "Interval",
+      "intervalUnit": "Interval unit"
+    },
+    "intervalUnits": {
+      "days_one": "Day",
+      "days_other": "Days",
+      "weeks_one": "Week",
+      "weeks_other": "Weeks",
+      "months_one": "Month",
+      "months_other": "Months"
+    },
+    "errors": {
+      "invalidNumberOfTimes": "Number of times must be a positive whole number",
+      "invalidInterval": "Interval must be a positive whole number",
+      "frequencyOverInterval": "Number of times must be less than or equal to the interval ({{max}} days)"
+    }
   }
 }
