@@ -41,7 +41,6 @@
   color: var(--neutral-11);
   cursor: pointer;
   background-color: transparent;
-  border: 0;
   border-radius: 8px;
   transition: color 150ms;
 }

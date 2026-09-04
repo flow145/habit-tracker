@@ -1,0 +1,39 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend {
+  color: var(--neutral-12);
+}
+
+.legend[data-disabled] {
+  color: var(--neutral-8);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 53px auto 53px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.timesIn {
+  inline-size: max-content;
+  color: var(--neutral-12);
+}
+
+@media (width >= 400px) {
+  .row {
+    grid-template-columns: 63px auto 63px 1fr;
+    gap: 12px;
+  }
+}
+
+@media (width >= 460px) {
+  .row {
+    grid-template-columns: 73px auto 73px 1fr;
+    gap: 16px;
+  }
+}

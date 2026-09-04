@@ -10,7 +10,7 @@
 - router: Wouter
 - styling: CSS Modules
 - headless accessible UI library: Base UI
-- forms and validation: decide later: just Base UI's Form component + Zod OR React Hook Form + Zod
+- forms and validation: Base UI's Form
 - testing: mostly integration (Vitest, Testing Library) and some e2e (Playwright)
 - i18n: just English for now but use i18next to organize strings and pluralization
 - date and time: date-fns
