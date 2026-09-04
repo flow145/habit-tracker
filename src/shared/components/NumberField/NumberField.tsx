@@ -5,7 +5,10 @@ import { clsx } from 'clsx'
 import styles from './NumberField.module.css'
 
 export interface NumberFieldProps
-  extends Pick<Field.Root.Props, 'className' | 'disabled' | 'name' | 'validate' | 'validationMode'>,
+  extends Pick<
+      Field.Root.Props,
+      'className' | 'disabled' | 'name' | 'validate' | 'validationDebounceTime' | 'validationMode'
+    >,
     Pick<
       BaseNumberField.Root.Props,
       | 'allowOutOfRange'
@@ -30,17 +33,14 @@ export const NumberField = ({
   name,
   validate,
   validationMode,
+  validationDebounceTime,
   disabled,
   ...numberFieldProps
 }: NumberFieldProps) => {
+  const fieldRootProps = { name, validate, validationMode, validationDebounceTime, disabled }
+
   return (
-    <Field.Root
-      name={name}
-      validate={validate}
-      validationMode={validationMode}
-      disabled={disabled}
-      className={clsx(styles.root, 'label', className)}
-    >
+    <Field.Root {...fieldRootProps} className={clsx(styles.root, 'label', className)}>
       <BaseNumberField.Root {...numberFieldProps} className={styles.field}>
         <Field.Label className={clsx(styles.label, hideLabel && 'visually-hidden')}>
           {label}
