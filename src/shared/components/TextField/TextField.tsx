@@ -6,11 +6,13 @@ import styles from './TextField.module.css'
 export type TextFieldComponent = 'input' | 'textarea'
 
 export interface TextFieldProps
-  extends Pick<Field.Root.Props, 'dirty' | 'touched' | 'disabled' | 'invalid' | 'className'>,
-    Omit<Field.Control.Props, 'className' | 'style' | 'render'> {
+  extends Pick<
+      Field.Root.Props,
+      'className' | 'disabled' | 'name' | 'validate' | 'validationDebounceTime' | 'validationMode'
+    >,
+    Omit<Field.Control.Props, 'className' | 'name' | 'style' | 'render'> {
   component?: TextFieldComponent
   label: string
-  error?: string
   hideLabel?: boolean
 }
 
@@ -24,19 +26,19 @@ export interface TextFieldProps
 export const TextField = ({
   component = 'input',
   label,
-  error,
   hideLabel,
-  dirty,
-  touched,
+  name,
+  validate,
+  validationMode,
+  validationDebounceTime,
   disabled,
-  invalid,
   className,
   ...controlProps
 }: TextFieldProps) => {
-  const rootProps = { dirty, touched, disabled, invalid: invalid || !!error }
+  const fieldRootProps = { name, validate, validationMode, validationDebounceTime, disabled }
 
   return (
-    <Field.Root className={clsx(styles.root, 'label', className)} {...rootProps}>
+    <Field.Root {...fieldRootProps} className={clsx(styles.root, 'label', className)}>
       <Field.Label className={clsx(styles.label, hideLabel && 'visually-hidden')}>
         {label}
       </Field.Label>
@@ -46,11 +48,7 @@ export const TextField = ({
           className={clsx(styles.control, 'body')}
           {...controlProps}
         />
-        {error && (
-          <Field.Error className={clsx(styles.error, 'hint')} match>
-            {error}
-          </Field.Error>
-        )}
+        <Field.Error className={clsx(styles.error, 'hint')} />
       </div>
     </Field.Root>
   )
