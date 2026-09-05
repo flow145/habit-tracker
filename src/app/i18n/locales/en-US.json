@@ -2,12 +2,13 @@
   "app": {
     "title": "Habit tracker"
   },
-  "navigation": {},
-  "errors": {},
   "AddHabit": {
     "title": "Add habit",
     "back": "Back",
     "save": "Save",
+    "errors": {
+      "nameRequired": "Name is required"
+    },
     "fields": {
       "name": "Name",
       "namePlaceholder": "Habit name",

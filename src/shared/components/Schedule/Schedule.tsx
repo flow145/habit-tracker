@@ -14,22 +14,22 @@ const DAYS_IN_WEEK = 7
 // practice until buildComputedEntries caps the requirement at the window length.
 const DAYS_IN_MONTH = 31
 
-export const DEFAULT_SCHEDULE: ScheduleValue = {
-  frequency: 1,
-  interval: 1,
-  intervalUnit: 'days',
-}
-
 export interface ScheduleProps {
-  defaultValue?: ScheduleValue
+  value: ScheduleValue
+  onValueChange: (value: ScheduleValue) => void
   disabled?: boolean
   className?: string
 }
 
-interface ScheduleState {
-  frequency: number | null
-  interval: number | null
-  intervalUnit: IntervalUnit
+/**
+ * Transient state while a number field is being edited: cleared fields are
+ * `null` until they are committed, at which point the value is normalized and
+ * pushed to `onValueChange`.
+ */
+interface ScheduleDraft {
+  frequency?: number | null
+  interval?: number | null
+  intervalUnit?: IntervalUnit
 }
 
 const toIntervalDays = (interval: number, intervalUnit: IntervalUnit): number => {
@@ -41,13 +41,11 @@ const toIntervalDays = (interval: number, intervalUnit: IntervalUnit): number =>
 const toInteger = (value: number | null): number | null =>
   value === null ? null : Math.trunc(value)
 
-export const Schedule = ({
-  defaultValue = DEFAULT_SCHEDULE,
-  disabled,
-  className,
-}: ScheduleProps) => {
+export const Schedule = ({ value, onValueChange, disabled, className }: ScheduleProps) => {
   const { t } = useTranslation()
-  const [state, setState] = useState<ScheduleState>(defaultValue)
+  const [draft, setDraft] = useState<ScheduleDraft>({})
+
+  const state = { ...value, ...draft }
 
   const intervalCount = state.interval ?? 1
   const frequencyMax = toIntervalDays(intervalCount, state.intervalUnit)
@@ -70,43 +68,39 @@ export const Schedule = ({
     interval: number,
     intervalUnit: IntervalUnit,
   ): number | null =>
-    frequency === null ? null : Math.min(frequency, toIntervalDays(interval, intervalUnit))
+    frequency === null
+      ? null
+      : Math.max(1, Math.min(frequency, toIntervalDays(interval, intervalUnit)))
 
-  const handleFrequencyChange = (value: number | null) => {
-    setState((prev) => ({ ...prev, frequency: toInteger(value) }))
-  }
-
-  const handleFrequencyCommit = (value: number | null) => {
-    setState((prev) => ({
-      ...prev,
-      // Re-seed a cleared field to the min (1); the max is always >= 1.
-      frequency: clampFrequency(toInteger(value) ?? 1, prev.interval ?? 1, prev.intervalUnit),
-    }))
-  }
-
-  const handleIntervalChange = (value: number | null) => {
-    setState((prev) => ({ ...prev, interval: toInteger(value) }))
-  }
-
-  const handleIntervalCommit = (value: number | null) => {
-    setState((prev) => {
-      const interval = toInteger(value) ?? 1
-      return {
-        ...prev,
-        interval,
-        frequency: clampFrequency(prev.frequency, interval, prev.intervalUnit),
-      }
+  const commitDraft = (patch: ScheduleDraft) => {
+    const next = { ...state, ...patch }
+    setDraft({})
+    onValueChange({
+      frequency: clampFrequency(next.frequency, next.interval ?? 1, next.intervalUnit) ?? 1,
+      interval: next.interval ?? 1,
+      intervalUnit: next.intervalUnit,
     })
+  }
+
+  const handleFrequencyChange = (input: number | null) => {
+    setDraft((prev) => ({ ...prev, frequency: toInteger(input) }))
+  }
+
+  const handleFrequencyCommit = (input: number | null) => {
+    commitDraft({ frequency: toInteger(input) })
+  }
+
+  const handleIntervalChange = (input: number | null) => {
+    setDraft((prev) => ({ ...prev, interval: toInteger(input) }))
+  }
+
+  const handleIntervalCommit = (input: number | null) => {
+    commitDraft({ interval: toInteger(input) })
   }
 
   const handleUnitChange = (item: SelectItem | null) => {
     if (item === null) return
-    const intervalUnit = item.value as IntervalUnit
-    setState((prev) => ({
-      ...prev,
-      intervalUnit,
-      frequency: clampFrequency(prev.frequency, prev.interval ?? 1, intervalUnit),
-    }))
+    commitDraft({ intervalUnit: item.value as IntervalUnit })
   }
 
   return (

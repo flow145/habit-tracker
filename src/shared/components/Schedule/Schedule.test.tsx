@@ -1,11 +1,19 @@
 import '~/app/i18n'
 
+import { useState } from 'react'
 import { describe, expect, it } from 'vitest'
 
+import { DEFAULT_SCHEDULE } from '~/shared/constants'
+import type { Schedule as ScheduleValue } from '~/shared/db'
 import { render, screen } from '~/shared/tests'
 import { Schedule } from './Schedule'
 
 type User = ReturnType<typeof render>['user']
+
+const ScheduleHarness = () => {
+  const [value, setValue] = useState<ScheduleValue>(DEFAULT_SCHEDULE)
+  return <Schedule value={value} onValueChange={setValue} />
+}
 
 const getFrequencyInput = () => screen.getByLabelText('Times') as HTMLInputElement
 const getIntervalInput = () => screen.getByLabelText('Interval') as HTMLInputElement
@@ -27,14 +35,14 @@ const setFrequency = async (user: User, value: string) => {
 
 describe('Schedule', () => {
   it('renders default values', () => {
-    render(<Schedule />)
+    render(<ScheduleHarness />)
 
     expect(getFrequencyInput()).toHaveValue('1')
     expect(getIntervalInput()).toHaveValue('1')
   })
 
   it('accepts typed integer input', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
     await setInterval(user, '31')
     await setFrequency(user, '10')
 
@@ -42,7 +50,7 @@ describe('Schedule', () => {
   })
 
   it('truncates a pasted fractional value on commit', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
 
     const frequency = getFrequencyInput()
     await user.click(frequency)
@@ -54,7 +62,7 @@ describe('Schedule', () => {
   })
 
   it('clamps a pasted negative value to the min', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
 
     const frequency = getFrequencyInput()
     await user.click(frequency)
@@ -66,7 +74,7 @@ describe('Schedule', () => {
   })
 
   it('re-seeds a cleared field to the min on commit', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
     await setInterval(user, '31')
 
     const frequency = getFrequencyInput()
@@ -79,7 +87,7 @@ describe('Schedule', () => {
   })
 
   it('clamps typed frequency to the dynamic max', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
     await setInterval(user, '5')
     await setFrequency(user, '9')
     await user.tab()
@@ -88,7 +96,7 @@ describe('Schedule', () => {
   })
 
   it('clamps frequency when the interval commits to a smaller window', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
     await setInterval(user, '31')
     await setFrequency(user, '10')
     expect(getFrequencyInput()).toHaveValue('10')
@@ -99,7 +107,7 @@ describe('Schedule', () => {
   })
 
   it('clamps frequency when the unit change shrinks the window', async () => {
-    const { user } = render(<Schedule />)
+    const { user } = render(<ScheduleHarness />)
     await setInterval(user, '2')
 
     await user.click(screen.getByRole('combobox'))
