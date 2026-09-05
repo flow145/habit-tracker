@@ -37,7 +37,9 @@ export const Home = () => {
         title={t('Home.title')}
         endSlot={
           <>
-            <Button variant='ghost' icon={<Plus />} aria-label={t('Home.addHabit')} />
+            <Button variant='ghost' responsive icon={<Plus />}>
+              {t('Home.addHabit')}
+            </Button>
             <Button variant='ghost' icon={<Settings />} aria-label={t('Home.settings')} />
           </>
         }
