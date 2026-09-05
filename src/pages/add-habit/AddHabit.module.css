@@ -1,0 +1,24 @@
+.main {
+  padding: 24px;
+}
+
+.form {
+  display: grid;
+  gap: 24px;
+  max-inline-size: 500px;
+  margin-inline: auto;
+}
+
+.save {
+  justify-self: start;
+}
+
+@media (width >= 600px) {
+  .main {
+    padding-block-start: 20px;
+  }
+
+  .form {
+    gap: 32px;
+  }
+}

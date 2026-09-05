@@ -14,6 +14,7 @@ export interface TextFieldProps
   component?: TextFieldComponent
   label: string
   hideLabel?: boolean
+  rows?: number
 }
 
 /**
@@ -27,6 +28,7 @@ export const TextField = ({
   component = 'input',
   label,
   hideLabel,
+  rows = 3,
   name,
   validate,
   validationMode,
@@ -44,7 +46,7 @@ export const TextField = ({
       </Field.Label>
       <div className={styles.group}>
         <Field.Control
-          render={component === 'textarea' ? <textarea rows={3} /> : undefined}
+          render={component === 'textarea' ? <textarea rows={rows} /> : undefined}
           className={clsx(styles.control, 'body')}
           {...controlProps}
         />

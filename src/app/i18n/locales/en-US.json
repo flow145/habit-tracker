@@ -4,6 +4,17 @@
   },
   "navigation": {},
   "errors": {},
+  "AddHabit": {
+    "title": "Add habit",
+    "back": "Back",
+    "save": "Save",
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Habit name",
+      "description": "Description",
+      "descriptionPlaceholder": "Notes"
+    }
+  },
   "Home": {
     "title": "Habits",
     "addHabit": "Add habit",

@@ -10,6 +10,7 @@ import {
 } from '~/features/habit'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
+import { Path } from '~/shared/constants'
 import { usePageTitle } from '~/shared/hooks'
 
 import { HabitItem } from './HabitItem'
@@ -37,7 +38,7 @@ export const Home = () => {
         title={t('Home.title')}
         endSlot={
           <>
-            <Button variant='ghost' responsive icon={<Plus />}>
+            <Button variant='ghost' responsive icon={<Plus />} as='Link' to={Path.AddHabit}>
               {t('Home.addHabit')}
             </Button>
             <Button variant='ghost' icon={<Settings />} aria-label={t('Home.settings')} />
