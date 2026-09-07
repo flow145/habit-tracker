@@ -1,7 +1,8 @@
 import '~/app/i18n'
 
+import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { DEFAULT_SCHEDULE } from '~/shared/constants'
 import type { Schedule as ScheduleValue } from '~/shared/db'
@@ -13,6 +14,21 @@ type User = ReturnType<typeof render>['user']
 const ScheduleHarness = () => {
   const [value, setValue] = useState<ScheduleValue>(DEFAULT_SCHEDULE)
   return <Schedule value={value} onValueChange={setValue} />
+}
+
+interface ScheduleFormHarnessProps {
+  onSubmit?: () => void
+}
+
+const ScheduleFormHarness = ({ onSubmit = vi.fn() }: ScheduleFormHarnessProps) => {
+  const [value, setValue] = useState<ScheduleValue>(DEFAULT_SCHEDULE)
+
+  return (
+    <Form onFormSubmit={onSubmit}>
+      <Schedule value={value} onValueChange={setValue} />
+      <button type='submit'>Save</button>
+    </Form>
+  )
 }
 
 const getFrequencyInput = () => screen.getByLabelText('Times') as HTMLInputElement
@@ -86,16 +102,16 @@ describe('Schedule', () => {
     expect(frequency).toHaveValue('1')
   })
 
-  it('clamps typed frequency to the dynamic max', async () => {
+  it('allows typed frequency above the interval', async () => {
     const { user } = render(<ScheduleHarness />)
     await setInterval(user, '5')
     await setFrequency(user, '9')
     await user.tab()
 
-    expect(getFrequencyInput()).toHaveValue('5')
+    expect(getFrequencyInput()).toHaveValue('9')
   })
 
-  it('clamps frequency when the interval commits to a smaller window', async () => {
+  it('does not clamp frequency when the interval commits to a smaller window', async () => {
     const { user } = render(<ScheduleHarness />)
     await setInterval(user, '31')
     await setFrequency(user, '10')
@@ -103,10 +119,10 @@ describe('Schedule', () => {
 
     await setInterval(user, '5')
 
-    expect(getFrequencyInput()).toHaveValue('5')
+    expect(getFrequencyInput()).toHaveValue('10')
   })
 
-  it('clamps frequency when the unit change shrinks the window', async () => {
+  it('does not clamp frequency when the unit change shrinks the window', async () => {
     const { user } = render(<ScheduleHarness />)
     await setInterval(user, '2')
 
@@ -118,6 +134,76 @@ describe('Schedule', () => {
     await user.click(screen.getByRole('combobox'))
     await user.click(screen.getByRole('option', { name: 'Days' }))
 
-    expect(getFrequencyInput()).toHaveValue('2')
+    expect(getFrequencyInput()).toHaveValue('10')
+  })
+
+  it('does not show the cross-field error before form submission', async () => {
+    const { user } = render(<ScheduleFormHarness />)
+    await setFrequency(user, '2')
+    await user.tab()
+
+    expect(
+      screen.queryByText(/Number of times must not exceed the interval \(1 days\)/i),
+    ).not.toBeInTheDocument()
+  })
+
+  it('blocks an invalid submission and shows the interval day count', async () => {
+    const onSubmit = vi.fn()
+    const { user } = render(<ScheduleFormHarness onSubmit={onSubmit} />)
+    await setFrequency(user, '8')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(
+      screen.getByText(/Number of times must not exceed the interval \(1 days\)/i),
+    ).toBeInTheDocument()
+  })
+
+  it('uses the converted day count for week intervals', async () => {
+    const { user } = render(<ScheduleFormHarness />)
+    await setInterval(user, '2')
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: 'Weeks' }))
+    await setFrequency(user, '15')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(
+      screen.getByText(/Number of times must not exceed the interval \(14 days\)/i),
+    ).toBeInTheDocument()
+  })
+
+  it.each([
+    ['frequency', async (user: User) => setFrequency(user, '1')],
+    ['interval', async (user: User) => setInterval(user, '2')],
+    [
+      'interval unit',
+      async (user: User) => {
+        await user.click(screen.getByRole('combobox'))
+        await user.click(screen.getByRole('option', { name: 'Week' }))
+      },
+    ],
+  ])('clears the error when %s changes after submission', async (_, change) => {
+    const { user } = render(<ScheduleFormHarness />)
+    await setFrequency(user, '2')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(
+      screen.getByText(/Number of times must not exceed the interval \(1 days\)/i),
+    ).toBeInTheDocument()
+
+    await change(user)
+
+    expect(
+      screen.queryByText(/Number of times must not exceed the interval \(1 days\)/i),
+    ).not.toBeInTheDocument()
+  })
+
+  it('submits a valid schedule', async () => {
+    const onSubmit = vi.fn()
+    const { user } = render(<ScheduleFormHarness onSubmit={onSubmit} />)
+    await setInterval(user, '3')
+    await setFrequency(user, '2')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
   })
 })

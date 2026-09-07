@@ -1,6 +1,7 @@
+import type { Field } from '@base-ui/react/field'
 import { Fieldset } from '@base-ui/react/fieldset'
 import { clsx } from 'clsx'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NumberField } from '~/shared/components/NumberField'
 import { Select, type SelectItem } from '~/shared/components/Select'
@@ -44,11 +45,13 @@ const toInteger = (value: number | null): number | null =>
 export const Schedule = ({ value, onValueChange, disabled, className }: ScheduleProps) => {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<ScheduleDraft>({})
+  const frequencyActionsRef = useRef<Field.Root.Actions | null>(null)
+  const [errorContainer, setErrorContainer] = useState<HTMLDivElement | null>(null)
+  const hasSubmittedRef = useRef(false)
 
   const state = { ...value, ...draft }
 
   const intervalCount = state.interval ?? 1
-  const frequencyMax = toIntervalDays(intervalCount, state.intervalUnit)
 
   const unitItemsByValue: Record<IntervalUnit, SelectItem> = {
     days: { value: 'days', label: t('Schedule.intervalUnits.days', { count: intervalCount }) },
@@ -63,21 +66,32 @@ export const Schedule = ({ value, onValueChange, disabled, className }: Schedule
   }
   const unitItems = Object.values(unitItemsByValue)
 
-  const clampFrequency = (
-    frequency: number | null,
-    interval: number,
-    intervalUnit: IntervalUnit,
-  ): number | null =>
-    frequency === null
-      ? null
-      : Math.max(1, Math.min(frequency, toIntervalDays(interval, intervalUnit)))
+  useEffect(() => {
+    if (hasSubmittedRef.current) frequencyActionsRef.current?.validate()
+  }, [state.interval, state.intervalUnit])
+
+  const validateFrequency = (
+    _input: unknown,
+    formValues: Record<string, unknown>,
+  ): string | null => {
+    hasSubmittedRef.current = true
+
+    const frequency = formValues.frequency as number | null
+    const interval = (formValues.interval as number | null) ?? state.interval ?? 1
+    const intervalUnit = (formValues.intervalUnit as IntervalUnit) ?? state.intervalUnit
+    const max = toIntervalDays(interval, intervalUnit)
+
+    return frequency !== null && frequency > max
+      ? t('Schedule.errors.frequencyOverInterval', { count: max })
+      : null
+  }
 
   const commitDraft = (patch: ScheduleDraft) => {
     const next = { ...state, ...patch }
     setDraft({})
     onValueChange({
-      frequency: clampFrequency(next.frequency, next.interval ?? 1, next.intervalUnit) ?? 1,
-      interval: next.interval ?? 1,
+      frequency: Math.max(1, next.frequency ?? 1),
+      interval: Math.max(1, next.interval ?? 1),
       intervalUnit: next.intervalUnit,
     })
   }
@@ -111,10 +125,12 @@ export const Schedule = ({ value, onValueChange, disabled, className }: Schedule
       <div className={styles.row}>
         <NumberField
           hideLabel
+          actionsRef={frequencyActionsRef}
+          errorContainer={errorContainer}
           label={t('Schedule.labels.frequency')}
-          max={frequencyMax}
           min={1}
           name='frequency'
+          validate={validateFrequency}
           value={state.frequency}
           onValueChange={handleFrequencyChange}
           onValueCommitted={handleFrequencyCommit}
@@ -140,6 +156,7 @@ export const Schedule = ({ value, onValueChange, disabled, className }: Schedule
           onValueChange={handleUnitChange}
         />
       </div>
+      <div className={styles.errors} ref={setErrorContainer} />
     </Fieldset.Root>
   )
 }

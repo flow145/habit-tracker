@@ -44,6 +44,9 @@
       "weeks_other": "Weeks",
       "months_one": "Month",
       "months_other": "Months"
+    },
+    "errors": {
+      "frequencyOverInterval": "Number of times must not exceed the interval ({{count}} days)"
     }
   }
 }
