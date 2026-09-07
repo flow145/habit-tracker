@@ -1,6 +1,7 @@
+import type { Field } from '@base-ui/react/field'
 import { Fieldset } from '@base-ui/react/fieldset'
 import { clsx } from 'clsx'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NumberField } from '~/shared/components/NumberField'
 import { Select, type SelectItem } from '~/shared/components/Select'
@@ -14,22 +15,22 @@ const DAYS_IN_WEEK = 7
 // practice until buildComputedEntries caps the requirement at the window length.
 const DAYS_IN_MONTH = 31
 
-export const DEFAULT_SCHEDULE: ScheduleValue = {
-  frequency: 1,
-  interval: 1,
-  intervalUnit: 'days',
-}
-
 export interface ScheduleProps {
-  defaultValue?: ScheduleValue
+  value: ScheduleValue
+  onValueChange: (value: ScheduleValue) => void
   disabled?: boolean
   className?: string
 }
 
-interface ScheduleState {
-  frequency: number | null
-  interval: number | null
-  intervalUnit: IntervalUnit
+/**
+ * Transient state while a number field is being edited: cleared fields are
+ * `null` until they are committed, at which point the value is normalized and
+ * pushed to `onValueChange`.
+ */
+interface ScheduleDraft {
+  frequency?: number | null
+  interval?: number | null
+  intervalUnit?: IntervalUnit
 }
 
 const toIntervalDays = (interval: number, intervalUnit: IntervalUnit): number => {
@@ -41,16 +42,16 @@ const toIntervalDays = (interval: number, intervalUnit: IntervalUnit): number =>
 const toInteger = (value: number | null): number | null =>
   value === null ? null : Math.trunc(value)
 
-export const Schedule = ({
-  defaultValue = DEFAULT_SCHEDULE,
-  disabled,
-  className,
-}: ScheduleProps) => {
+export const Schedule = ({ value, onValueChange, disabled, className }: ScheduleProps) => {
   const { t } = useTranslation()
-  const [state, setState] = useState<ScheduleState>(defaultValue)
+  const [draft, setDraft] = useState<ScheduleDraft>({})
+  const frequencyActionsRef = useRef<Field.Root.Actions | null>(null)
+  const [errorContainer, setErrorContainer] = useState<HTMLDivElement | null>(null)
+  const hasSubmittedRef = useRef(false)
+
+  const state = { ...value, ...draft }
 
   const intervalCount = state.interval ?? 1
-  const frequencyMax = toIntervalDays(intervalCount, state.intervalUnit)
 
   const unitItemsByValue: Record<IntervalUnit, SelectItem> = {
     days: { value: 'days', label: t('Schedule.intervalUnits.days', { count: intervalCount }) },
@@ -65,48 +66,55 @@ export const Schedule = ({
   }
   const unitItems = Object.values(unitItemsByValue)
 
-  const clampFrequency = (
-    frequency: number | null,
-    interval: number,
-    intervalUnit: IntervalUnit,
-  ): number | null =>
-    frequency === null ? null : Math.min(frequency, toIntervalDays(interval, intervalUnit))
+  useEffect(() => {
+    if (hasSubmittedRef.current) frequencyActionsRef.current?.validate()
+  }, [state.interval, state.intervalUnit])
 
-  const handleFrequencyChange = (value: number | null) => {
-    setState((prev) => ({ ...prev, frequency: toInteger(value) }))
+  const validateFrequency = (
+    _input: unknown,
+    formValues: Record<string, unknown>,
+  ): string | null => {
+    hasSubmittedRef.current = true
+
+    const frequency = formValues.frequency as number | null
+    const interval = (formValues.interval as number | null) ?? state.interval ?? 1
+    const intervalUnit = (formValues.intervalUnit as IntervalUnit) ?? state.intervalUnit
+    const max = toIntervalDays(interval, intervalUnit)
+
+    return frequency !== null && frequency > max
+      ? t('Schedule.errors.frequencyOverInterval', { count: max })
+      : null
   }
 
-  const handleFrequencyCommit = (value: number | null) => {
-    setState((prev) => ({
-      ...prev,
-      // Re-seed a cleared field to the min (1); the max is always >= 1.
-      frequency: clampFrequency(toInteger(value) ?? 1, prev.interval ?? 1, prev.intervalUnit),
-    }))
-  }
-
-  const handleIntervalChange = (value: number | null) => {
-    setState((prev) => ({ ...prev, interval: toInteger(value) }))
-  }
-
-  const handleIntervalCommit = (value: number | null) => {
-    setState((prev) => {
-      const interval = toInteger(value) ?? 1
-      return {
-        ...prev,
-        interval,
-        frequency: clampFrequency(prev.frequency, interval, prev.intervalUnit),
-      }
+  const commitDraft = (patch: ScheduleDraft) => {
+    const next = { ...state, ...patch }
+    setDraft({})
+    onValueChange({
+      frequency: Math.max(1, next.frequency ?? 1),
+      interval: Math.max(1, next.interval ?? 1),
+      intervalUnit: next.intervalUnit,
     })
+  }
+
+  const handleFrequencyChange = (input: number | null) => {
+    setDraft((prev) => ({ ...prev, frequency: toInteger(input) }))
+  }
+
+  const handleFrequencyCommit = (input: number | null) => {
+    commitDraft({ frequency: toInteger(input) })
+  }
+
+  const handleIntervalChange = (input: number | null) => {
+    setDraft((prev) => ({ ...prev, interval: toInteger(input) }))
+  }
+
+  const handleIntervalCommit = (input: number | null) => {
+    commitDraft({ interval: toInteger(input) })
   }
 
   const handleUnitChange = (item: SelectItem | null) => {
     if (item === null) return
-    const intervalUnit = item.value as IntervalUnit
-    setState((prev) => ({
-      ...prev,
-      intervalUnit,
-      frequency: clampFrequency(prev.frequency, prev.interval ?? 1, intervalUnit),
-    }))
+    commitDraft({ intervalUnit: item.value as IntervalUnit })
   }
 
   return (
@@ -117,10 +125,12 @@ export const Schedule = ({
       <div className={styles.row}>
         <NumberField
           hideLabel
+          actionsRef={frequencyActionsRef}
+          errorContainer={errorContainer}
           label={t('Schedule.labels.frequency')}
-          max={frequencyMax}
           min={1}
           name='frequency'
+          validate={validateFrequency}
           value={state.frequency}
           onValueChange={handleFrequencyChange}
           onValueCommitted={handleFrequencyCommit}
@@ -146,6 +156,7 @@ export const Schedule = ({
           onValueChange={handleUnitChange}
         />
       </div>
+      <div className={styles.errors} ref={setErrorContainer} />
     </Fieldset.Root>
   )
 }

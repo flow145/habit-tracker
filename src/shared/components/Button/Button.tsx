@@ -11,6 +11,7 @@ interface ButtonSharedProps {
   variant?: ButtonVariant
   color?: ButtonColor
   icon?: ReactElement
+  responsive?: boolean
 }
 
 type ButtonAsButtonProps = Omit<ComponentProps<'button'>, 'color'> & {
@@ -36,6 +37,7 @@ export const Button = ({
   variant = 'filled',
   color = 'neutral',
   icon,
+  responsive = false,
   className,
   children,
   ...props
@@ -43,6 +45,7 @@ export const Button = ({
   const appearance = (() => {
     if (icon && !children) return 'icon'
     if (!icon && children) return 'text'
+    if (responsive) return 'responsive'
     return 'icon-text'
   })()
 

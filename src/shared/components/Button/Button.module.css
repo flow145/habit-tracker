@@ -47,15 +47,15 @@
 }
 
 @media (width < 600px) {
-  .button[data-appearance='icon-text'] {
+  .button[data-appearance='responsive'] {
     padding: 4px;
   }
 
-  .button[data-appearance='icon-text'] :where(.icon) {
+  .button[data-appearance='responsive'] :where(.icon) {
     inline-size: 32px;
   }
 
-  .button[data-appearance='icon-text'] :where(.text) {
+  .button[data-appearance='responsive'] :where(.text) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;

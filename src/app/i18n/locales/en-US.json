@@ -2,8 +2,20 @@
   "app": {
     "title": "Habit tracker"
   },
-  "navigation": {},
-  "errors": {},
+  "AddHabit": {
+    "title": "Add habit",
+    "back": "Back",
+    "save": "Save",
+    "errors": {
+      "nameRequired": "Name is required"
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Habit name",
+      "description": "Description",
+      "descriptionPlaceholder": "Notes"
+    }
+  },
   "Home": {
     "title": "Habits",
     "addHabit": "Add habit",
@@ -32,6 +44,9 @@
       "weeks_other": "Weeks",
       "months_one": "Month",
       "months_other": "Months"
+    },
+    "errors": {
+      "frequencyOverInterval": "Number of times must not exceed the interval ({{count}} days)"
     }
   }
 }
