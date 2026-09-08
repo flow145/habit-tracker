@@ -55,3 +55,9 @@
 .error[data-disabled] {
   color: var(--neutral-8);
 }
+
+@media (width >= 600px) {
+  .root {
+    gap: 16px;
+  }
+}
