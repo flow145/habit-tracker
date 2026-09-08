@@ -1,0 +1,24 @@
+.main {
+  padding: 24px;
+}
+
+.dialogDescription {
+  margin-block-start: 12px;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 8px;
+  justify-content: end;
+  margin-block-start: 24px;
+}
+
+@media (width >= 600px) {
+  .main {
+    padding-block-start: 20px;
+  }
+
+  .dialogActions {
+    gap: 12px;
+  }
+}

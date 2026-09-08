@@ -56,6 +56,11 @@ export const addHabit = async ({
   return habit
 }
 
+export const getHabit = async (id: string): Promise<Habit | null> => {
+  const db = await getDb()
+  return (await db.get('habits', id)) ?? null
+}
+
 export const getHabitList = async ({
   start,
   end = new Date(),

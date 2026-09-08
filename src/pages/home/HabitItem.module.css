@@ -19,6 +19,17 @@
   color: var(--neutral-12);
 }
 
+.nameLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .nameLink:hover {
+    text-decoration: underline;
+  }
+}
+
 .dayList {
   display: flex;
   gap: 4px;

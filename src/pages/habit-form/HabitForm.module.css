@@ -1,0 +1,18 @@
+.form {
+  display: grid;
+  gap: 24px;
+  max-inline-size: 500px;
+  margin-inline: auto;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+@media (width >= 600px) {
+  .form {
+    gap: 32px;
+  }
+}
