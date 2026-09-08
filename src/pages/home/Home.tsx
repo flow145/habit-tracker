@@ -19,7 +19,7 @@ import { getTimelineStart, Timeline } from './Timeline'
 
 export const Home = () => {
   const { t } = useTranslation()
-  const [isFetching, setIsFetching] = useState(true)
+  const [isFetching, setIsFetching] = useState(false)
   const [habits, setHabits] = useState<HabitWithComputedEntries[]>([])
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { Route, Switch } from 'wouter'
+import { Redirect, Route, Switch } from 'wouter'
 
 import { AddHabit } from '~/pages/add-habit'
 import { EditHabit } from '~/pages/edit-habit'
@@ -16,8 +16,9 @@ export const App = () => {
         <Route path={Path.AddHabit} component={AddHabit} />
         <Route path={`${Path.EditHabit}/:id`} component={EditHabit} />
         <Route path={Path.Settings} component={Settings} />
-        {/* TODO */}
-        <Route>404: No such page!</Route>
+        <Route>
+          <Redirect to={Path.Home} />
+        </Route>
       </Switch>
     </>
   )

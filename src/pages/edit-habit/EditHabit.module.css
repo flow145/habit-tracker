@@ -2,6 +2,16 @@
   padding: 24px;
 }
 
+.empty {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+  max-inline-size: 500px;
+  margin: 200px auto 0;
+  color: var(--neutral-11);
+  text-align: center;
+}
+
 .dialogDescription {
   margin-block-start: 12px;
 }
