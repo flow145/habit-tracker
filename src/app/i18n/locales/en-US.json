@@ -35,6 +35,10 @@
       "title": "Delete habit?",
       "description": "This will permanently delete \"{{habit}}\" habit and all of its history.",
       "cancel": "Cancel"
+    },
+    "empty": {
+      "text": "No such habit.",
+      "button": "Go to habits"
     }
   },
   "HabitForm": {

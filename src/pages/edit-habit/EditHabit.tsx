@@ -21,7 +21,8 @@ export const EditHabit = () => {
   const { t } = useTranslation()
   const [, navigate] = useLocation()
   const [, params] = useRoute(`${Path.EditHabit}/:id`)
-  const [habit, setHabit] = useState<Habit>()
+  const [isFetching, setIsFetching] = useState(true)
+  const [habit, setHabit] = useState<Habit | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -32,26 +33,25 @@ export const EditHabit = () => {
   usePageTitle(t('EditHabit.title'))
 
   useEffect(() => {
-    if (!habitId) {
-      navigate(Path.Home, { replace: true })
-      return
-    }
+    if (!habitId) return
 
     let isCurrent = true
+    setIsFetching(true)
 
-    getHabit(habitId).then((result) => {
-      if (!isCurrent) return
-      if (!result) {
-        navigate(Path.Home, { replace: true })
-        return
-      }
-      setHabit(result)
-    })
+    getHabit(habitId)
+      .then((result) => {
+        if (!isCurrent) return
+        setHabit(result)
+      })
+      .finally(() => {
+        if (!isCurrent) return
+        setIsFetching(false)
+      })
 
     return () => {
       isCurrent = false
     }
-  }, [habitId, navigate])
+  }, [habitId])
 
   const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
     if (!habitId) return
@@ -88,22 +88,40 @@ export const EditHabit = () => {
     }
   }
 
+  const header = (
+    <Header
+      title={t('EditHabit.title')}
+      startSlot={
+        <Button
+          variant='ghost'
+          icon={<ChevronLeft />}
+          as='Link'
+          to={Path.Home}
+          aria-label={t('shared.back')}
+        />
+      }
+    />
+  )
+
+  if (!isFetching && !habit) {
+    return (
+      <>
+        {header}
+        <div className={styles.empty}>
+          <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
+          <Button as='Link' to={Path.Home}>
+            {t('EditHabit.empty.button')}
+          </Button>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
-      <Header
-        title={t('EditHabit.title')}
-        startSlot={
-          <Button
-            variant='ghost'
-            icon={<ChevronLeft />}
-            as='Link'
-            to={Path.Home}
-            aria-label={t('shared.back')}
-          />
-        }
-      />
+      {header}
       <main className={styles.main}>
-        {habit && (
+        {!isFetching && habit && (
           <>
             <HabitForm
               initialValues={habit}
