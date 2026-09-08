@@ -8,7 +8,8 @@
   "Home": {
     "title": "Habits",
     "addHabit": "Add habit",
-    "settings": "Settings"
+    "settings": "Settings",
+    "empty": "No habits yet"
   },
   "HabitItem": {
     "dayToggle": "{{date}}: {{currentStatus}}. Press to mark {{nextStatus}}.",

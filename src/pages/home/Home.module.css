@@ -3,6 +3,16 @@
   padding-inline: 12px;
 }
 
+.empty {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+  max-inline-size: 500px;
+  margin: 200px auto 0;
+  color: var(--neutral-11);
+  text-align: center;
+}
+
 .habitList {
   display: grid;
   gap: 16px;

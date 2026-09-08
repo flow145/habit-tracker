@@ -46,14 +46,26 @@ export const Home = () => {
         }
       />
       <main className={styles.main}>
-        {habits.length > 0 && <Timeline />}
-        <ul className={styles.habitList}>
-          {habits.map((habit) => (
-            <li key={habit.id}>
-              <HabitItem habit={habit} onToggleDay={handleToggleDay(habit.id)} />
-            </li>
-          ))}
-        </ul>
+        {habits.length > 0 && (
+          <div className={styles.empty}>
+            <h2 className='subheading'>{t('Home.empty')}</h2>
+            <Button icon={<Plus />} as='Link' to={Path.AddHabit}>
+              {t('Home.addHabit')}
+            </Button>
+          </div>
+        )}
+        {habits.length === 0 && (
+          <>
+            <Timeline />
+            <ul className={styles.habitList}>
+              {habits.map((habit) => (
+                <li key={habit.id}>
+                  <HabitItem habit={habit} onToggleDay={handleToggleDay(habit.id)} />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </main>
     </>
   )
