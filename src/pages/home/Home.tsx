@@ -19,10 +19,14 @@ import { getTimelineStart, Timeline } from './Timeline'
 
 export const Home = () => {
   const { t } = useTranslation()
+  const [isFetching, setIsFetching] = useState(true)
   const [habits, setHabits] = useState<HabitWithComputedEntries[]>([])
 
   useEffect(() => {
-    getHabitList({ start: getTimelineStart() }).then(setHabits)
+    setIsFetching(true)
+    getHabitList({ start: getTimelineStart() })
+      .then(setHabits)
+      .finally(() => setIsFetching(false))
   }, [])
 
   usePageTitle(t('Home.title'))
@@ -41,12 +45,18 @@ export const Home = () => {
             <Button variant='ghost' responsive icon={<Plus />} as='Link' to={Path.AddHabit}>
               {t('Home.addHabit')}
             </Button>
-            <Button variant='ghost' icon={<Settings />} aria-label={t('Home.settings')} />
+            <Button
+              variant='ghost'
+              icon={<Settings />}
+              as='Link'
+              to={Path.Settings}
+              aria-label={t('Home.settings')}
+            />
           </>
         }
       />
       <main className={styles.main}>
-        {habits.length > 0 && (
+        {!isFetching && habits.length === 0 && (
           <div className={styles.empty}>
             <h2 className='subheading'>{t('Home.empty')}</h2>
             <Button icon={<Plus />} as='Link' to={Path.AddHabit}>
@@ -54,7 +64,7 @@ export const Home = () => {
             </Button>
           </div>
         )}
-        {habits.length === 0 && (
+        {habits.length > 0 && (
           <>
             <Timeline />
             <ul className={styles.habitList}>

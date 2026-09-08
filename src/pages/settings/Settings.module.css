@@ -1,0 +1,18 @@
+.main {
+  padding: 24px;
+}
+
+.list {
+  max-inline-size: 500px;
+  margin-inline: auto;
+}
+
+.item {
+  display: block;
+}
+
+@media (width >= 600px) {
+  .main {
+    padding-block-start: 20px;
+  }
+}
