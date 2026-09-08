@@ -61,5 +61,14 @@
     "errors": {
       "frequencyOverInterval": "Number of times must not exceed the interval ({{count}} days)"
     }
+  },
+  "Settings": {
+    "title": "Settings",
+    "colorTheme": "Color theme",
+    "themeOptions": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
   }
 }

@@ -1,13 +1,13 @@
-.root {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .field {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .label {
@@ -45,4 +45,10 @@
 
 .error[data-disabled] {
   color: var(--neutral-8);
+}
+
+@media (width >= 600px) {
+  .field {
+    gap: 16px;
+  }
 }

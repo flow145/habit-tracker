@@ -24,6 +24,11 @@
   text-decoration: none;
 }
 
+.nameLink:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
 @media (hover: hover) {
   .nameLink:hover {
     text-decoration: underline;
