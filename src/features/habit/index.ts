@@ -3,6 +3,7 @@ export {
   addHabit,
   deleteHabit,
   editHabit,
+  getHabit,
   getHabitList,
   getNextStatus,
   type HabitWithComputedEntries,

@@ -3,10 +3,12 @@ import { format } from 'date-fns'
 import { Check, Squircle } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'wouter'
 
 import type { ComputedStatus, HabitWithComputedEntries } from '~/features/habit'
 import { getNextStatus } from '~/features/habit'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
+import { Path } from '~/shared/constants'
 import styles from './HabitItem.module.css'
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; key: string }> = {
@@ -25,7 +27,11 @@ export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
 
   return (
     <article className={styles.habit}>
-      <h2 className={clsx(styles.name, 'subheading')}>{habit.name}</h2>
+      <h2 className={clsx(styles.name, 'subheading')}>
+        <Link className={styles.nameLink} to={`${Path.EditHabit}/${habit.id}`}>
+          {habit.name}
+        </Link>
+      </h2>
       <ol className={styles.dayList}>
         {habit.computedEntries.map(({ day, status }) => {
           const nextStatus = getNextStatus(status)

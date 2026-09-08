@@ -1,20 +1,9 @@
 {
-  "app": {
-    "title": "Habit tracker"
-  },
-  "AddHabit": {
-    "title": "Add habit",
+  "shared": {
+    "appTitle": "Habit tracker",
     "back": "Back",
     "save": "Save",
-    "errors": {
-      "nameRequired": "Name is required"
-    },
-    "fields": {
-      "name": "Name",
-      "namePlaceholder": "Habit name",
-      "description": "Description",
-      "descriptionPlaceholder": "Notes"
-    }
+    "delete": "Delete"
   },
   "Home": {
     "title": "Habits",
@@ -27,6 +16,29 @@
       "complete": "complete",
       "incomplete": "incomplete",
       "notRequired": "not required"
+    }
+  },
+  "AddHabit": {
+    "title": "Add habit",
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Habit name",
+      "description": "Description",
+      "descriptionPlaceholder": "Notes"
+    }
+  },
+  "EditHabit": {
+    "title": "Edit habit",
+    "deleteLabel": "Delete habit",
+    "deleteDialog": {
+      "title": "Delete habit?",
+      "description": "This will permanently delete \"{{habit}}\" habit and all of its history.",
+      "cancel": "Cancel"
+    }
+  },
+  "HabitForm": {
+    "errors": {
+      "nameRequired": "Name is required"
     }
   },
   "Schedule": {

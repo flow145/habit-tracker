@@ -8,7 +8,15 @@ import {
   type Schedule,
 } from '~/shared/db'
 import { date, resetTestDb } from '~/shared/tests'
-import { addHabit, deleteHabit, editHabit, getHabitList, getNextStatus, toggleDay } from './service'
+import {
+  addHabit,
+  deleteHabit,
+  editHabit,
+  getHabit,
+  getHabitList,
+  getNextStatus,
+  toggleDay,
+} from './service'
 
 const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'days' }
 
@@ -52,7 +60,7 @@ const seedEntry = async (data: {
   return entry
 }
 
-const getHabit = async (id: string) => (await getDb()).get('habits', id)
+const getOneHabit = async (id: string) => (await getDb()).get('habits', id)
 const getAllHabits = async () => (await getDb()).getAll('habits')
 const getAllEntries = async () => (await getDb()).getAll('entries')
 
@@ -87,7 +95,7 @@ describe('addHabit', () => {
   it('preserves an explicitly empty description', async () => {
     const { id } = await addHabit({ name: 'Read', description: '', schedule })
 
-    expect((await getHabit(id))?.description).toBe('')
+    expect((await getOneHabit(id))?.description).toBe('')
   })
 
   it('maps a database constraint failure to EntityConflictError', async () => {
@@ -177,6 +185,18 @@ describe('getHabitList', () => {
   })
 })
 
+describe('getHabit', () => {
+  it('returns the habit for an existing ID', async () => {
+    const habit = await seedHabit()
+
+    expect(await getHabit(habit.id)).toEqual(habit)
+  })
+
+  it('returns null for an unknown ID', async () => {
+    expect(await getHabit('missing')).toBeNull()
+  })
+})
+
 describe('editHabit', () => {
   it('updates only supplied fields, including an empty description', async () => {
     const habit = await seedHabit({
@@ -222,7 +242,7 @@ describe('editHabit', () => {
     await expect(editHabit({ id: 'missing', name: 'Missing' })).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
     )
-    expect(await getHabit(habit.id)).toEqual(habit)
+    expect(await getOneHabit(habit.id)).toEqual(habit)
   })
 
   it('maps an injected put constraint failure to EntityConflictError', async () => {
@@ -260,7 +280,7 @@ describe('deleteHabit', () => {
     expect(await deleteHabit(deleted.id)).toBeUndefined()
     expect(await getAllHabits()).toEqual([kept])
     expect(await getAllEntries()).toEqual([keptEntry])
-    expect(await getHabit(deleted.id)).toBeUndefined()
+    expect(await getOneHabit(deleted.id)).toBeUndefined()
   })
 
   it('rejects an unknown habit without affecting existing records', async () => {
