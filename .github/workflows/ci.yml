@@ -90,11 +90,30 @@ jobs:
         run: pnpm install
 
       - name: Build
+        env:
+          VITE_DB_NAME: habit-tracker
+          BASE_URL: /habit-tracker/
         run: pnpm run build
 
-      - name: Upload build
-        uses: actions/upload-artifact@v7
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
         with:
-          name: build
           path: dist
-          retention-days: 7
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

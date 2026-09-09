@@ -1,4 +1,4 @@
-import { Redirect, Route, Switch } from 'wouter'
+import { Redirect, Route, Router, Switch } from 'wouter'
 
 import { AddHabit } from '~/pages/add-habit'
 import { EditHabit } from '~/pages/edit-habit'
@@ -9,7 +9,7 @@ import { ThemeSynchronizer } from '../theme'
 
 export const App = () => {
   return (
-    <>
+    <Router base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ThemeSynchronizer />
       <Switch>
         <Route path={Path.Home} component={Home} />
@@ -20,6 +20,6 @@ export const App = () => {
           <Redirect to={Path.Home} />
         </Route>
       </Switch>
-    </>
+    </Router>
   )
 }
