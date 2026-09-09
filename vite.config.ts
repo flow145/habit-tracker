@@ -11,8 +11,6 @@ export default defineConfig(({ mode }) => ({
     tsconfigPaths: true,
   },
 
-  base: process.env.BASE_URL,
-
   build: {
     target: ['chrome111', 'edge111', 'firefox114', 'safari16.4', 'ios16.4'],
   },
@@ -39,7 +37,6 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'inline',
-      scope: process.env.BASE_URL,
       manifest: {
         name: 'Habit tracker',
         short_name: 'Habits',

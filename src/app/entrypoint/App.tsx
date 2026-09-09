@@ -9,7 +9,7 @@ import { ThemeSynchronizer } from '../theme'
 
 export const App = () => {
   return (
-    <Router base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+    <Router>
       <ThemeSynchronizer />
       <Switch>
         <Route path={Path.Home} component={Home} />
