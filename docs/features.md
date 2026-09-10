@@ -1,15 +1,15 @@
 ## Alpha 1 (MVP)
 
-- [ ] create habits (only yes/no, name, description)
-- [ ] habit frequency (X times in Y days/weeks/months)
-- [ ] list of habits with a couple recent days' statuses (expanded view: 2-row card)
-- [ ] mark habits complete or not (in the list)
-- [ ] automatically determine today's status from habit history and schedule
-- [ ] edit habit (name, description, frequency)
-- [ ] delete habits
-- [ ] light/dark theme
-- [ ] local db
-- [ ] installable on mobile
+- [x] create habits (only yes/no, name, description)
+- [x] habit schedule (X times in Y days/weeks/months)
+- [x] list of habits with a few recent days' statuses (expanded view)
+- [x] mark habits complete or not (in the list)
+- [x] automatically determine today's status from habit history and schedule
+- [x] edit habit (name, description, frequency)
+- [x] delete habits
+- [x] light/dark theme
+- [x] local db
+- [x] installable (pwa)
 
 ## Alpha 2
 
