@@ -4,6 +4,7 @@
 - language: TypeScript
 - framework: React
 - build tool: Vite
+- PWA: vite-plugin-pwa with a web app manifest and service worker
 - based on my react-starter with code quality tools setup
 - data storage: IndexedDB + idb
 - state manager: Zustand

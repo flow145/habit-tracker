@@ -21,14 +21,14 @@
 
 | Style       | Size | Line height | Weight   | Desktop size |
 | ----------- | ---- | ----------- | -------- | ------------ |
-| Title       | 23px | 120%        | Semibold | 26px         |
-| Heading     | 20px | 120%        | Medium   | 22px         |
-| Subheading  | 18px | 120%        | Medium   | 20px         |
-| Body medium | 16px | 140%        | Regular  | same         |
-| Body small  | 14px | 140%        | Regular  | same         |
-| Button      | 16px | 100%        | Medium   | same         |
-| Label       | 16px | 140%        | Medium   | same         |
-| Hint        | 13px | 120%        | Medium   | same         |
+| Title       | 23px | 28px        | Semibold | 26px         |
+| Heading     | 20px | 24px        | Medium   | 22px         |
+| Subheading  | 18px | 22px        | Medium   | 20px         |
+| Body medium | 16px | 22px        | Regular  | same         |
+| Body small  | 14px | 20px        | Regular  | same         |
+| Button      | 16px | 21px        | Medium   | same         |
+| Label       | 16px | 22px        | Medium   | same         |
+| Hint        | 13px | 16px        | Medium   | same         |
 
 ## Layout
 
@@ -40,7 +40,7 @@ Instead:
 - larger spacing
 - slightly larger typography
 
-Target maximum content width: **800px**
+Target maximum content width: **800px** or **500px** for forms
 
 ## Day statuses
 

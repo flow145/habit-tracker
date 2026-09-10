@@ -1,7 +1,7 @@
 ## Create habits
 
 - As a user, I want to add habits to the app so that I can start tracking a behavior I want to build
-- As a user, I want to be able to set a flexible habit schedule so that it matches my routine
+- As a user, I want to be able to set a flexible habit schedule (X times in Y days, weeks, or months) so that it matches my routine
 
 ## View and complete habits
 
@@ -23,4 +23,4 @@
 
 - As a user, I want to install the app so that I get the app-like experience (separate screen/window, app icon, no browser UI)
 - As a user, I want my habit data to be saved automatically so that it isn't lost when I close the browser/app
-- As a user, I want to switch between light and dark mode so that the app is comfortable to use in different environments
+- As a user, I want to choose between system, light, and dark themes so that the app is comfortable to use in different environments
