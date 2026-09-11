@@ -1,5 +1,6 @@
 import { differenceInCalendarDays, min } from 'date-fns'
 import { v7 as uuidv7 } from 'uuid'
+
 import {
   EntityConflictError,
   EntityNotFoundError,
@@ -9,20 +10,104 @@ import {
   type Schedule,
 } from '~/shared/db'
 import { groupBy, isErrorNamed } from '~/shared/lib'
-import {
-  buildComputedEntries,
-  type ComputedEntry,
-  type ComputedStatus,
-  getWindowStart,
-} from './computed-entries'
 
-export interface HabitWithComputedEntries extends Habit {
-  computedEntries: ComputedEntry[]
+import { buildComputedEntries, type ComputedStatus, getWindowStart } from './computed-entries'
+
+export interface HabitData {
+  habits: Habit[]
+  entries: Entry[]
 }
 
-export const getNextStatus = (status: ComputedStatus) =>
-  status === 'complete' ? 'incomplete' : 'complete'
+export const loadHabitData = async (): Promise<HabitData> => {
+  const db = await getDb()
+  const tx = db.transaction(['habits', 'entries'], 'readonly')
+  const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
+  const entries = await tx.objectStore('entries').getAll()
 
+  await tx.done
+  return { habits, entries }
+}
+
+export const addHabitRecord = async (habit: Habit): Promise<void> => {
+  const db = await getDb()
+
+  try {
+    await db.add('habits', habit)
+  } catch (error) {
+    if (isErrorNamed(error, 'ConstraintError'))
+      throw new EntityConflictError('Habit', habit.id, { cause: error })
+    throw error
+  }
+}
+
+export const updateHabitRecord = async (habit: Habit): Promise<void> => {
+  const db = await getDb()
+  const tx = db.transaction('habits', 'readwrite')
+  const existing = await tx.store.get(habit.id)
+
+  if (!existing) {
+    await tx.done
+    throw new EntityNotFoundError('Habit', habit.id)
+  }
+
+  try {
+    await tx.store.put(habit)
+    await tx.done
+  } catch (error) {
+    if (isErrorNamed(error, 'ConstraintError'))
+      throw new EntityConflictError('Habit', habit.id, { cause: error })
+    throw error
+  }
+}
+
+export const addEntryRecord = async (entry: Entry): Promise<void> => {
+  const db = await getDb()
+
+  try {
+    await db.add('entries', entry)
+  } catch (error) {
+    if (isErrorNamed(error, 'ConstraintError'))
+      throw new EntityConflictError('Entry', entry.id, { cause: error })
+    throw error
+  }
+}
+
+export const deleteEntryRecord = async ({ habitId, day }: { habitId: string; day: Date }) => {
+  const db = await getDb()
+  const tx = db.transaction('entries', 'readwrite')
+  const existing = await tx.store.index('byHabitAndDay').get([habitId, day])
+
+  if (!existing) {
+    await tx.done
+    return
+  }
+
+  await tx.store.delete(existing.id)
+  await tx.done
+}
+
+export const deleteHabitRecord = async (id: string): Promise<void> => {
+  const db = await getDb()
+  const tx = db.transaction(['habits', 'entries'], 'readwrite')
+  const habitsStore = tx.objectStore('habits')
+  const entriesStore = tx.objectStore('entries')
+  const existing = await habitsStore.get(id)
+
+  if (!existing) {
+    await tx.done
+    throw new EntityNotFoundError('Habit', id)
+  }
+
+  const habitEntries = (await entriesStore.getAll()).filter((entry) => entry.habitId === id)
+
+  await Promise.all([
+    ...habitEntries.map((entry) => entriesStore.delete(entry.id)),
+    habitsStore.delete(id),
+    tx.done,
+  ])
+}
+
+// Compatibility APIs remain available for the existing persistence tests. UI code uses actions.
 export const addHabit = async ({
   name,
   description,
@@ -32,12 +117,9 @@ export const addHabit = async ({
   description?: string
   schedule: Schedule
 }): Promise<Habit> => {
-  const db = await getDb()
-  const id = uuidv7()
   const now = new Date()
-
   const habit: Habit = {
-    id,
+    id: uuidv7(),
     name,
     description: description ?? '',
     schedule,
@@ -45,20 +127,17 @@ export const addHabit = async ({
     updatedAt: now,
   }
 
-  try {
-    await db.add('habits', habit)
-  } catch (error) {
-    if (isErrorNamed(error, 'ConstraintError'))
-      throw new EntityConflictError('Habit', { id }, { cause: error })
-    throw error
-  }
-
+  await addHabitRecord(habit)
   return habit
 }
 
 export const getHabit = async (id: string): Promise<Habit | null> => {
   const db = await getDb()
   return (await db.get('habits', id)) ?? null
+}
+
+export interface HabitWithComputedEntries extends Habit {
+  computedEntries: ReturnType<typeof buildComputedEntries>
 }
 
 export const getHabitList = async ({
@@ -71,7 +150,6 @@ export const getHabitList = async ({
   const db = await getDb()
   const tx = db.transaction(['habits', 'entries'], 'readonly')
   const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
-
   const dayCount = differenceInCalendarDays(end, start) + 1
 
   if (habits.length === 0 || dayCount <= 0) {
@@ -80,14 +158,11 @@ export const getHabitList = async ({
   }
 
   const earliestEffectiveStart = min(habits.map((habit) => getWindowStart(start, habit.schedule)))
-
   const entries = await tx
     .objectStore('entries')
     .index('byDay')
     .getAll(IDBKeyRange.bound(earliestEffectiveStart, end))
-
   const entriesByHabit = groupBy(entries, (entry) => entry.habitId)
-
   const list = habits.map((habit) => ({
     ...habit,
     computedEntries: buildComputedEntries({
@@ -113,14 +188,8 @@ export const editHabit = async ({
   description?: string
   schedule?: Schedule
 }): Promise<Habit> => {
-  const db = await getDb()
-  const tx = db.transaction('habits', 'readwrite')
-  const existing = await tx.store.get(id)
-
-  if (!existing) {
-    await tx.done
-    throw new EntityNotFoundError('Habit', id)
-  }
+  const existing = await getHabit(id)
+  if (!existing) throw new EntityNotFoundError('Habit', id)
 
   const updated: Habit = {
     ...existing,
@@ -130,38 +199,11 @@ export const editHabit = async ({
     updatedAt: new Date(),
   }
 
-  try {
-    await tx.store.put(updated)
-    await tx.done
-  } catch (error) {
-    if (isErrorNamed(error, 'ConstraintError'))
-      throw new EntityConflictError('Habit', { id }, { cause: error })
-    throw error
-  }
-
+  await updateHabitRecord(updated)
   return updated
 }
 
-export const deleteHabit = async (id: string): Promise<void> => {
-  const db = await getDb()
-  const tx = db.transaction(['habits', 'entries'], 'readwrite')
-  const habitsStore = tx.objectStore('habits')
-  const entriesStore = tx.objectStore('entries')
-  const existing = await habitsStore.get(id)
-
-  if (!existing) {
-    await tx.done
-    throw new EntityNotFoundError('Habit', id)
-  }
-
-  const habitEntries = (await entriesStore.getAll()).filter((entry) => entry.habitId === id)
-
-  await Promise.all([
-    ...habitEntries.map((entry) => entriesStore.delete(entry.id)),
-    habitsStore.delete(id),
-    tx.done,
-  ])
-}
+export const deleteHabit = deleteHabitRecord
 
 export const toggleDay = async ({
   habitId,
@@ -172,40 +214,20 @@ export const toggleDay = async ({
   day: Date
   currentStatus: ComputedStatus
 }): Promise<void> => {
-  const status = getNextStatus(currentStatus)
-  const db = await getDb()
-
-  if (status === 'complete') {
-    const id = uuidv7()
-    const now = new Date()
-
-    const entry: Entry = {
-      id,
-      habitId,
-      status: 'complete',
-      day,
-      createdAt: now,
-      updatedAt: now,
-    }
-
-    try {
-      await db.add('entries', entry)
-    } catch (error) {
-      if (isErrorNamed(error, 'ConstraintError')) return
-      throw error
-    }
+  if (currentStatus === 'complete') {
+    await deleteEntryRecord({ habitId, day })
+    return
   }
 
-  if (status === 'incomplete') {
-    const tx = db.transaction('entries', 'readwrite')
-    const existing = await tx.store.index('byHabitAndDay').get([habitId, day])
-
-    if (!existing) {
-      await tx.done
-      return
-    }
-
-    await tx.store.delete(existing.id)
-    await tx.done
-  }
+  const now = new Date()
+  await addEntryRecord({
+    id: uuidv7(),
+    habitId,
+    status: 'complete',
+    day,
+    createdAt: now,
+    updatedAt: now,
+  })
 }
+
+export { getNextStatus } from './computed-entries'
