@@ -8,11 +8,8 @@ export class EntityNotFoundError extends Error {
 }
 
 export class EntityConflictError extends Error {
-  constructor(entity: Entity, keys: Record<string, unknown>, options?: ErrorOptions) {
-    const keysStr = Object.entries(keys)
-      .map(([key, value]) => `${key}:${value}`)
-      .join(', ')
-    super(`${entity} with ${keysStr} already exists`, options)
+  constructor(entity: Entity, id: string, options?: ErrorOptions) {
+    super(`${entity} ${id} conflicts with existing data`, options)
     this.name = 'EntityConflictError'
   }
 }

@@ -1,17 +1,11 @@
-import { differenceInCalendarDays, min } from 'date-fns'
-import { v7 as uuidv7 } from 'uuid'
-
 import {
   EntityConflictError,
   EntityNotFoundError,
   type Entry,
   getDb,
   type Habit,
-  type Schedule,
 } from '~/shared/db'
-import { groupBy, isErrorNamed } from '~/shared/lib'
-
-import { buildComputedEntries, type ComputedStatus, getWindowStart } from './computed-entries'
+import { isErrorNamed } from '~/shared/lib'
 
 export interface HabitData {
   habits: Habit[]
@@ -105,129 +99,6 @@ export const deleteHabitRecord = async (id: string): Promise<void> => {
     habitsStore.delete(id),
     tx.done,
   ])
-}
-
-// Compatibility APIs remain available for the existing persistence tests. UI code uses actions.
-export const addHabit = async ({
-  name,
-  description,
-  schedule,
-}: {
-  name: string
-  description?: string
-  schedule: Schedule
-}): Promise<Habit> => {
-  const now = new Date()
-  const habit: Habit = {
-    id: uuidv7(),
-    name,
-    description: description ?? '',
-    schedule,
-    createdAt: now,
-    updatedAt: now,
-  }
-
-  await addHabitRecord(habit)
-  return habit
-}
-
-export const getHabit = async (id: string): Promise<Habit | null> => {
-  const db = await getDb()
-  return (await db.get('habits', id)) ?? null
-}
-
-export interface HabitWithComputedEntries extends Habit {
-  computedEntries: ReturnType<typeof buildComputedEntries>
-}
-
-export const getHabitList = async ({
-  start,
-  end = new Date(),
-}: {
-  start: Date
-  end?: Date
-}): Promise<HabitWithComputedEntries[]> => {
-  const db = await getDb()
-  const tx = db.transaction(['habits', 'entries'], 'readonly')
-  const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
-  const dayCount = differenceInCalendarDays(end, start) + 1
-
-  if (habits.length === 0 || dayCount <= 0) {
-    await tx.done
-    return habits.map((habit) => ({ ...habit, computedEntries: [] }))
-  }
-
-  const earliestEffectiveStart = min(habits.map((habit) => getWindowStart(start, habit.schedule)))
-  const entries = await tx
-    .objectStore('entries')
-    .index('byDay')
-    .getAll(IDBKeyRange.bound(earliestEffectiveStart, end))
-  const entriesByHabit = groupBy(entries, (entry) => entry.habitId)
-  const list = habits.map((habit) => ({
-    ...habit,
-    computedEntries: buildComputedEntries({
-      start,
-      end,
-      entries: entriesByHabit.get(habit.id) ?? [],
-      schedule: habit.schedule,
-    }),
-  }))
-
-  await tx.done
-  return list
-}
-
-export const editHabit = async ({
-  id,
-  name,
-  description,
-  schedule,
-}: {
-  id: string
-  name?: string
-  description?: string
-  schedule?: Schedule
-}): Promise<Habit> => {
-  const existing = await getHabit(id)
-  if (!existing) throw new EntityNotFoundError('Habit', id)
-
-  const updated: Habit = {
-    ...existing,
-    name: name ?? existing.name,
-    description: description ?? existing.description,
-    schedule: schedule ?? existing.schedule,
-    updatedAt: new Date(),
-  }
-
-  await updateHabitRecord(updated)
-  return updated
-}
-
-export const deleteHabit = deleteHabitRecord
-
-export const toggleDay = async ({
-  habitId,
-  day,
-  currentStatus,
-}: {
-  habitId: string
-  day: Date
-  currentStatus: ComputedStatus
-}): Promise<void> => {
-  if (currentStatus === 'complete') {
-    await deleteEntryRecord({ habitId, day })
-    return
-  }
-
-  const now = new Date()
-  await addEntryRecord({
-    id: uuidv7(),
-    habitId,
-    status: 'complete',
-    day,
-    createdAt: now,
-    updatedAt: now,
-  })
 }
 
 export { getNextStatus } from './computed-entries'

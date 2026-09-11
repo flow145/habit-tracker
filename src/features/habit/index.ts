@@ -1,11 +1,12 @@
-export type { ComputedStatus } from './computed-entries'
+export { addHabit, deleteHabit, editHabit, hydrateHabitStore, toggleDay } from './actions'
+export { type ComputedStatus, getNextStatus } from './computed-entries'
+export { HabitStoreSynchronizer } from './HabitStoreSynchronizer'
 export {
-  addHabit,
-  deleteHabit,
-  editHabit,
-  getHabit,
-  getHabitList,
-  getNextStatus,
+  createHabitSelector,
+  type DateRange,
   type HabitWithComputedEntries,
-  toggleDay,
-} from './service'
+  selectHabit,
+  selectHabitIds,
+  selectHabitWithComputedEntries,
+} from './selectors'
+export { useHabitStore } from './store'

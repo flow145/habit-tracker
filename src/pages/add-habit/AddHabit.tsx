@@ -1,9 +1,8 @@
 import { ChevronLeft } from 'lucide-react'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'wouter'
 
-import { addHabit } from '~/features/habit'
+import { addHabit, useHabitStore } from '~/features/habit'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { Path } from '~/shared/constants'
@@ -15,25 +14,22 @@ import styles from './AddHabit.module.css'
 export const AddHabit = () => {
   const { t } = useTranslation()
   const [, navigate] = useLocation()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
 
   usePageTitle(t('AddHabit.title'))
 
-  const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
-    setIsSubmitting(true)
+  const handleSubmit = ({ name, description, schedule }: HabitFormValues) => {
+    const addHabitOperation = addHabit({
+      name,
+      description,
+      schedule,
+    })
 
-    try {
-      await addHabit({
-        name: name.trim(),
-        description: description.trim(),
-        schedule,
-      })
-      navigate(Path.Home, { replace: true })
-    } catch (error) {
+    navigate(Path.Home, { replace: true })
+    addHabitOperation.catch((error: unknown) => {
       console.error(error)
-    } finally {
-      setIsSubmitting(false)
-    }
+      // TODO show a toast when adding a habit fails.
+    })
   }
 
   return (
@@ -51,7 +47,7 @@ export const AddHabit = () => {
         }
       />
       <main className={styles.main}>
-        <HabitForm onSubmit={handleSubmit} disabled={isSubmitting} />
+        {hydrationStatus === 'ready' && <HabitForm onSubmit={handleSubmit} />}
       </main>
     </>
   )

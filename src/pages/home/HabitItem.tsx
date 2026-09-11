@@ -1,29 +1,47 @@
 import { clsx } from 'clsx'
 import { format } from 'date-fns'
 import { Check, Squircle } from 'lucide-react'
-import type { ReactElement } from 'react'
+import { type ReactElement, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 
-import type { ComputedStatus, HabitWithComputedEntries } from '~/features/habit'
-import { getNextStatus } from '~/features/habit'
+import {
+  type ComputedStatus,
+  createHabitSelector,
+  type DateRange,
+  getNextStatus,
+  toggleDay,
+  useHabitStore,
+} from '~/features/habit'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
 import { Path } from '~/shared/constants'
+
 import styles from './HabitItem.module.css'
 
-const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; key: string }> = {
-  complete: { icon: <Check />, key: 'complete' },
-  incomplete: { icon: <Squircle />, key: 'incomplete' },
-  'not-required': { icon: <SquircleCheckIcon />, key: 'notRequired' },
+const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
+  complete: { icon: <Check />, i18nKey: 'complete' },
+  incomplete: { icon: <Squircle />, i18nKey: 'incomplete' },
+  'not-required': { icon: <SquircleCheckIcon />, i18nKey: 'notRequired' },
 }
 
 export interface HabitItemProps {
-  habit: HabitWithComputedEntries
-  onToggleDay: (day: Date, currentStatus: ComputedStatus) => void
+  habitId: string
+  range: DateRange
 }
 
-export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
+export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const { t } = useTranslation()
+  const selectHabit = useMemo(() => createHabitSelector(habitId, range), [habitId, range])
+  const habit = useHabitStore(selectHabit)
+
+  if (!habit) return null
+
+  const handleToggleDay = (day: Date) => {
+    toggleDay({ habitId, day }).catch((error: unknown) => {
+      console.error(error)
+      // TODO show a toast when saving a day fails.
+    })
+  }
 
   return (
     <article className={styles.habit}>
@@ -36,6 +54,7 @@ export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
         {habit.computedEntries.map(({ day, status }) => {
           const nextStatus = getNextStatus(status)
           const isMuted = status === 'incomplete' || status === 'not-required'
+          const { icon, i18nKey } = STATUS_CONFIG[status]
 
           return (
             <li key={day.toISOString()} className={styles.dayItem}>
@@ -44,12 +63,12 @@ export const HabitItem = ({ habit, onToggleDay }: HabitItemProps) => {
                 className={clsx(styles.dayToggle, isMuted && styles.muted)}
                 aria-label={t('HabitItem.dayToggle', {
                   date: format(day, 'MMMM d'),
-                  currentStatus: t(`HabitItem.dayStatus.${STATUS_CONFIG[status].key}`),
+                  currentStatus: t(`HabitItem.dayStatus.${i18nKey}`),
                   nextStatus: t(`HabitItem.dayStatus.${nextStatus}`),
                 })}
-                onClick={() => onToggleDay(day, status)}
+                onClick={() => handleToggleDay(day)}
               >
-                {STATUS_CONFIG[status].icon}
+                {icon}
               </button>
             </li>
           )
