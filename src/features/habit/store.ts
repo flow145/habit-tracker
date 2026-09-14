@@ -10,15 +10,15 @@ export interface HabitStore {
   habitsById: Record<string, Habit>
   /** Ordered by creation date newest last */
   habitIds: string[]
-  entriesByHabitDay: Record<string, Entry>
+  entriesByHabitId: Record<string, Record<string, Entry>>
 }
 
-export const getEntryKey = (habitId: string, day: Date) => `${habitId}:${day.toISOString()}`
+export const getDayKey = (day: Date) => day.toISOString()
 
 export const useHabitStore = create<HabitStore>()(() => ({
   hydrationStatus: 'idle',
   hydrationError: null,
   habitsById: {},
   habitIds: [],
-  entriesByHabitDay: {},
+  entriesByHabitId: {},
 }))

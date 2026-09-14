@@ -7,12 +7,12 @@ import { Link } from 'wouter'
 
 import {
   type ComputedStatus,
-  createHabitSelector,
   type DateRange,
   getNextStatus,
   toggleDay,
   useHabitStore,
 } from '~/features/habit'
+import { buildComputedEntries } from '~/features/habit/computed-entries'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
 import { Path } from '~/shared/constants'
 
@@ -31,8 +31,21 @@ export interface HabitItemProps {
 
 export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const { t } = useTranslation()
-  const selectHabit = useMemo(() => createHabitSelector(habitId, range), [habitId, range])
-  const habit = useHabitStore(selectHabit)
+  const habit = useHabitStore((state) => state.habitsById[habitId])
+  const entriesByDay = useHabitStore((state) => state.entriesByHabitId[habitId])
+
+  const computedEntries = useMemo(
+    () =>
+      habit
+        ? buildComputedEntries({
+            start: range.start,
+            end: range.end,
+            entries: Object.values(entriesByDay ?? {}),
+            schedule: habit.schedule,
+          })
+        : [],
+    [habit, entriesByDay, range.start, range.end],
+  )
 
   if (!habit) return null
 
@@ -51,7 +64,7 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
         </Link>
       </h2>
       <ol className={styles.dayList}>
-        {habit.computedEntries.map(({ day, status }) => {
+        {computedEntries.map(({ day, status }) => {
           const nextStatus = getNextStatus(status)
           const isMuted = status === 'incomplete' || status === 'not-required'
           const { icon, i18nKey } = STATUS_CONFIG[status]

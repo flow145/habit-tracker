@@ -11,7 +11,7 @@ import {
   loadHabitData,
   updateHabitRecord,
 } from './service'
-import { getEntryKey, useHabitStore } from './store'
+import { getDayKey, useHabitStore } from './store'
 
 let hydrationPromise: Promise<void> | null = null
 const habitQueues = new Map<string, Promise<unknown>>()
@@ -32,7 +32,7 @@ const hydrate = async () => {
     hydrationError: null,
     habitIds: [],
     habitsById: {},
-    entriesByHabitDay: {},
+    entriesByHabitId: {},
   })
 
   try {
@@ -41,9 +41,13 @@ const hydrate = async () => {
       hydrationStatus: 'ready',
       habitIds: habits.map(({ id }) => id),
       habitsById: Object.fromEntries(habits.map((habit) => [habit.id, habit])),
-      entriesByHabitDay: Object.fromEntries(
-        entries.map((entry) => [getEntryKey(entry.habitId, entry.day), entry]),
-      ),
+      entriesByHabitId: entries.reduce<Record<string, Record<string, Entry>>>((acc, entry) => {
+        acc[entry.habitId] = {
+          ...acc[entry.habitId],
+          [getDayKey(entry.day)]: entry,
+        }
+        return acc
+      }, {}),
     })
   } catch (error) {
     useHabitStore.setState({
@@ -132,24 +136,34 @@ export const toggleDay = async ({
 }): Promise<void> => {
   await ensureHydrated()
 
-  const { entriesByHabitDay } = useHabitStore.getState()
-  const key = getEntryKey(habitId, day)
-  const existingEntry = entriesByHabitDay[key]
+  const { entriesByHabitId } = useHabitStore.getState()
+  const entriesByDay = entriesByHabitId[habitId] ?? {}
+  const dayKey = getDayKey(day)
+  const existingEntry = entriesByDay[dayKey]
 
   if (existingEntry) {
-    const updatedEntriesByHabitDay = { ...entriesByHabitDay }
-    delete updatedEntriesByHabitDay[key]
-    useHabitStore.setState({ entriesByHabitDay: updatedEntriesByHabitDay })
+    const updatedEntriesByDay = { ...entriesByDay }
+    delete updatedEntriesByDay[dayKey]
+
+    useHabitStore.setState({
+      entriesByHabitId: { ...entriesByHabitId, [habitId]: updatedEntriesByDay },
+    })
 
     await enqueueHabitOperation(habitId, async () => {
       try {
         await deleteEntryRecord({ habitId, day })
       } catch (error) {
         useHabitStore.setState((state) =>
-          state.entriesByHabitDay[key]
+          state.entriesByHabitId[habitId]?.[dayKey]
             ? state
             : {
-                entriesByHabitDay: { ...state.entriesByHabitDay, [key]: existingEntry },
+                entriesByHabitId: {
+                  ...state.entriesByHabitId,
+                  [habitId]: {
+                    ...state.entriesByHabitId[habitId],
+                    [dayKey]: existingEntry,
+                  },
+                },
               },
         )
 
@@ -168,7 +182,10 @@ export const toggleDay = async ({
     }
 
     useHabitStore.setState({
-      entriesByHabitDay: { ...entriesByHabitDay, [key]: entry },
+      entriesByHabitId: {
+        ...entriesByHabitId,
+        [habitId]: { ...entriesByDay, [dayKey]: entry },
+      },
     })
 
     await enqueueHabitOperation(habitId, async () => {
@@ -176,12 +193,15 @@ export const toggleDay = async ({
         await addEntryRecord(entry)
       } catch (error) {
         useHabitStore.setState((state) => {
-          if (state.entriesByHabitDay[key] !== entry) return state
+          const entriesByDay = state.entriesByHabitId[habitId]
+          if (entriesByDay?.[dayKey] !== entry) return state
 
-          const updatedEntriesByHabitDay = { ...state.entriesByHabitDay }
-          delete updatedEntriesByHabitDay[key]
+          const updatedEntriesByDay = { ...entriesByDay }
+          delete updatedEntriesByDay[dayKey]
 
-          return { entriesByHabitDay: updatedEntriesByHabitDay }
+          return {
+            entriesByHabitId: { ...state.entriesByHabitId, [habitId]: updatedEntriesByDay },
+          }
         })
 
         throw error
@@ -197,14 +217,13 @@ export const deleteHabit = async (id: string): Promise<void> => {
     const habitsById = { ...state.habitsById }
     delete habitsById[id]
 
-    const entriesByHabitDay = Object.fromEntries(
-      Object.entries(state.entriesByHabitDay).filter(([key]) => !key.startsWith(`${id}:`)),
-    )
+    const entriesByHabitId = { ...state.entriesByHabitId }
+    delete entriesByHabitId[id]
 
     return {
       habitsById,
       habitIds: state.habitIds.filter((habitId) => habitId !== id),
-      entriesByHabitDay,
+      entriesByHabitId,
     }
   })
 
