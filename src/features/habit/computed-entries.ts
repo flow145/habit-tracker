@@ -1,4 +1,4 @@
-import { add, differenceInCalendarDays, eachDayOfInterval, min, sub } from 'date-fns'
+import { add, differenceInCalendarDays, eachDayOfInterval, format, min, sub } from 'date-fns'
 
 import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
 
@@ -14,7 +14,7 @@ export interface ComputedEntry {
   status: ComputedStatus
 }
 
-export const getDayKey = (date: Date) => date.toISOString()
+export const getDayKey = (date: Date) => format(date, 'yyyy-MM-dd')
 
 export const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) => {
   const firstDayAfterWindow = add(date, { [intervalUnit]: interval })
@@ -34,7 +34,7 @@ export const buildComputedEntries = ({
 }: {
   start: Date
   end: Date
-  entries: Pick<Entry, 'day' | 'status'>[]
+  entries: Pick<Entry, 'day' | 'status'>[] // TODO use object type from the store
   schedule: Schedule
 }): ComputedEntry[] => {
   const dayCount = differenceInCalendarDays(end, start) + 1
