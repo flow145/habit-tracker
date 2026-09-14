@@ -1,4 +1,5 @@
 import { ChevronLeft } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'wouter'
 
@@ -14,22 +15,23 @@ import styles from './AddHabit.module.css'
 export const AddHabit = () => {
   const { t } = useTranslation()
   const [, navigate] = useLocation()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
 
   usePageTitle(t('AddHabit.title'))
 
-  const handleSubmit = ({ name, description, schedule }: HabitFormValues) => {
-    const addHabitOperation = addHabit({
-      name,
-      description,
-      schedule,
-    })
+  const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
+    setIsSubmitting(true)
 
-    navigate(Path.Home, { replace: true })
-    addHabitOperation.catch((error: unknown) => {
+    try {
+      await addHabit({ name, description, schedule })
+      navigate(Path.Home, { replace: true })
+    } catch (error) {
       console.error(error)
-      // TODO show a toast when adding a habit fails.
-    })
+      alert(t('shared.changeFailed'))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -47,7 +49,9 @@ export const AddHabit = () => {
         }
       />
       <main className={styles.main}>
-        {hydrationStatus === 'ready' && <HabitForm onSubmit={handleSubmit} />}
+        {hydrationStatus === 'ready' && (
+          <HabitForm onSubmit={handleSubmit} disabled={isSubmitting} />
+        )}
       </main>
     </>
   )

@@ -1,5 +1,6 @@
 import { type IDBPDatabase, openDB } from 'idb'
 
+import { i18n } from '~/app/i18n'
 import type { DBSchema } from './schema'
 
 export const DB_VERSION = 1
@@ -30,8 +31,7 @@ export const getDb = () => {
     },
 
     blocked() {
-      // TODO use app level notifications
-      alert('Update pending, please close all the other Habit Tracker tabs')
+      alert(i18n.t('shared.updateBlocked'))
     },
 
     async blocking() {

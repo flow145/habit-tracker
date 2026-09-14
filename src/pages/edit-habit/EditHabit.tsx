@@ -21,38 +21,44 @@ export const EditHabit = () => {
   const [, navigate] = useLocation()
   const [, params] = useRoute(`${Path.EditHabit}/:id`)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
   const habitId = params?.id
   const habit = useHabitStore((state) => (habitId ? (state.habitsById[habitId] ?? null) : null))
 
   usePageTitle(t('EditHabit.title'))
 
-  const handleSubmit = ({ name, description, schedule }: HabitFormValues) => {
+  const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
     if (!habitId) return
 
-    const editHabitOperation = editHabit({
-      id: habitId,
-      name,
-      description,
-      schedule,
-    })
+    setIsSubmitting(true)
 
-    navigate(Path.Home, { replace: true })
-    editHabitOperation.catch((error: unknown) => {
+    try {
+      await editHabit({ id: habitId, name, description, schedule })
+      navigate(Path.Home, { replace: true })
+    } catch (error) {
       console.error(error)
-      // TODO show a toast when editing a habit fails.
-    })
+      alert(t('shared.changeFailed'))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!habitId) return
 
-    const deleteHabitOperation = deleteHabit(habitId)
-    navigate(Path.Home, { replace: true })
-    deleteHabitOperation.catch((error: unknown) => {
+    setIsDeleting(true)
+
+    try {
+      await deleteHabit(habitId)
+      navigate(Path.Home, { replace: true })
+    } catch (error) {
       console.error(error)
-      // TODO show a toast when deleting a habit fails.
-    })
+      alert(t('shared.changeFailed'))
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const header = (
@@ -92,6 +98,7 @@ export const EditHabit = () => {
             <HabitForm
               initialValues={habit}
               onSubmit={handleSubmit}
+              disabled={isSubmitting || isDeleting}
               additionalAction={
                 <AlertDialog.Trigger handle={deletionDialog}>
                   <Button
@@ -100,6 +107,7 @@ export const EditHabit = () => {
                     color='danger'
                     icon={<Trash2 />}
                     aria-label={t('EditHabit.deleteLabel')}
+                    disabled={isSubmitting || isDeleting}
                   >
                     {t('shared.delete')}
                   </Button>
@@ -124,7 +132,7 @@ export const EditHabit = () => {
                     {t('EditHabit.deleteDialog.cancel')}
                   </Button>
                 </AlertDialog.Close>
-                <Button type='button' color='danger' onClick={handleDelete}>
+                <Button type='button' color='danger' onClick={handleDelete} disabled={isDeleting}>
                   {t('shared.delete')}
                 </Button>
               </div>

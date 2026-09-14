@@ -39,7 +39,7 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const handleToggleDay = (day: Date) => {
     toggleDay({ habitId, day }).catch((error: unknown) => {
       console.error(error)
-      // TODO show a toast when saving a day fails.
+      alert(t('shared.changeFailed'))
     })
   }
 
