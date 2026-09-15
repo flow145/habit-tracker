@@ -1,20 +1,21 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { createStore } from 'zustand/vanilla'
 
-import { EntityNotFoundError, type Entry, type Habit, type Schedule } from '~/shared/db'
-import { date, entry, habit } from '~/shared/tests'
-import type { HabitData } from './service'
+import { EntityNotFoundError, type Entry, type Habit } from '~/shared/db'
+import { date, makeEntry, makeHabit } from '~/shared/tests'
 
-vi.mock('uuid', () => ({ v7: vi.fn(() => 'generated-id') }))
-vi.mock('./service', () => ({
-  loadHabitData: vi.fn(),
-  addHabitRecord: vi.fn(),
-  updateHabitRecord: vi.fn(),
-  addEntryRecord: vi.fn(),
-  deleteEntryRecord: vi.fn(),
-  deleteHabitRecord: vi.fn(),
-}))
-
-const schedule: Schedule = { frequency: 1, interval: 1, intervalUnit: 'days' }
+import {
+  addEntryToStore,
+  addHabitToStore,
+  createHabitActions,
+  getHydratedHabitState,
+  getLoadingHabitState,
+  removeEntryFromStore,
+  removeHabitFromStore,
+  updateHabitInStore,
+} from './actions'
+import type { HabitData, HabitRepository } from './repository'
+import type { HabitStore } from './store'
 
 const deferred = <T>() => {
   let resolve!: (value: T | PromiseLike<T>) => void
@@ -27,21 +28,45 @@ const deferred = <T>() => {
   return { promise, resolve, reject }
 }
 
-let actions: typeof import('./actions')
-let service: typeof import('./service')
-let useHabitStore: typeof import('./store')['useHabitStore']
+const emptyStore = (): HabitStore => ({
+  hydrationStatus: 'idle',
+  hydrationError: null,
+  habitIds: [],
+  habitsById: {},
+  entriesByHabitId: {},
+})
 
-const setReadyStore = (habits: Habit[] = [], entries: Entry[] = []) => {
-  useHabitStore.setState({
-    hydrationStatus: 'ready',
-    hydrationError: null,
-    habitIds: habits.map(({ id }) => id),
-    habitsById: Object.fromEntries(habits.map((value) => [value.id, value])),
-    entriesByHabitId: entries.reduce<Record<string, Record<string, Entry>>>((acc, value) => {
-      acc[value.habitId] = { ...acc[value.habitId], [value.day.toISOString()]: value }
-      return acc
-    }, {}),
+const readyStore = (habits: Habit[] = [], entries: Entry[] = []): HabitStore => ({
+  hydrationStatus: 'ready',
+  hydrationError: null,
+  ...getHydratedHabitState({ habits, entries }),
+})
+
+const createRepositoryMock = (data: HabitData = { habits: [], entries: [] }) =>
+  ({
+    loadData: vi.fn(async () => data),
+    addHabitRecord: vi.fn(async () => {}),
+    updateHabitRecord: vi.fn(async () => {}),
+    addEntryRecord: vi.fn(async () => {}),
+    deleteEntryRecord: vi.fn(async () => {}),
+    deleteHabitRecord: vi.fn(async () => {}),
+  }) satisfies HabitRepository
+
+const createTestActions = ({
+  state = emptyStore(),
+  repository = createRepositoryMock(),
+}: {
+  state?: HabitStore
+  repository?: HabitRepository
+} = {}) => {
+  const store = createStore<HabitStore>()(() => state)
+  const actions = createHabitActions({
+    store,
+    repository,
+    now: () => date(3, 1, 10),
+    generateId: () => 'generated-id',
   })
+  return { store, actions }
 }
 
 const waitForActions = async () => {
@@ -49,271 +74,266 @@ const waitForActions = async () => {
   await Promise.resolve()
 }
 
-beforeEach(async () => {
-  vi.resetModules()
-  service = await import('./service')
-  actions = await import('./actions')
-  useHabitStore = (await import('./store')).useHabitStore
-  vi.mocked(service.loadHabitData).mockResolvedValue({ habits: [], entries: [] })
-  vi.mocked(service.addHabitRecord).mockResolvedValue()
-  vi.mocked(service.updateHabitRecord).mockResolvedValue()
-  vi.mocked(service.addEntryRecord).mockResolvedValue()
-  vi.mocked(service.deleteEntryRecord).mockResolvedValue()
-  vi.mocked(service.deleteHabitRecord).mockResolvedValue()
-})
+describe('store mutations', () => {
+  it('normalizes hydrated data by habit and day', () => {
+    const firstHabit = makeHabit({ id: 'habit-1' })
+    const secondHabit = makeHabit({ id: 'habit-2' })
+    const firstEntry = makeEntry({ habitId: firstHabit.id })
+    const secondEntry = makeEntry({ id: 'entry-2', habitId: secondHabit.id, day: date(2) })
 
-afterEach(() => {
-  vi.useRealTimers()
-  vi.clearAllMocks()
-})
-
-describe('hydrateHabitStore', () => {
-  it('hydrates normalized records once for concurrent callers', async () => {
-    const first = habit({ id: 'habit-1' })
-    const second = habit({ id: 'habit-2' })
-    const firstEntry = entry({ habitId: first.id })
-    const secondEntry = entry({ id: 'entry-2', habitId: second.id, day: date(2) })
-    const loading = deferred<HabitData>()
-    vi.mocked(service.loadHabitData).mockReturnValueOnce(loading.promise)
-
-    const firstHydration = actions.hydrateHabitStore()
-    const secondHydration = actions.hydrateHabitStore()
-
-    expect(service.loadHabitData).toHaveBeenCalledTimes(1)
-    expect(useHabitStore.getState().hydrationStatus).toBe('loading')
-
-    loading.resolve({ habits: [first, second], entries: [firstEntry, secondEntry] })
-    await Promise.all([firstHydration, secondHydration])
-
-    expect(useHabitStore.getState()).toMatchObject({
-      hydrationStatus: 'ready',
-      habitIds: [first.id, second.id],
-      habitsById: { [first.id]: first, [second.id]: second },
+    expect(
+      getHydratedHabitState({
+        habits: [firstHabit, secondHabit],
+        entries: [firstEntry, secondEntry],
+      }),
+    ).toEqual({
+      habitIds: [firstHabit.id, secondHabit.id],
+      habitsById: { [firstHabit.id]: firstHabit, [secondHabit.id]: secondHabit },
       entriesByHabitId: {
-        [first.id]: { [firstEntry.day.toISOString()]: firstEntry },
-        [second.id]: { [secondEntry.day.toISOString()]: secondEntry },
+        [firstHabit.id]: { [firstEntry.day.toISOString()]: firstEntry },
+        [secondHabit.id]: { [secondEntry.day.toISOString()]: secondEntry },
       },
     })
   })
 
-  it('rejects, records the error, and can retry after a failed hydration', async () => {
-    const failure = new Error('IndexedDB unavailable')
-    vi.mocked(service.loadHabitData).mockRejectedValueOnce(failure)
+  it('adds, updates, and removes habits without changing unrelated entries', () => {
+    const firstHabit = makeHabit({ id: 'habit-1' })
+    const secondHabit = makeHabit({ id: 'habit-2', name: 'Exercise' })
+    const firstEntry = makeEntry({ habitId: firstHabit.id })
+    const initial = readyStore([firstHabit], [firstEntry])
 
-    await expect(actions.hydrateHabitStore()).rejects.toBe(failure)
-    expect(useHabitStore.getState()).toMatchObject({
-      hydrationStatus: 'error',
-      hydrationError: failure,
+    const added = addHabitToStore(initial, secondHabit)
+    const updated = updateHabitInStore({ ...initial, ...added }, { ...secondHabit, name: 'Move' })
+    const removed = removeHabitFromStore({ ...initial, ...updated }, firstHabit.id)
+
+    expect(added.habitIds).toEqual([firstHabit.id, secondHabit.id])
+    expect(updated.habitsById[secondHabit.id]?.name).toBe('Move')
+    expect(removed).toEqual({
+      habitIds: [secondHabit.id],
+      habitsById: { [secondHabit.id]: { ...secondHabit, name: 'Move' } },
+      entriesByHabitId: {},
     })
+  })
 
-    const loaded = habit()
-    vi.mocked(service.loadHabitData).mockResolvedValueOnce({ habits: [loaded], entries: [] })
-    await expect(actions.hydrateHabitStore()).resolves.toBeUndefined()
-    expect(service.loadHabitData).toHaveBeenCalledTimes(2)
-    expect(useHabitStore.getState().habitsById).toEqual({ [loaded.id]: loaded })
+  it('adds and removes an entry by its habit and day', () => {
+    const habit = makeHabit()
+    const entry = makeEntry({ habitId: habit.id, day: date(2) })
+    const initial = readyStore([habit])
+
+    const added = addEntryToStore(initial, entry)
+    const removed = removeEntryFromStore({ ...initial, ...added }, entry)
+
+    expect(added.entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toEqual(entry)
+    expect(removed.entriesByHabitId[habit.id]).toEqual({})
   })
 })
 
-describe('form mutations', () => {
-  it('automatically hydrates and adds a habit only after persistence succeeds', async () => {
+describe('habit actions', () => {
+  it('hydrate normalized records once for concurrent callers', async () => {
+    const firstHabit = makeHabit({ id: 'habit-1' })
+    const secondHabit = makeHabit({ id: 'habit-2' })
+    const loading = deferred<HabitData>()
+    const repository = createRepositoryMock()
+    repository.loadData.mockReturnValueOnce(loading.promise)
+    const { store, actions } = createTestActions({ repository })
+
+    const firstHydration = actions.hydrateHabitStore()
+    const secondHydration = actions.hydrateHabitStore()
+
+    expect(repository.loadData).toHaveBeenCalledTimes(1)
+    expect(store.getState()).toEqual(getLoadingHabitState())
+
+    loading.resolve({ habits: [firstHabit, secondHabit], entries: [] })
+    await Promise.all([firstHydration, secondHydration])
+    expect(store.getState()).toMatchObject({
+      hydrationStatus: 'ready',
+      habitIds: [firstHabit.id, secondHabit.id],
+    })
+  })
+
+  it('record a hydration failure and retry with the same action instance', async () => {
+    const failure = new Error('IndexedDB unavailable')
+    const repository = createRepositoryMock()
+    repository.loadData.mockRejectedValueOnce(failure).mockResolvedValueOnce({
+      habits: [makeHabit()],
+      entries: [],
+    })
+    const { store, actions } = createTestActions({ repository })
+
+    await expect(actions.hydrateHabitStore()).rejects.toBe(failure)
+    expect(store.getState()).toMatchObject({ hydrationStatus: 'error', hydrationError: failure })
+
+    await actions.hydrateHabitStore()
+    expect(repository.loadData).toHaveBeenCalledTimes(2)
+    expect(store.getState().hydrationStatus).toBe('ready')
+  })
+
+  it('persist form mutations before changing the store', async () => {
     const persisted = deferred<void>()
-    const now = date(3, 1, 10)
-    vi.setSystemTime(now)
-    vi.mocked(service.addHabitRecord).mockReturnValueOnce(persisted.promise)
+    const repository = createRepositoryMock()
+    repository.addHabitRecord.mockReturnValueOnce(persisted.promise)
+    const { store, actions } = createTestActions({ repository, state: readyStore() })
 
     const result = actions.addHabit({
       name: '  Exercise  ',
       description: '  Daily  ',
-      schedule,
+      schedule: makeHabit().schedule,
     })
     await waitForActions()
 
-    expect(service.loadHabitData).toHaveBeenCalledTimes(1)
-    expect(service.addHabitRecord).toHaveBeenCalledWith({
-      id: 'generated-id',
-      name: 'Exercise',
-      description: 'Daily',
-      schedule,
-      createdAt: now,
-      updatedAt: now,
-    })
-    expect(useHabitStore.getState().habitIds).toEqual([])
-
-    persisted.resolve()
-    await result
-    expect(useHabitStore.getState().habitIds).toEqual(['generated-id'])
-  })
-
-  it('leaves the store unchanged when adding fails', async () => {
-    setReadyStore()
-    const failure = new Error('write failed')
-    vi.mocked(service.addHabitRecord).mockRejectedValueOnce(failure)
-
-    await expect(actions.addHabit({ name: 'Read', schedule })).rejects.toBe(failure)
-    expect(useHabitStore.getState().habitIds).toEqual([])
-  })
-
-  it('edits a habit only after persistence succeeds', async () => {
-    const existing = habit()
-    const persisted = deferred<void>()
-    setReadyStore([existing])
-    vi.mocked(service.updateHabitRecord).mockReturnValueOnce(persisted.promise)
-
-    const result = actions.editHabit({ id: existing.id, name: '  Exercise  ' })
-    await waitForActions()
-
-    expect(useHabitStore.getState().habitsById[existing.id]).toEqual(existing)
-    expect(service.updateHabitRecord).toHaveBeenCalledWith(
-      expect.objectContaining({ id: existing.id, name: 'Exercise' }),
+    expect(repository.addHabitRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'generated-id', name: 'Exercise', description: 'Daily' }),
     )
+    expect(store.getState().habitIds).toEqual([])
 
     persisted.resolve()
     await result
-    expect(useHabitStore.getState().habitsById[existing.id]).toEqual(
+    expect(store.getState().habitIds).toEqual(['generated-id'])
+  })
+
+  it('keep form state unchanged when persistence fails', async () => {
+    const habit = makeHabit()
+    const repository = createRepositoryMock()
+    repository.updateHabitRecord.mockRejectedValueOnce(new Error('write failed'))
+    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
+
+    await expect(actions.editHabit({ id: habit.id, name: 'Exercise' })).rejects.toThrow(
+      'write failed',
+    )
+    expect(store.getState().habitsById[habit.id]).toEqual(habit)
+  })
+
+  it('edit a habit only after persistence succeeds', async () => {
+    const habit = makeHabit()
+    const persisted = deferred<void>()
+    const repository = createRepositoryMock()
+    repository.updateHabitRecord.mockReturnValueOnce(persisted.promise)
+    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
+
+    const result = actions.editHabit({ id: habit.id, name: '  Exercise  ' })
+    await waitForActions()
+
+    expect(repository.updateHabitRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Exercise' }),
+    )
+    expect(store.getState().habitsById[habit.id]).toEqual(habit)
+
+    persisted.resolve()
+    await result
+    expect(store.getState().habitsById[habit.id]).toEqual(
       expect.objectContaining({ name: 'Exercise' }),
     )
   })
 
-  it('leaves the store unchanged when editing fails', async () => {
-    const existing = habit()
-    setReadyStore([existing])
-    vi.mocked(service.updateHabitRecord).mockRejectedValueOnce(new Error('write failed'))
+  it('keep a habit in the store when deletion fails', async () => {
+    const habit = makeHabit()
+    const repository = createRepositoryMock()
+    repository.deleteHabitRecord.mockRejectedValueOnce(new Error('write failed'))
+    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
 
-    await expect(actions.editHabit({ id: existing.id, name: 'Exercise' })).rejects.toThrow(
-      'write failed',
-    )
-    expect(useHabitStore.getState().habitsById[existing.id]).toEqual(existing)
+    await expect(actions.deleteHabit(habit.id)).rejects.toThrow('write failed')
+    expect(store.getState().habitsById[habit.id]).toEqual(habit)
   })
 
-  it('removes a habit from the store only after persistence succeeds', async () => {
-    const existing = habit()
-    const existingEntry = entry()
+  it('apply an optimistic toggle and roll it back when persistence fails', async () => {
+    const habit = makeHabit()
     const persisted = deferred<void>()
-    setReadyStore([existing], [existingEntry])
-    vi.mocked(service.deleteHabitRecord).mockReturnValueOnce(persisted.promise)
+    const repository = createRepositoryMock()
+    repository.addEntryRecord.mockReturnValueOnce(persisted.promise)
+    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
 
-    const result = actions.deleteHabit(existing.id)
+    const result = actions.toggleDay({ habitId: habit.id, day: date(2) })
     await waitForActions()
-
-    expect(useHabitStore.getState().habitsById[existing.id]).toEqual(existing)
-    expect(useHabitStore.getState().entriesByHabitId[existing.id]).toEqual({
-      [existingEntry.day.toISOString()]: existingEntry,
-    })
-
-    persisted.resolve()
-    await result
-    expect(useHabitStore.getState().habitsById[existing.id]).toBeUndefined()
-    expect(useHabitStore.getState().entriesByHabitId[existing.id]).toBeUndefined()
-  })
-
-  it('leaves the store unchanged when deleting fails', async () => {
-    const existing = habit()
-    setReadyStore([existing])
-    vi.mocked(service.deleteHabitRecord).mockRejectedValueOnce(new Error('write failed'))
-
-    await expect(actions.deleteHabit(existing.id)).rejects.toThrow('write failed')
-    expect(useHabitStore.getState().habitsById[existing.id]).toEqual(existing)
-  })
-})
-
-describe('toggleDay', () => {
-  it('adds an entry optimistically and removes it if persistence fails', async () => {
-    const existing = habit()
-    const day = date(2)
-    const persisted = deferred<void>()
-    setReadyStore([existing])
-    vi.mocked(service.addEntryRecord).mockReturnValueOnce(persisted.promise)
-
-    const result = actions.toggleDay({ habitId: existing.id, day })
-    await waitForActions()
-
-    expect(useHabitStore.getState().entriesByHabitId[existing.id]?.[day.toISOString()]).toEqual(
-      expect.objectContaining({ habitId: existing.id, day }),
+    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toEqual(
+      expect.objectContaining({ habitId: habit.id }),
     )
 
     persisted.reject(new Error('write failed'))
     await expect(result).rejects.toThrow('write failed')
-    expect(
-      useHabitStore.getState().entriesByHabitId[existing.id]?.[day.toISOString()],
-    ).toBeUndefined()
+    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toBeUndefined()
   })
 
-  it('removes an entry optimistically and restores it if persistence fails', async () => {
-    const existing = habit()
-    const existingEntry = entry()
-    setReadyStore([existing], [existingEntry])
-    vi.mocked(service.deleteEntryRecord).mockRejectedValueOnce(new Error('write failed'))
+  it('restore an optimistically removed entry when persistence fails', async () => {
+    const habit = makeHabit()
+    const entry = makeEntry({ habitId: habit.id })
+    const persisted = deferred<void>()
+    const repository = createRepositoryMock()
+    repository.deleteEntryRecord.mockReturnValueOnce(persisted.promise)
+    const { store, actions } = createTestActions({
+      repository,
+      state: readyStore([habit], [entry]),
+    })
 
-    const result = actions.toggleDay({ habitId: existing.id, day: existingEntry.day })
+    const result = actions.toggleDay({ habitId: habit.id, day: entry.day })
     await waitForActions()
-    expect(
-      useHabitStore.getState().entriesByHabitId[existing.id]?.[existingEntry.day.toISOString()],
-    ).toBeUndefined()
+    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toBeUndefined()
 
+    persisted.reject(new Error('write failed'))
     await expect(result).rejects.toThrow('write failed')
-    expect(
-      useHabitStore.getState().entriesByHabitId[existing.id]?.[existingEntry.day.toISOString()],
-    ).toEqual(existingEntry)
+    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toEqual(entry)
   })
 
-  it('serializes rapid toggles for one habit', async () => {
-    const existing = habit()
-    const day = date(2)
+  it('serialize rapid toggles for the same habit', async () => {
+    const habit = makeHabit()
     const added = deferred<void>()
     const deleted = deferred<void>()
-    setReadyStore([existing])
-    vi.mocked(service.addEntryRecord).mockReturnValueOnce(added.promise)
-    vi.mocked(service.deleteEntryRecord).mockReturnValueOnce(deleted.promise)
+    const repository = createRepositoryMock()
+    repository.addEntryRecord.mockReturnValueOnce(added.promise)
+    repository.deleteEntryRecord.mockReturnValueOnce(deleted.promise)
+    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
 
-    const firstToggle = actions.toggleDay({ habitId: existing.id, day })
+    const firstToggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
     await waitForActions()
-    const secondToggle = actions.toggleDay({ habitId: existing.id, day })
+    const secondToggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
     await waitForActions()
 
-    expect(service.deleteEntryRecord).not.toHaveBeenCalled()
+    expect(repository.deleteEntryRecord).not.toHaveBeenCalled()
     added.resolve()
     await firstToggle
     await waitForActions()
-    expect(service.deleteEntryRecord).toHaveBeenCalledWith({ habitId: existing.id, day })
+    expect(repository.deleteEntryRecord).toHaveBeenCalledWith({
+      habitId: habit.id,
+      day: date(2),
+    })
 
     deleted.resolve()
     await secondToggle
-    expect(
-      useHabitStore.getState().entriesByHabitId[existing.id]?.[day.toISOString()],
-    ).toBeUndefined()
+    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toBeUndefined()
   })
 
-  it('queues deletion behind an earlier toggle for the same habit', async () => {
-    const existing = habit()
+  it('serialize a deletion behind an earlier toggle for the same habit', async () => {
+    const habit = makeHabit()
     const added = deferred<void>()
     const deleted = deferred<void>()
-    setReadyStore([existing])
-    vi.mocked(service.addEntryRecord).mockReturnValueOnce(added.promise)
-    vi.mocked(service.deleteHabitRecord).mockReturnValueOnce(deleted.promise)
+    const repository = createRepositoryMock()
+    repository.addEntryRecord.mockReturnValueOnce(added.promise)
+    repository.deleteHabitRecord.mockReturnValueOnce(deleted.promise)
+    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
 
-    const toggle = actions.toggleDay({ habitId: existing.id, day: date(2) })
+    const toggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
     await waitForActions()
-    const deletion = actions.deleteHabit(existing.id)
+    const deletion = actions.deleteHabit(habit.id)
     await waitForActions()
 
-    expect(service.deleteHabitRecord).not.toHaveBeenCalled()
+    expect(repository.deleteHabitRecord).not.toHaveBeenCalled()
     added.resolve()
     await toggle
     await waitForActions()
-    expect(service.deleteHabitRecord).toHaveBeenCalledWith(existing.id)
+    expect(repository.deleteHabitRecord).toHaveBeenCalledWith(habit.id)
 
     deleted.resolve()
     await deletion
-    expect(useHabitStore.getState().habitsById[existing.id]).toBeUndefined()
+    expect(store.getState().habitsById[habit.id]).toBeUndefined()
   })
 
-  it('rejects an absent habit without persisting an orphan entry', async () => {
-    setReadyStore()
+  it('reject toggles for absent habits without persisting an orphan entry', async () => {
+    const repository = createRepositoryMock()
+    const { store, actions } = createTestActions({ repository, state: readyStore() })
 
     await expect(actions.toggleDay({ habitId: 'missing', day: date(1) })).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
     )
-    expect(service.addEntryRecord).not.toHaveBeenCalled()
-    expect(useHabitStore.getState().entriesByHabitId).toEqual({})
+    expect(repository.addEntryRecord).not.toHaveBeenCalled()
+    expect(store.getState().entriesByHabitId).toEqual({})
   })
 })

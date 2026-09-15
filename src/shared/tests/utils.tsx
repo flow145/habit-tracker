@@ -12,7 +12,7 @@ import { closeDb, type Entry, type Habit } from '~/shared/db'
 export const date = (day: number, month = 1, hour = 0, minute = 0) =>
   new Date(2026, month - 1, day, hour, minute)
 
-export const habit = (overrides: Partial<Habit> = {}): Habit => ({
+export const makeHabit = (overrides: Partial<Habit> = {}): Habit => ({
   id: 'habit-1',
   name: 'Read',
   description: '',
@@ -22,7 +22,7 @@ export const habit = (overrides: Partial<Habit> = {}): Habit => ({
   ...overrides,
 })
 
-export const entry = (overrides: Partial<Entry> = {}): Entry => ({
+export const makeEntry = (overrides: Partial<Entry> = {}): Entry => ({
   id: 'entry-1',
   habitId: 'habit-1',
   status: 'complete',

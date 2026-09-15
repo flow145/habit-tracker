@@ -7,16 +7,9 @@ import {
   getDb,
   type Habit,
 } from '~/shared/db'
-import { date, entry, habit, resetTestDb } from '~/shared/tests'
+import { date, makeEntry, makeHabit, resetTestDb } from '~/shared/tests'
 
-import {
-  addEntryRecord,
-  addHabitRecord,
-  deleteEntryRecord,
-  deleteHabitRecord,
-  loadHabitData,
-  updateHabitRecord,
-} from './service'
+import { repository } from './repository'
 
 const schedule = { frequency: 1, interval: 1, intervalUnit: 'days' } as const
 
@@ -38,12 +31,12 @@ afterEach(async () => {
 
 describe('loadHabitData', () => {
   it('returns all habits in creation order and all entries', async () => {
-    const oldest = await seed(habit({ id: 'habit-1', createdAt: date(1) }))
-    const newest = await seed(habit({ id: 'habit-2', createdAt: date(2) }))
-    const firstEntry = await seed(entry({ id: 'entry-1', habitId: oldest.id }))
-    const secondEntry = await seed(entry({ id: 'entry-2', habitId: newest.id, day: date(2) }))
+    const oldest = await seed(makeHabit({ id: 'habit-1', createdAt: date(1) }))
+    const newest = await seed(makeHabit({ id: 'habit-2', createdAt: date(2) }))
+    const firstEntry = await seed(makeEntry({ id: 'entry-1', habitId: oldest.id }))
+    const secondEntry = await seed(makeEntry({ id: 'entry-2', habitId: newest.id, day: date(2) }))
 
-    expect(await loadHabitData()).toEqual({
+    expect(await repository.loadData()).toEqual({
       habits: [oldest, newest],
       entries: [firstEntry, secondEntry],
     })
@@ -61,14 +54,14 @@ describe('addHabitRecord', () => {
       updatedAt: date(1),
     }
 
-    expect(await addHabitRecord(value)).toBeUndefined()
+    expect(await repository.addHabitRecord(value)).toBeUndefined()
     expect(await getOneHabit(value.id)).toEqual(value)
   })
 
   it('maps duplicate IDs to EntityConflictError', async () => {
-    const value = await seed(habit())
+    const value = await seed(makeHabit())
 
-    const result = addHabitRecord(value)
+    const result = repository.addHabitRecord(value)
     await expect(result).rejects.toThrow(EntityConflictError)
     await expect(result).rejects.toMatchObject({
       message: `Habit ${value.id} conflicts with existing data`,
@@ -79,16 +72,16 @@ describe('addHabitRecord', () => {
 
 describe('updateHabitRecord', () => {
   it('replaces an existing record with the supplied value', async () => {
-    const existing = await seed(habit())
+    const existing = await seed(makeHabit())
     const updated = { ...existing, name: 'Exercise', description: 'Daily', updatedAt: date(3) }
 
-    expect(await updateHabitRecord(updated)).toBeUndefined()
+    expect(await repository.updateHabitRecord(updated)).toBeUndefined()
     expect(await getOneHabit(updated.id)).toEqual(updated)
   })
 
   it('rejects an unknown habit', async () => {
     await expect(
-      updateHabitRecord({
+      repository.updateHabitRecord({
         id: 'habit-1',
         name: 'Read',
         description: '',
@@ -100,14 +93,14 @@ describe('updateHabitRecord', () => {
   })
 
   it('maps a constraint failure to EntityConflictError', async () => {
-    const value = await seed(habit())
+    const value = await seed(makeHabit())
     const failure = new DOMException('duplicate', 'ConstraintError')
     const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
       throw failure
     })
 
     try {
-      const result = updateHabitRecord(value)
+      const result = repository.updateHabitRecord(value)
       await expect(result).rejects.toThrow(EntityConflictError)
       await expect(result).rejects.toMatchObject({
         message: `Habit ${value.id} conflicts with existing data`,
@@ -130,14 +123,14 @@ describe('addEntryRecord', () => {
       updatedAt: date(1),
     }
 
-    expect(await addEntryRecord(value)).toBeUndefined()
+    expect(await repository.addEntryRecord(value)).toBeUndefined()
     expect(await getOneEntry(value.id)).toEqual(value)
   })
 
   it('maps duplicate IDs to EntityConflictError', async () => {
-    const value = await seed(entry())
+    const value = await seed(makeEntry())
 
-    const result = addEntryRecord(value)
+    const result = repository.addEntryRecord(value)
     await expect(result).rejects.toThrow(EntityConflictError)
     await expect(result).rejects.toMatchObject({
       message: `Entry ${value.id} conflicts with existing data`,
@@ -148,37 +141,37 @@ describe('addEntryRecord', () => {
 
 describe('deleteEntryRecord', () => {
   it('deletes only the entry matching the habit and day', async () => {
-    await seed(entry({ id: 'entry-1', day: date(1) }))
-    const kept = await seed(entry({ id: 'entry-2', day: date(2) }))
-    const otherHabit = await seed(entry({ id: 'entry-3', habitId: 'habit-2', day: date(1) }))
+    await seed(makeEntry({ id: 'entry-1', day: date(1) }))
+    const kept = await seed(makeEntry({ id: 'entry-2', day: date(2) }))
+    const otherHabit = await seed(makeEntry({ id: 'entry-3', habitId: 'habit-2', day: date(1) }))
 
-    expect(await deleteEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeUndefined()
+    expect(await repository.deleteEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeUndefined()
     expect(await getAllEntries()).toEqual([kept, otherHabit])
   })
 
   it('does nothing when the entry is absent', async () => {
-    expect(await deleteEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeUndefined()
+    expect(await repository.deleteEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeUndefined()
   })
 })
 
 describe('deleteHabitRecord', () => {
   it('deletes the habit and its entries without affecting other records', async () => {
-    const deleted = await seed(habit({ id: 'habit-1' }))
-    const kept = await seed(habit({ id: 'habit-2' }))
-    await seed(entry({ id: 'entry-1', habitId: deleted.id }))
-    await seed(entry({ id: 'entry-2', habitId: deleted.id, day: date(2) }))
-    const keptEntry = await seed(entry({ id: 'entry-3', habitId: kept.id }))
+    const deleted = await seed(makeHabit({ id: 'habit-1' }))
+    const kept = await seed(makeHabit({ id: 'habit-2' }))
+    await seed(makeEntry({ id: 'entry-1', habitId: deleted.id }))
+    await seed(makeEntry({ id: 'entry-2', habitId: deleted.id, day: date(2) }))
+    const keptEntry = await seed(makeEntry({ id: 'entry-3', habitId: kept.id }))
 
-    expect(await deleteHabitRecord(deleted.id)).toBeUndefined()
+    expect(await repository.deleteHabitRecord(deleted.id)).toBeUndefined()
     expect(await getAllHabits()).toEqual([kept])
     expect(await getAllEntries()).toEqual([keptEntry])
   })
 
   it('rejects an unknown habit without changing records', async () => {
-    const value = await seed(habit())
-    const valueEntry = await seed(entry())
+    const value = await seed(makeHabit())
+    const valueEntry = await seed(makeEntry())
 
-    await expect(deleteHabitRecord('missing')).rejects.toThrow(
+    await expect(repository.deleteHabitRecord('missing')).rejects.toThrow(
       new EntityNotFoundError('Habit', 'missing'),
     )
     expect(await getAllHabits()).toEqual([value])

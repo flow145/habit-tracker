@@ -1,237 +1,257 @@
 import { v7 as uuidv7 } from 'uuid'
+import type { StoreApi } from 'zustand'
 
 import { EntityNotFoundError, type Entry, type Habit, type Schedule } from '~/shared/db'
 import { toError } from '~/shared/lib'
 
-import {
-  addEntryRecord,
-  addHabitRecord,
-  deleteEntryRecord,
-  deleteHabitRecord,
-  loadHabitData,
-  updateHabitRecord,
-} from './service'
-import { getDayKey, useHabitStore } from './store'
+import { type HabitData, type HabitRepository, repository } from './repository'
+import { getDayKey, type HabitStore, useHabitStore } from './store'
 
-let hydrationPromise: Promise<void> | null = null
-const habitQueues = new Map<string, Promise<unknown>>()
+type HabitStoreApi = Pick<StoreApi<HabitStore>, 'getState' | 'setState'>
 
-const enqueueHabitOperation = <T>(habitId: string, operation: () => Promise<T>): Promise<T> => {
-  const prev = habitQueues.get(habitId) ?? Promise.resolve()
-  const next = prev.catch(() => {}).then(operation)
-  habitQueues.set(habitId, next)
+type HabitDataState = Pick<HabitStore, 'habitIds' | 'habitsById' | 'entriesByHabitId'>
 
-  return next.finally(() => {
-    if (habitQueues.get(habitId) === next) habitQueues.delete(habitId)
-  })
-}
+export const getLoadingHabitState = (): HabitStore => ({
+  hydrationStatus: 'loading',
+  hydrationError: null,
+  habitIds: [],
+  habitsById: {},
+  entriesByHabitId: {},
+})
 
-const hydrate = async () => {
-  useHabitStore.setState({
-    hydrationStatus: 'loading',
-    hydrationError: null,
-    habitIds: [],
-    habitsById: {},
-    entriesByHabitId: {},
-  })
+export const getHydratedHabitState = ({ habits, entries }: HabitData): HabitDataState => ({
+  habitIds: habits.map(({ id }) => id),
+  habitsById: Object.fromEntries(habits.map((habit) => [habit.id, habit])),
+  entriesByHabitId: entries.reduce<Record<string, Record<string, Entry>>>((acc, entry) => {
+    acc[entry.habitId] = {
+      ...acc[entry.habitId],
+      [getDayKey(entry.day)]: entry,
+    }
+    return acc
+  }, {}),
+})
 
-  try {
-    const { habits, entries } = await loadHabitData()
-    useHabitStore.setState({
-      hydrationStatus: 'ready',
-      habitIds: habits.map(({ id }) => id),
-      habitsById: Object.fromEntries(habits.map((habit) => [habit.id, habit])),
-      entriesByHabitId: entries.reduce<Record<string, Record<string, Entry>>>((acc, entry) => {
-        acc[entry.habitId] = {
-          ...acc[entry.habitId],
-          [getDayKey(entry.day)]: entry,
-        }
-        return acc
-      }, {}),
-    })
-  } catch (error) {
-    useHabitStore.setState({
-      hydrationStatus: 'error',
-      hydrationError: toError(error),
-    })
-    throw error
+export const addHabitToStore = (state: HabitStore, habit: Habit): HabitDataState => ({
+  habitsById: { ...state.habitsById, [habit.id]: habit },
+  habitIds: [...state.habitIds, habit.id],
+  entriesByHabitId: state.entriesByHabitId,
+})
+
+export const updateHabitInStore = (state: HabitStore, habit: Habit): HabitDataState => ({
+  habitsById: { ...state.habitsById, [habit.id]: habit },
+  habitIds: state.habitIds,
+  entriesByHabitId: state.entriesByHabitId,
+})
+
+export const removeHabitFromStore = (state: HabitStore, id: string): HabitDataState => {
+  const habitsById = { ...state.habitsById }
+  delete habitsById[id]
+
+  const entriesByHabitId = { ...state.entriesByHabitId }
+  delete entriesByHabitId[id]
+
+  return {
+    habitsById,
+    habitIds: state.habitIds.filter((habitId) => habitId !== id),
+    entriesByHabitId,
   }
 }
 
-export const hydrateHabitStore = () => {
-  if (hydrationPromise) return hydrationPromise
-  hydrationPromise = hydrate()
-  hydrationPromise.catch(() => {
-    hydrationPromise = null
-  })
-  return hydrationPromise
+export const addEntryToStore = (state: HabitStore, entry: Entry): HabitDataState => ({
+  habitsById: state.habitsById,
+  habitIds: state.habitIds,
+  entriesByHabitId: {
+    ...state.entriesByHabitId,
+    [entry.habitId]: {
+      ...state.entriesByHabitId[entry.habitId],
+      [getDayKey(entry.day)]: entry,
+    },
+  },
+})
+
+export const removeEntryFromStore = (
+  state: HabitStore,
+  { habitId, day }: Pick<Entry, 'habitId' | 'day'>,
+): HabitDataState => {
+  const entriesByDay = { ...state.entriesByHabitId[habitId] }
+  delete entriesByDay[getDayKey(day)]
+
+  return {
+    habitsById: state.habitsById,
+    habitIds: state.habitIds,
+    entriesByHabitId: { ...state.entriesByHabitId, [habitId]: entriesByDay },
+  }
 }
 
-const ensureHydrated = async () => {
-  if (useHabitStore.getState().hydrationStatus !== 'ready') await hydrateHabitStore()
+export interface HabitActionDependencies {
+  store: HabitStoreApi
+  repository: HabitRepository
+  now?: () => Date
+  generateId?: () => string
 }
 
-export const addHabit = async ({
-  name,
-  description,
-  schedule,
-}: {
-  name: string
-  description?: string
-  schedule: Schedule
-}): Promise<void> => {
-  await ensureHydrated()
+export const createHabitActions = ({
+  store,
+  repository,
+  now = () => new Date(),
+  generateId = uuidv7,
+}: HabitActionDependencies) => {
+  let hydrationPromise: Promise<void> | null = null
+  const habitQueues = new Map<string, Promise<unknown>>()
 
-  const now = new Date()
-  const habit: Habit = {
-    id: uuidv7(),
-    name: name.trim(),
-    description: description?.trim() ?? '',
+  const enqueueHabitOperation = <T>(habitId: string, operation: () => Promise<T>): Promise<T> => {
+    const prev = habitQueues.get(habitId) ?? Promise.resolve()
+    const next = prev.catch(() => {}).then(operation)
+    habitQueues.set(habitId, next)
+
+    return next.finally(() => {
+      if (habitQueues.get(habitId) === next) habitQueues.delete(habitId)
+    })
+  }
+
+  const hydrate = async () => {
+    store.setState(getLoadingHabitState())
+
+    try {
+      const data = await repository.loadData()
+      store.setState({
+        hydrationStatus: 'ready',
+        hydrationError: null,
+        ...getHydratedHabitState(data),
+      })
+    } catch (error) {
+      store.setState({ hydrationStatus: 'error', hydrationError: toError(error) })
+      throw error
+    }
+  }
+
+  const hydrateHabitStore = () => {
+    if (hydrationPromise) return hydrationPromise
+
+    const pending = hydrate()
+    hydrationPromise = pending
+    void pending.catch(() => {
+      if (hydrationPromise === pending) hydrationPromise = null
+    })
+    return pending
+  }
+
+  const ensureHydrated = async () => {
+    if (store.getState().hydrationStatus !== 'ready') await hydrateHabitStore()
+  }
+
+  const addHabit = async ({
+    name,
+    description,
     schedule,
-    createdAt: now,
-    updatedAt: now,
+  }: {
+    name: string
+    description?: string
+    schedule: Schedule
+  }): Promise<void> => {
+    await ensureHydrated()
+
+    const timestamp = now()
+    const habit: Habit = {
+      id: generateId(),
+      name: name.trim(),
+      description: description?.trim() ?? '',
+      schedule,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }
+
+    await repository.addHabitRecord(habit)
+    store.setState((state) => addHabitToStore(state, habit))
   }
 
-  await addHabitRecord(habit)
+  const editHabit = async ({
+    id,
+    name,
+    description,
+    schedule,
+  }: {
+    id: string
+    name?: string
+    description?: string
+    schedule?: Schedule
+  }): Promise<void> => {
+    await ensureHydrated()
 
-  useHabitStore.setState((state) => ({
-    habitsById: { ...state.habitsById, [habit.id]: habit },
-    habitIds: [...state.habitIds, habit.id],
-  }))
-}
+    const existing = store.getState().habitsById[id]
+    if (!existing) throw new EntityNotFoundError('Habit', id)
 
-export const editHabit = async ({
-  id,
-  name,
-  description,
-  schedule,
-}: {
-  id: string
-  name?: string
-  description?: string
-  schedule?: Schedule
-}): Promise<void> => {
-  await ensureHydrated()
+    const habit: Habit = {
+      ...existing,
+      name: name === undefined ? existing.name : name.trim(),
+      description: description === undefined ? existing.description : description.trim(),
+      schedule: schedule ?? existing.schedule,
+      updatedAt: now(),
+    }
 
-  const existing = useHabitStore.getState().habitsById[id]
-  if (!existing) throw new EntityNotFoundError('Habit', id)
-
-  const edited: Habit = {
-    ...existing,
-    name: name === undefined ? existing.name : name.trim(),
-    description: description === undefined ? existing.description : description.trim(),
-    schedule: schedule ?? existing.schedule,
-    updatedAt: new Date(),
+    await repository.updateHabitRecord(habit)
+    store.setState((state) => updateHabitInStore(state, habit))
   }
 
-  await updateHabitRecord(edited)
+  const toggleDay = async ({ habitId, day }: { habitId: string; day: Date }): Promise<void> => {
+    await ensureHydrated()
 
-  useHabitStore.setState((state) => ({
-    habitsById: { ...state.habitsById, [edited.id]: edited },
-  }))
-}
+    const state = store.getState()
+    if (!state.habitsById[habitId]) throw new EntityNotFoundError('Habit', habitId)
 
-export const toggleDay = async ({
-  habitId,
-  day,
-}: {
-  habitId: string
-  day: Date
-}): Promise<void> => {
-  await ensureHydrated()
+    const existingEntry = state.entriesByHabitId[habitId]?.[getDayKey(day)]
+    if (existingEntry) {
+      store.setState((current) => removeEntryFromStore(current, existingEntry))
 
-  const { habitsById, entriesByHabitId } = useHabitStore.getState()
-  if (!habitsById[habitId]) throw new EntityNotFoundError('Habit', habitId)
+      await enqueueHabitOperation(habitId, async () => {
+        try {
+          await repository.deleteEntryRecord({ habitId, day })
+        } catch (error) {
+          store.setState((current) =>
+            current.entriesByHabitId[habitId]?.[getDayKey(day)]
+              ? {}
+              : addEntryToStore(current, existingEntry),
+          )
+          throw error
+        }
+      })
+      return
+    }
 
-  const entriesByDay = entriesByHabitId[habitId] ?? {}
-  const dayKey = getDayKey(day)
-  const existingEntry = entriesByDay[dayKey]
-
-  if (existingEntry) {
-    const updatedEntriesByDay = { ...entriesByDay }
-    delete updatedEntriesByDay[dayKey]
-
-    useHabitStore.setState({
-      entriesByHabitId: { ...entriesByHabitId, [habitId]: updatedEntriesByDay },
-    })
-
-    await enqueueHabitOperation(habitId, async () => {
-      try {
-        await deleteEntryRecord({ habitId, day })
-      } catch (error) {
-        useHabitStore.setState((state) =>
-          state.entriesByHabitId[habitId]?.[dayKey]
-            ? state
-            : {
-                entriesByHabitId: {
-                  ...state.entriesByHabitId,
-                  [habitId]: {
-                    ...state.entriesByHabitId[habitId],
-                    [dayKey]: existingEntry,
-                  },
-                },
-              },
-        )
-
-        throw error
-      }
-    })
-  } else {
-    const now = new Date()
+    const timestamp = now()
     const entry: Entry = {
-      id: uuidv7(),
+      id: generateId(),
       habitId,
       status: 'complete',
       day,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: timestamp,
+      updatedAt: timestamp,
     }
 
-    useHabitStore.setState({
-      entriesByHabitId: {
-        ...entriesByHabitId,
-        [habitId]: { ...entriesByDay, [dayKey]: entry },
-      },
-    })
+    store.setState((current) => addEntryToStore(current, entry))
 
     await enqueueHabitOperation(habitId, async () => {
       try {
-        await addEntryRecord(entry)
+        await repository.addEntryRecord(entry)
       } catch (error) {
-        useHabitStore.setState((state) => {
-          const entriesByDay = state.entriesByHabitId[habitId]
-          if (entriesByDay?.[dayKey] !== entry) return state
-
-          const updatedEntriesByDay = { ...entriesByDay }
-          delete updatedEntriesByDay[dayKey]
-
-          return {
-            entriesByHabitId: { ...state.entriesByHabitId, [habitId]: updatedEntriesByDay },
-          }
-        })
-
+        store.setState((current) =>
+          current.entriesByHabitId[habitId]?.[getDayKey(day)] === entry
+            ? removeEntryFromStore(current, entry)
+            : {},
+        )
         throw error
       }
     })
   }
+
+  const deleteHabit = async (id: string): Promise<void> => {
+    await ensureHydrated()
+    await enqueueHabitOperation(id, () => repository.deleteHabitRecord(id))
+    store.setState((state) => removeHabitFromStore(state, id))
+  }
+
+  return { hydrateHabitStore, addHabit, editHabit, toggleDay, deleteHabit }
 }
 
-export const deleteHabit = async (id: string): Promise<void> => {
-  await ensureHydrated()
-
-  await enqueueHabitOperation(id, () => deleteHabitRecord(id))
-
-  useHabitStore.setState((state) => {
-    const habitsById = { ...state.habitsById }
-    delete habitsById[id]
-
-    const entriesByHabitId = { ...state.entriesByHabitId }
-    delete entriesByHabitId[id]
-
-    return {
-      habitsById,
-      habitIds: state.habitIds.filter((habitId) => habitId !== id),
-      entriesByHabitId,
-    }
-  })
-}
+export const { hydrateHabitStore, addHabit, editHabit, toggleDay, deleteHabit } =
+  createHabitActions({ store: useHabitStore, repository })
