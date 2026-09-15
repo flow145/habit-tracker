@@ -1,15 +1,14 @@
 import { clsx } from 'clsx'
 import { ChevronLeft, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useRoute } from 'wouter'
 
-import { deleteHabit, editHabit, getHabit } from '~/features/habit'
+import { deleteHabit, editHabit, useHabitStore } from '~/features/habit'
 import { AlertDialog } from '~/shared/components/AlertDialog'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { Path } from '~/shared/constants'
-import type { Habit } from '~/shared/db'
 import { usePageTitle } from '~/shared/hooks'
 
 import { HabitForm, type HabitFormValues } from '../habit-form'
@@ -21,37 +20,14 @@ export const EditHabit = () => {
   const { t } = useTranslation()
   const [, navigate] = useLocation()
   const [, params] = useRoute(`${Path.EditHabit}/:id`)
-  const [isFetching, setIsFetching] = useState(true)
-  const [habit, setHabit] = useState<Habit | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-
+  const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
   const habitId = params?.id
-  const isBusy = isSubmitting || isDeleting
+  const habit = useHabitStore((state) => (habitId ? (state.habitsById[habitId] ?? null) : null))
 
   usePageTitle(t('EditHabit.title'))
-
-  useEffect(() => {
-    if (!habitId) return
-
-    let isCurrent = true
-    setIsFetching(true)
-
-    getHabit(habitId)
-      .then((result) => {
-        if (!isCurrent) return
-        setHabit(result)
-      })
-      .finally(() => {
-        if (!isCurrent) return
-        setIsFetching(false)
-      })
-
-    return () => {
-      isCurrent = false
-    }
-  }, [habitId])
 
   const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
     if (!habitId) return
@@ -59,15 +35,11 @@ export const EditHabit = () => {
     setIsSubmitting(true)
 
     try {
-      await editHabit({
-        id: habitId,
-        name: name.trim(),
-        description: description.trim(),
-        schedule,
-      })
+      await editHabit({ id: habitId, name, description, schedule })
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
+      alert(t('shared.changeFailed'))
     } finally {
       setIsSubmitting(false)
     }
@@ -83,6 +55,7 @@ export const EditHabit = () => {
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
+      alert(t('shared.changeFailed'))
     } finally {
       setIsDeleting(false)
     }
@@ -103,29 +76,29 @@ export const EditHabit = () => {
     />
   )
 
-  if (!isFetching && !habit) {
+  if (!habit)
     return (
       <>
         {header}
-        <div className={styles.empty}>
+        <main className={styles.empty}>
           <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
           <Button as='Link' to={Path.Home}>
             {t('EditHabit.empty.button')}
           </Button>
-        </div>
+        </main>
       </>
     )
-  }
 
   return (
     <>
       {header}
       <main className={styles.main}>
-        {!isFetching && habit && (
+        {hydrationStatus === 'ready' && (
           <>
             <HabitForm
               initialValues={habit}
               onSubmit={handleSubmit}
+              disabled={isSubmitting || isDeleting}
               additionalAction={
                 <AlertDialog.Trigger handle={deletionDialog}>
                   <Button
@@ -133,14 +106,13 @@ export const EditHabit = () => {
                     variant='ghost'
                     color='danger'
                     icon={<Trash2 />}
-                    disabled={isBusy}
                     aria-label={t('EditHabit.deleteLabel')}
+                    disabled={isSubmitting || isDeleting}
                   >
                     {t('shared.delete')}
                   </Button>
                 </AlertDialog.Trigger>
               }
-              disabled={isBusy}
             />
             <AlertDialog
               open={isDeleteDialogOpen}
@@ -156,7 +128,7 @@ export const EditHabit = () => {
               </AlertDialog.Description>
               <div className={styles.dialogActions}>
                 <AlertDialog.Close>
-                  <Button type='button' variant='ghost' disabled={isDeleting}>
+                  <Button type='button' variant='ghost'>
                     {t('EditHabit.deleteDialog.cancel')}
                   </Button>
                 </AlertDialog.Close>

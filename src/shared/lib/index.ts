@@ -3,7 +3,7 @@ export const isErrorNamed = (error: unknown, name: string) => {
   return 'name' in error && error.name === name
 }
 
-export function groupBy<T, K>(items: T[], getKey: (item: T) => K): Map<K, T[]> {
+export const groupBy = <T, K>(items: T[], getKey: (item: T) => K): Map<K, T[]> => {
   const groups = new Map<K, T[]>()
 
   for (const item of items) {
@@ -16,3 +16,8 @@ export function groupBy<T, K>(items: T[], getKey: (item: T) => K): Map<K, T[]> {
 
   return groups
 }
+
+export const toError = (value: unknown): Error =>
+  value instanceof Error
+    ? value
+    : new Error('Non-Error value was thrown, see cause', { cause: value })

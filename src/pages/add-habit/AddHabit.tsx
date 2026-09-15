@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'wouter'
 
-import { addHabit } from '~/features/habit'
+import { addHabit, useHabitStore } from '~/features/habit'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { Path } from '~/shared/constants'
@@ -16,6 +16,7 @@ export const AddHabit = () => {
   const { t } = useTranslation()
   const [, navigate] = useLocation()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
 
   usePageTitle(t('AddHabit.title'))
 
@@ -23,14 +24,11 @@ export const AddHabit = () => {
     setIsSubmitting(true)
 
     try {
-      await addHabit({
-        name: name.trim(),
-        description: description.trim(),
-        schedule,
-      })
+      await addHabit({ name, description, schedule })
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
+      alert(t('shared.changeFailed'))
     } finally {
       setIsSubmitting(false)
     }
@@ -51,7 +49,9 @@ export const AddHabit = () => {
         }
       />
       <main className={styles.main}>
-        <HabitForm onSubmit={handleSubmit} disabled={isSubmitting} />
+        {hydrationStatus === 'ready' && (
+          <HabitForm onSubmit={handleSubmit} disabled={isSubmitting} />
+        )}
       </main>
     </>
   )

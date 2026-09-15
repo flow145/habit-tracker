@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest'
 
 import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
 import { date } from '~/shared/tests'
-import { buildComputedEntries, getWindowEnd, getWindowStart } from './computed-entries'
+import {
+  buildComputedEntries,
+  getNextStatus,
+  getWindowEnd,
+  getWindowStart,
+} from './computed-entries'
 
 type TestEntry = Pick<Entry, 'day' | 'status'>
 
@@ -23,6 +28,17 @@ const everyMonth: Schedule = { frequency: 1, interval: 1, intervalUnit: 'months'
 export const entry = (day: Date, status: ExplicitStatus = 'complete'): TestEntry => ({
   day,
   status,
+})
+
+describe('getNextStatus', () => {
+  it('cycles complete to incomplete', () => {
+    expect(getNextStatus('complete')).toBe('incomplete')
+  })
+
+  it('cycles every other status to complete', () => {
+    expect(getNextStatus('incomplete')).toBe('complete')
+    expect(getNextStatus('not-required')).toBe('complete')
+  })
 })
 
 describe('getWindowEnd', () => {

@@ -1,5 +1,6 @@
 import { Redirect, Route, Router, Switch } from 'wouter'
 
+import { HabitStoreSynchronizer } from '~/features/habit'
 import { AddHabit } from '~/pages/add-habit'
 import { EditHabit } from '~/pages/edit-habit'
 import { Home } from '~/pages/home'
@@ -10,6 +11,7 @@ import { ThemeSynchronizer } from '../theme'
 export const App = () => {
   return (
     <Router>
+      <HabitStoreSynchronizer />
       <ThemeSynchronizer />
       <Switch>
         <Route path={Path.Home} component={Home} />
