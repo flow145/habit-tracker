@@ -18,7 +18,7 @@ i18n.use(initReactI18next).init({
     escapeValue: false, // not needed for react as it escapes by default
   },
   parseMissingKeyHandler: (key) => `[[${key}]]`,
-  debug: import.meta.env.DEV,
+  debug: import.meta.env.MODE === 'development',
 })
 
 export { i18n }

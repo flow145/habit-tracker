@@ -100,5 +100,3 @@ export const deleteHabitRecord = async (id: string): Promise<void> => {
     tx.done,
   ])
 }
-
-export { getNextStatus } from './computed-entries'

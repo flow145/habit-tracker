@@ -54,17 +54,21 @@ const hydrate = async () => {
       hydrationStatus: 'error',
       hydrationError: toError(error),
     })
+    throw error
   }
-}
-
-const ensureHydrated = async () => {
-  if (hydrationPromise) await hydrationPromise
 }
 
 export const hydrateHabitStore = () => {
   if (hydrationPromise) return hydrationPromise
   hydrationPromise = hydrate()
+  hydrationPromise.catch(() => {
+    hydrationPromise = null
+  })
   return hydrationPromise
+}
+
+const ensureHydrated = async () => {
+  if (useHabitStore.getState().hydrationStatus !== 'ready') await hydrateHabitStore()
 }
 
 export const addHabit = async ({
@@ -88,12 +92,12 @@ export const addHabit = async ({
     updatedAt: now,
   }
 
+  await addHabitRecord(habit)
+
   useHabitStore.setState((state) => ({
     habitsById: { ...state.habitsById, [habit.id]: habit },
     habitIds: [...state.habitIds, habit.id],
   }))
-
-  await addHabitRecord(habit)
 }
 
 export const editHabit = async ({
@@ -120,11 +124,11 @@ export const editHabit = async ({
     updatedAt: new Date(),
   }
 
+  await updateHabitRecord(edited)
+
   useHabitStore.setState((state) => ({
     habitsById: { ...state.habitsById, [edited.id]: edited },
   }))
-
-  await updateHabitRecord(edited)
 }
 
 export const toggleDay = async ({
@@ -136,7 +140,9 @@ export const toggleDay = async ({
 }): Promise<void> => {
   await ensureHydrated()
 
-  const { entriesByHabitId } = useHabitStore.getState()
+  const { habitsById, entriesByHabitId } = useHabitStore.getState()
+  if (!habitsById[habitId]) throw new EntityNotFoundError('Habit', habitId)
+
   const entriesByDay = entriesByHabitId[habitId] ?? {}
   const dayKey = getDayKey(day)
   const existingEntry = entriesByDay[dayKey]
@@ -213,6 +219,8 @@ export const toggleDay = async ({
 export const deleteHabit = async (id: string): Promise<void> => {
   await ensureHydrated()
 
+  await enqueueHabitOperation(id, () => deleteHabitRecord(id))
+
   useHabitStore.setState((state) => {
     const habitsById = { ...state.habitsById }
     delete habitsById[id]
@@ -226,6 +234,4 @@ export const deleteHabit = async (id: string): Promise<void> => {
       entriesByHabitId,
     }
   })
-
-  await deleteHabitRecord(id)
 }
