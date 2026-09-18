@@ -30,6 +30,9 @@ export const entry = (day: Date, status: ExplicitStatus = 'complete'): TestEntry
   status,
 })
 
+const entriesByDay = (entries: readonly TestEntry[]) =>
+  Object.fromEntries(entries.map((entry) => [entry.day.toISOString(), entry]))
+
 describe('getNextStatus', () => {
   it('cycles complete to incomplete', () => {
     expect(getNextStatus('complete')).toBe('incomplete')
@@ -106,7 +109,7 @@ describe('buildComputedEntries', () => {
       buildComputedEntries({
         start: date(3),
         end: date(2),
-        entries: [],
+        entries: {},
         schedule: everyDay,
       }),
     ).toEqual([])
@@ -145,7 +148,12 @@ describe('buildComputedEntries', () => {
     entries,
     expected,
   }) => {
-    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
+    const computedEntries = buildComputedEntries({
+      start,
+      end,
+      entries: entriesByDay(entries),
+      schedule,
+    })
 
     expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
     expect(computedEntries[0]?.day).toEqual(expected.firstDay)
@@ -306,7 +314,12 @@ describe('buildComputedEntries', () => {
     entries,
     expected,
   }) => {
-    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
+    const computedEntries = buildComputedEntries({
+      start,
+      end,
+      entries: entriesByDay(entries),
+      schedule,
+    })
 
     expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
     expect(computedEntries[0]?.day).toEqual(expected.firstDay)
@@ -477,7 +490,12 @@ describe('buildComputedEntries', () => {
     entries,
     expected,
   }) => {
-    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
+    const computedEntries = buildComputedEntries({
+      start,
+      end,
+      entries: entriesByDay(entries),
+      schedule,
+    })
 
     expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
     expect(computedEntries[0]?.day).toEqual(expected.firstDay)
@@ -569,7 +587,12 @@ describe('buildComputedEntries', () => {
     entries,
     expected,
   }) => {
-    const computedEntries = buildComputedEntries({ start, end, entries, schedule })
+    const computedEntries = buildComputedEntries({
+      start,
+      end,
+      entries: entriesByDay(entries),
+      schedule,
+    })
 
     expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
     expect(computedEntries[0]?.day).toEqual(expected.firstDay)
@@ -580,7 +603,7 @@ describe('buildComputedEntries', () => {
     const computedEntries = buildComputedEntries({
       start: date(2),
       end: date(4),
-      entries: [entry(date(1))],
+      entries: entriesByDay([entry(date(1))]),
       schedule: every3Days,
     })
 
@@ -596,7 +619,7 @@ describe('buildComputedEntries', () => {
     const computedEntries = buildComputedEntries({
       start: date(4),
       end: date(6),
-      entries: [entry(date(1))],
+      entries: entriesByDay([entry(date(1))]),
       schedule: every3Days,
     })
 
@@ -607,7 +630,7 @@ describe('buildComputedEntries', () => {
     const computedEntries = buildComputedEntries({
       start: date(1),
       end: date(3),
-      entries: [entry(date(4))],
+      entries: entriesByDay([entry(date(4))]),
       schedule: every3Days,
     })
 

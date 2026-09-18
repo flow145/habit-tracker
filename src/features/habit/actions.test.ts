@@ -1,21 +1,12 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createStore } from 'zustand/vanilla'
 
-import { EntityNotFoundError, type Entry, type Habit } from '~/shared/db'
+import type { Entry } from '~/shared/db'
 import { date, makeEntry, makeHabit } from '~/shared/tests'
 
-import {
-  addEntryToStore,
-  addHabitToStore,
-  createHabitActions,
-  getHydratedHabitState,
-  getLoadingHabitState,
-  removeEntryFromStore,
-  removeHabitFromStore,
-  updateHabitInStore,
-} from './actions'
+import { createHabitActions } from './actions'
 import type { HabitData, HabitRepository } from './repository'
-import type { HabitStore } from './store'
+import { createHabitState, type HabitState } from './store'
 
 const deferred = <T>() => {
   let resolve!: (value: T | PromiseLike<T>) => void
@@ -24,316 +15,251 @@ const deferred = <T>() => {
     resolve = resolvePromise
     reject = rejectPromise
   })
-
-  return { promise, resolve, reject }
+  return { promise, reject, resolve }
 }
 
-const emptyStore = (): HabitStore => ({
-  hydrationStatus: 'idle',
-  hydrationError: null,
-  habitIds: [],
-  habitsById: {},
-  entriesByHabitId: {},
-})
+const settle = async () => {
+  await Promise.resolve()
+  await Promise.resolve()
+}
 
-const readyStore = (habits: Habit[] = [], entries: Entry[] = []): HabitStore => ({
-  hydrationStatus: 'ready',
-  hydrationError: null,
-  ...getHydratedHabitState({ habits, entries }),
-})
-
-const createRepositoryMock = (data: HabitData = { habits: [], entries: [] }) =>
+const mockRepository = (data: HabitData = { habits: [], entries: [] }) =>
   ({
     loadData: vi.fn(async () => data),
     addHabitRecord: vi.fn(async () => {}),
     updateHabitRecord: vi.fn(async () => {}),
+    getEntryRecord: vi.fn(async (): Promise<Entry | null> => null),
     addEntryRecord: vi.fn(async () => {}),
     deleteEntryRecord: vi.fn(async () => {}),
     deleteHabitRecord: vi.fn(async () => {}),
   }) satisfies HabitRepository
 
 const createTestActions = ({
-  state = emptyStore(),
-  repository = createRepositoryMock(),
+  repository = mockRepository(),
+  state = createHabitState(),
 }: {
-  state?: HabitStore
   repository?: HabitRepository
+  state?: HabitState
 } = {}) => {
-  const store = createStore<HabitStore>()(() => state)
-  const actions = createHabitActions({
-    store,
+  const store = createStore<HabitState>()(() => state)
+  return {
+    actions: createHabitActions({
+      store,
+      repository,
+      now: () => date(3),
+      generateId: () => 'generated-id',
+    }),
     repository,
-    now: () => date(3, 1, 10),
-    generateId: () => 'generated-id',
-  })
-  return { store, actions }
+    store,
+  }
 }
 
-const waitForActions = async () => {
-  await Promise.resolve()
-  await Promise.resolve()
-}
-
-describe('store mutations', () => {
-  it('normalizes hydrated data by habit and day', () => {
-    const firstHabit = makeHabit({ id: 'habit-1' })
-    const secondHabit = makeHabit({ id: 'habit-2' })
-    const firstEntry = makeEntry({ habitId: firstHabit.id })
-    const secondEntry = makeEntry({ id: 'entry-2', habitId: secondHabit.id, day: date(2) })
-
-    expect(
-      getHydratedHabitState({
-        habits: [firstHabit, secondHabit],
-        entries: [firstEntry, secondEntry],
-      }),
-    ).toEqual({
-      habitIds: [firstHabit.id, secondHabit.id],
-      habitsById: { [firstHabit.id]: firstHabit, [secondHabit.id]: secondHabit },
-      entriesByHabitId: {
-        [firstHabit.id]: { [firstEntry.day.toISOString()]: firstEntry },
-        [secondHabit.id]: { [secondEntry.day.toISOString()]: secondEntry },
-      },
-    })
-  })
-
-  it('adds, updates, and removes habits without changing unrelated entries', () => {
-    const firstHabit = makeHabit({ id: 'habit-1' })
-    const secondHabit = makeHabit({ id: 'habit-2', name: 'Exercise' })
-    const firstEntry = makeEntry({ habitId: firstHabit.id })
-    const initial = readyStore([firstHabit], [firstEntry])
-
-    const added = addHabitToStore(initial, secondHabit)
-    const updated = updateHabitInStore({ ...initial, ...added }, { ...secondHabit, name: 'Move' })
-    const removed = removeHabitFromStore({ ...initial, ...updated }, firstHabit.id)
-
-    expect(added.habitIds).toEqual([firstHabit.id, secondHabit.id])
-    expect(updated.habitsById[secondHabit.id]?.name).toBe('Move')
-    expect(removed).toEqual({
-      habitIds: [secondHabit.id],
-      habitsById: { [secondHabit.id]: { ...secondHabit, name: 'Move' } },
-      entriesByHabitId: {},
-    })
-  })
-
-  it('adds and removes an entry by its habit and day', () => {
-    const habit = makeHabit()
-    const entry = makeEntry({ habitId: habit.id, day: date(2) })
-    const initial = readyStore([habit])
-
-    const added = addEntryToStore(initial, entry)
-    const removed = removeEntryFromStore({ ...initial, ...added }, entry)
-
-    expect(added.entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toEqual(entry)
-    expect(removed.entriesByHabitId[habit.id]).toEqual({})
-  })
-})
-
-describe('habit actions', () => {
-  it('hydrate normalized records once for concurrent callers', async () => {
-    const firstHabit = makeHabit({ id: 'habit-1' })
-    const secondHabit = makeHabit({ id: 'habit-2' })
+describe('Habit actions', () => {
+  it('hydrates one ordered, internally consistent dataset for concurrent callers', async () => {
+    const first = makeHabit({ id: 'first', createdAt: date(2) })
+    const second = makeHabit({ id: 'second', createdAt: date(1) })
+    const entry = makeEntry({ habitId: first.id, day: date(2) })
+    const orphan = makeEntry({ id: 'orphan', habitId: 'missing', day: date(3) })
     const loading = deferred<HabitData>()
-    const repository = createRepositoryMock()
+    const repository = mockRepository()
     repository.loadData.mockReturnValueOnce(loading.promise)
-    const { store, actions } = createTestActions({ repository })
+    const { actions, store } = createTestActions({ repository })
 
     const firstHydration = actions.hydrateHabitStore()
     const secondHydration = actions.hydrateHabitStore()
 
     expect(repository.loadData).toHaveBeenCalledTimes(1)
-    expect(store.getState()).toEqual(getLoadingHabitState())
-
-    loading.resolve({ habits: [firstHabit, secondHabit], entries: [] })
+    expect(store.getState().hydrationStatus).toBe('loading')
+    loading.resolve({ habits: [first, second], entries: [entry, orphan] })
     await Promise.all([firstHydration, secondHydration])
+
     expect(store.getState()).toMatchObject({
       hydrationStatus: 'ready',
-      habitIds: [firstHabit.id, secondHabit.id],
+      habits: [first, second],
+      habitsById: { first, second },
+      entriesByHabitId: {
+        first: { [entry.day.toISOString()]: entry },
+        second: {},
+      },
     })
+    expect(store.getState().entriesByHabitId.missing).toBeUndefined()
   })
 
-  it('record a hydration failure and retry with the same action instance', async () => {
+  it('keeps a failed hydration observable and lets a later action retry it', async () => {
     const failure = new Error('IndexedDB unavailable')
-    const repository = createRepositoryMock()
-    repository.loadData.mockRejectedValueOnce(failure).mockResolvedValueOnce({
-      habits: [makeHabit()],
-      entries: [],
-    })
-    const { store, actions } = createTestActions({ repository })
+    const habit = makeHabit()
+    const repository = mockRepository()
+    repository.loadData
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValueOnce({ habits: [habit], entries: [] })
+    const { actions, store } = createTestActions({ repository })
 
     await expect(actions.hydrateHabitStore()).rejects.toBe(failure)
     expect(store.getState()).toMatchObject({ hydrationStatus: 'error', hydrationError: failure })
 
-    await actions.hydrateHabitStore()
+    await actions.editHabit({ id: habit.id, name: 'Exercise' })
     expect(repository.loadData).toHaveBeenCalledTimes(2)
-    expect(store.getState().hydrationStatus).toBe('ready')
+    expect(store.getState().habitsById[habit.id]).toMatchObject({ name: 'Exercise' })
   })
 
-  it('persist form mutations before changing the store', async () => {
-    const persisted = deferred<void>()
-    const repository = createRepositoryMock()
-    repository.addHabitRecord.mockReturnValueOnce(persisted.promise)
-    const { store, actions } = createTestActions({ repository, state: readyStore() })
+  it('adds a Habit and its empty Entry record only after persistence succeeds', async () => {
+    const saved = deferred<void>()
+    const repository = mockRepository({ habits: [], entries: [] })
+    repository.addHabitRecord.mockReturnValueOnce(saved.promise)
+    const { actions, store } = createTestActions({ repository })
 
-    const result = actions.addHabit({
+    const added = actions.addHabit({
       name: '  Exercise  ',
       description: '  Daily  ',
       schedule: makeHabit().schedule,
     })
-    await waitForActions()
+    await settle()
 
     expect(repository.addHabitRecord).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'generated-id', name: 'Exercise', description: 'Daily' }),
     )
-    expect(store.getState().habitIds).toEqual([])
+    expect(store.getState().habits).toEqual([])
+    saved.resolve()
+    await added
 
-    persisted.resolve()
-    await result
-    expect(store.getState().habitIds).toEqual(['generated-id'])
-  })
-
-  it('keep form state unchanged when persistence fails', async () => {
-    const habit = makeHabit()
-    const repository = createRepositoryMock()
-    repository.updateHabitRecord.mockRejectedValueOnce(new Error('write failed'))
-    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
-
-    await expect(actions.editHabit({ id: habit.id, name: 'Exercise' })).rejects.toThrow(
-      'write failed',
-    )
-    expect(store.getState().habitsById[habit.id]).toEqual(habit)
-  })
-
-  it('edit a habit only after persistence succeeds', async () => {
-    const habit = makeHabit()
-    const persisted = deferred<void>()
-    const repository = createRepositoryMock()
-    repository.updateHabitRecord.mockReturnValueOnce(persisted.promise)
-    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
-
-    const result = actions.editHabit({ id: habit.id, name: '  Exercise  ' })
-    await waitForActions()
-
-    expect(repository.updateHabitRecord).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Exercise' }),
-    )
-    expect(store.getState().habitsById[habit.id]).toEqual(habit)
-
-    persisted.resolve()
-    await result
-    expect(store.getState().habitsById[habit.id]).toEqual(
-      expect.objectContaining({ name: 'Exercise' }),
-    )
-  })
-
-  it('keep a habit in the store when deletion fails', async () => {
-    const habit = makeHabit()
-    const repository = createRepositoryMock()
-    repository.deleteHabitRecord.mockRejectedValueOnce(new Error('write failed'))
-    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
-
-    await expect(actions.deleteHabit(habit.id)).rejects.toThrow('write failed')
-    expect(store.getState().habitsById[habit.id]).toEqual(habit)
-  })
-
-  it('apply an optimistic toggle and roll it back when persistence fails', async () => {
-    const habit = makeHabit()
-    const persisted = deferred<void>()
-    const repository = createRepositoryMock()
-    repository.addEntryRecord.mockReturnValueOnce(persisted.promise)
-    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
-
-    const result = actions.toggleDay({ habitId: habit.id, day: date(2) })
-    await waitForActions()
-    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toEqual(
-      expect.objectContaining({ habitId: habit.id }),
-    )
-
-    persisted.reject(new Error('write failed'))
-    await expect(result).rejects.toThrow('write failed')
-    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toBeUndefined()
-  })
-
-  it('restore an optimistically removed entry when persistence fails', async () => {
-    const habit = makeHabit()
-    const entry = makeEntry({ habitId: habit.id })
-    const persisted = deferred<void>()
-    const repository = createRepositoryMock()
-    repository.deleteEntryRecord.mockReturnValueOnce(persisted.promise)
-    const { store, actions } = createTestActions({
-      repository,
-      state: readyStore([habit], [entry]),
+    expect(store.getState()).toMatchObject({
+      habits: [expect.objectContaining({ id: 'generated-id' })],
+      entriesByHabitId: { 'generated-id': {} },
     })
-
-    const result = actions.toggleDay({ habitId: habit.id, day: entry.day })
-    await waitForActions()
-    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toBeUndefined()
-
-    persisted.reject(new Error('write failed'))
-    await expect(result).rejects.toThrow('write failed')
-    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toEqual(entry)
   })
 
-  it('serialize rapid toggles for the same habit', async () => {
+  it('keeps edits pessimistic and replaces the existing ordered Habit position on success', async () => {
+    const first = makeHabit({ id: 'first' })
+    const second = makeHabit({ id: 'second' })
+    const saved = deferred<void>()
+    const repository = mockRepository({ habits: [first, second], entries: [] })
+    repository.updateHabitRecord.mockReturnValueOnce(saved.promise)
+    const { actions, store } = createTestActions({ repository })
+
+    const edited = actions.editHabit({ id: first.id, name: 'Exercise' })
+    await settle()
+    expect(store.getState().habits).toEqual([first, second])
+    saved.resolve()
+    await edited
+
+    expect(store.getState().habits).toEqual([expect.objectContaining({ name: 'Exercise' }), second])
+  })
+
+  it('optimistically toggles a Day and rolls it back when persistence fails', async () => {
     const habit = makeHabit()
-    const added = deferred<void>()
-    const deleted = deferred<void>()
-    const repository = createRepositoryMock()
-    repository.addEntryRecord.mockReturnValueOnce(added.promise)
-    repository.deleteEntryRecord.mockReturnValueOnce(deleted.promise)
-    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
+    const failed = deferred<void>()
+    const repository = mockRepository({ habits: [habit], entries: [] })
+    repository.addEntryRecord.mockReturnValueOnce(failed.promise)
+    const { actions, store } = createTestActions({ repository })
+    await actions.hydrateHabitStore()
 
-    const firstToggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
-    await waitForActions()
-    const secondToggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
-    await waitForActions()
-
-    expect(repository.deleteEntryRecord).not.toHaveBeenCalled()
-    added.resolve()
-    await firstToggle
-    await waitForActions()
-    expect(repository.deleteEntryRecord).toHaveBeenCalledWith({
+    const toggled = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    await settle()
+    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toMatchObject({
       habitId: habit.id,
-      day: date(2),
     })
 
-    deleted.resolve()
-    await secondToggle
-    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toBeUndefined()
+    failed.reject(new Error('write failed'))
+    await expect(toggled).rejects.toThrow('write failed')
+    expect(store.getState().entriesByHabitId[habit.id]).toEqual({})
   })
 
-  it('serialize a deletion behind an earlier toggle for the same habit', async () => {
+  it('preserves newer toggle intent when an older persistence operation fails', async () => {
+    const habit = makeHabit()
+    const failed = deferred<void>()
+    const repository = mockRepository({ habits: [habit], entries: [] })
+    repository.addEntryRecord.mockReturnValueOnce(failed.promise)
+    const { actions, store } = createTestActions({ repository })
+    await actions.hydrateHabitStore()
+
+    const first = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    await settle()
+    const second = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    await settle()
+    expect(store.getState().entriesByHabitId[habit.id]).toEqual({})
+
+    failed.reject(new Error('add failed'))
+    await expect(first).rejects.toThrow('add failed')
+    await second
+    expect(repository.deleteEntryRecord).not.toHaveBeenCalled()
+    expect(store.getState().entriesByHabitId[habit.id]).toEqual({})
+  })
+
+  it('uses the persisted Entry after a failed removal instead of adding a duplicate', async () => {
+    const habit = makeHabit()
+    const entry = makeEntry({ habitId: habit.id, day: date(2) })
+    const failedDeletion = deferred<void>()
+    const repository = mockRepository({ habits: [habit], entries: [entry] })
+    repository.getEntryRecord.mockResolvedValue(entry)
+    repository.deleteEntryRecord.mockReturnValueOnce(failedDeletion.promise)
+    const { actions, store } = createTestActions({ repository })
+    await actions.hydrateHabitStore()
+
+    const removal = actions.toggleDay({ habitId: habit.id, day: entry.day })
+    await settle()
+    const completion = actions.toggleDay({ habitId: habit.id, day: entry.day })
+    await settle()
+
+    failedDeletion.reject(new Error('delete failed'))
+    await expect(removal).rejects.toThrow('delete failed')
+    await completion
+
+    expect(repository.getEntryRecord).toHaveBeenCalledTimes(2)
+    expect(repository.addEntryRecord).not.toHaveBeenCalled()
+    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toBeDefined()
+  })
+
+  it('serializes mutations for one Habit while allowing another Habit to persist independently', async () => {
+    const first = makeHabit({ id: 'first' })
+    const second = makeHabit({ id: 'second' })
+    const firstSave = deferred<void>()
+    const secondSave = deferred<void>()
+    const repository = mockRepository({ habits: [first, second], entries: [] })
+    repository.updateHabitRecord
+      .mockReturnValueOnce(firstSave.promise)
+      .mockReturnValueOnce(secondSave.promise)
+    const { actions } = createTestActions({ repository })
+    await actions.hydrateHabitStore()
+
+    const firstEdit = actions.editHabit({ id: first.id, name: 'First edit' })
+    const firstToggle = actions.toggleDay({ habitId: first.id, day: date(2) })
+    const secondEdit = actions.editHabit({ id: second.id, name: 'Second edit' })
+    await settle()
+
+    expect(repository.updateHabitRecord).toHaveBeenCalledTimes(2)
+    expect(repository.addEntryRecord).not.toHaveBeenCalled()
+    secondSave.resolve()
+    await secondEdit
+    firstSave.resolve()
+    await firstEdit
+    await firstToggle
+    expect(repository.addEntryRecord).toHaveBeenCalledTimes(1)
+  })
+
+  it('serializes deletion behind earlier mutations and permits retry after failure', async () => {
     const habit = makeHabit()
     const added = deferred<void>()
-    const deleted = deferred<void>()
-    const repository = createRepositoryMock()
+    const failed = deferred<void>()
+    const repository = mockRepository({ habits: [habit], entries: [] })
     repository.addEntryRecord.mockReturnValueOnce(added.promise)
-    repository.deleteHabitRecord.mockReturnValueOnce(deleted.promise)
-    const { store, actions } = createTestActions({ repository, state: readyStore([habit]) })
+    repository.deleteHabitRecord.mockReturnValueOnce(failed.promise)
+    const { actions, store } = createTestActions({ repository })
+    await actions.hydrateHabitStore()
 
     const toggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
-    await waitForActions()
+    await settle()
     const deletion = actions.deleteHabit(habit.id)
-    await waitForActions()
-
+    await settle()
     expect(repository.deleteHabitRecord).not.toHaveBeenCalled()
     added.resolve()
     await toggle
-    await waitForActions()
+    await settle()
     expect(repository.deleteHabitRecord).toHaveBeenCalledWith(habit.id)
+    failed.reject(new Error('delete failed'))
+    await expect(deletion).rejects.toThrow('delete failed')
 
-    deleted.resolve()
-    await deletion
+    await actions.deleteHabit(habit.id)
     expect(store.getState().habitsById[habit.id]).toBeUndefined()
-  })
-
-  it('reject toggles for absent habits without persisting an orphan entry', async () => {
-    const repository = createRepositoryMock()
-    const { store, actions } = createTestActions({ repository, state: readyStore() })
-
-    await expect(actions.toggleDay({ habitId: 'missing', day: date(1) })).rejects.toThrow(
-      new EntityNotFoundError('Habit', 'missing'),
-    )
-    expect(repository.addEntryRecord).not.toHaveBeenCalled()
-    expect(store.getState().entriesByHabitId).toEqual({})
+    expect(store.getState().entriesByHabitId[habit.id]).toBeUndefined()
   })
 })

@@ -4,21 +4,25 @@ import type { Entry, Habit } from '~/shared/db'
 
 export type HydrationStatus = 'idle' | 'loading' | 'ready' | 'error'
 
-export interface HabitStore {
+export type EntriesByDay = Record<string, Entry>
+
+export interface HabitState {
   hydrationStatus: HydrationStatus
   hydrationError: Error | null
+  /** In the order supplied by the repository, with new Habits appended. */
+  habits: Habit[]
   habitsById: Record<string, Habit>
-  /** Ordered by creation date newest last */
-  habitIds: string[]
-  entriesByHabitId: Record<string, Record<string, Entry>>
+  entriesByHabitId: Record<string, EntriesByDay>
 }
+
+export const createHabitState = (): HabitState => ({
+  hydrationStatus: 'idle',
+  hydrationError: null,
+  habits: [],
+  habitsById: {},
+  entriesByHabitId: {},
+})
 
 export const getDayKey = (day: Date) => day.toISOString()
 
-export const useHabitStore = create<HabitStore>()(() => ({
-  hydrationStatus: 'idle',
-  hydrationError: null,
-  habitsById: {},
-  habitIds: [],
-  entriesByHabitId: {},
-}))
+export const useHabitStore = create<HabitState>()(createHabitState)

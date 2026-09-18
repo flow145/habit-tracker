@@ -2,24 +2,29 @@
 
 A simple, cross-platform habit tracker with flexible scheduling and a focus on long-term consistency over streaks.
 
-## Project documentation
+## Product context
 
-1. `docs/vision.md`
-2. `docs/features.md`
-3. `docs/user_stories.md`
-4. `docs/user_flows.canvas`
-5. `docs/ui_design.md`
-6. `docs/business_rules.md`
-7. `docs/architecture.md`
+Before changing product behavior, consult the applicable source of truth:
 
-## Common commands
+- **Product direction:** `docs/vision.md`
+- **Features, user stories, or business rules:** `docs/features.md`, `docs/user_stories.md`, and `docs/business_rules.md`
+- **User flows or interface design:** `docs/user_flows.canvas` and `docs/ui_design.md`
+- **Architecture:** `docs/architecture.md`
 
-- `pnpm build`: `vite build`
-- `pnpm format`: `biome format --reporter=summary`
-- `pnpm format:fix`: `pnpm format --write`
-- `pnpm check`: `biome check --reporter=summary`
-- `pnpm check:fix`: `pnpm check --write`
-- `pnpm typecheck`: `tsc -b`
-- `pnpm test`: `vitest run`
+## Verification
 
-Add options to these pnpm commmands if needed instead of running vitest/biome/etc directly. Example: `pnpm exec biome check src/app/entrypoint/App.tsx` -> `pnpm check src/app/entrypoint/App.tsx`.
+Use the repository's `pnpm` scripts for build, formatting, checks, type-checking, and tests; `package.json` is authoritative. Forward paths and options through the matching script, for example `pnpm check src/app/entrypoint/App.tsx`.
+
+## Repository workflows
+
+### GitHub tracker
+
+For GitHub issue or pull-request work, read `docs/agents/issue-tracker.md` before making tracker changes.
+
+### Triage labels
+
+For issue or pull-request triage, read `docs/agents/triage-labels.md` and use its canonical labels.
+
+### Domain docs
+
+Before exploring a domain area, proposing a domain-model change, or naming domain concepts, read `docs/agents/domain.md`.
