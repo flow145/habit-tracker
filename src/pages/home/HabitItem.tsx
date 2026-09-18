@@ -31,8 +31,8 @@ export interface HabitItemProps {
 
 export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const { t } = useTranslation()
-  const habit = useHabitStore((state) => state.habitsById[habitId])
-  const entriesByDay = useHabitStore((state) => state.entriesByHabitId[habitId])
+  const habit = useHabitStore((state) => state.habitsById[habitId ?? ''])
+  const entries = useHabitStore((state) => state.entriesByHabitId[habitId] ?? {})
 
   const computedEntries = useMemo(
     () =>
@@ -40,11 +40,11 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
         ? buildComputedEntries({
             start: range.start,
             end: range.end,
-            entries: Object.values(entriesByDay ?? {}),
+            entries,
             schedule: habit.schedule,
           })
         : [],
-    [habit, entriesByDay, range.start, range.end],
+    [habit, entries, range.start, range.end],
   )
 
   if (!habit) return null

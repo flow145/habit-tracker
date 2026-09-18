@@ -25,7 +25,7 @@ export const EditHabit = () => {
   const [isDeleting, setIsDeleting] = useState(false)
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
   const habitId = params?.id
-  const habit = useHabitStore((state) => (habitId ? (state.habitsById[habitId] ?? null) : null))
+  const habit = useHabitStore((state) => state.habitsById[habitId ?? ''])
 
   usePageTitle(t('EditHabit.title'))
 

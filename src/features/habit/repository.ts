@@ -16,6 +16,7 @@ export interface HabitRepository {
   loadData(): Promise<HabitData>
   addHabitRecord(habit: Habit): Promise<void>
   updateHabitRecord(habit: Habit): Promise<void>
+  getEntryRecord(input: { habitId: string; day: Date }): Promise<Entry | null>
   addEntryRecord(entry: Entry): Promise<void>
   deleteEntryRecord(input: { habitId: string; day: Date }): Promise<void>
   deleteHabitRecord(id: string): Promise<void>
@@ -74,6 +75,11 @@ export const repository: HabitRepository = {
         throw new EntityConflictError('Entry', entry.id, { cause: error })
       throw error
     }
+  },
+
+  async getEntryRecord({ habitId, day }) {
+    const db = await getDb()
+    return (await db.getFromIndex('entries', 'byHabitAndDay', [habitId, day])) ?? null
   },
 
   async deleteEntryRecord({ habitId, day }: { habitId: string; day: Date }) {

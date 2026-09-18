@@ -15,7 +15,7 @@ import { useTimelineRange } from './useTimelineRange'
 export const Home = () => {
   const { t } = useTranslation()
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
-  const habitIds = useHabitStore((state) => state.habitIds)
+  const habits = useHabitStore((state) => state.habits)
   const range = useTimelineRange()
 
   usePageTitle(t('Home.title'))
@@ -40,7 +40,7 @@ export const Home = () => {
         }
       />
       <main className={styles.main}>
-        {hydrationStatus === 'ready' && habitIds.length === 0 && (
+        {hydrationStatus === 'ready' && habits.length === 0 && (
           <main className={styles.empty}>
             <h2 className='subheading'>{t('Home.empty')}</h2>
             <Button icon={<Plus />} as='Link' to={Path.AddHabit}>
@@ -48,13 +48,13 @@ export const Home = () => {
             </Button>
           </main>
         )}
-        {hydrationStatus === 'ready' && habitIds.length > 0 && (
+        {hydrationStatus === 'ready' && habits.length > 0 && (
           <>
             <Timeline start={range.start} end={range.end} />
             <ul className={styles.habitList}>
-              {habitIds.map((habitId) => (
-                <li key={habitId}>
-                  <HabitItem habitId={habitId} range={range} />
+              {habits.map((habit) => (
+                <li key={habit.id}>
+                  <HabitItem habitId={habit.id} range={range} />
                 </li>
               ))}
             </ul>

@@ -139,6 +139,21 @@ describe('addEntryRecord', () => {
   })
 })
 
+describe('getEntryRecord', () => {
+  it('returns the entry matching the supplied Habit and Day', async () => {
+    const entry = await seed(makeEntry({ habitId: 'habit-1', day: date(2) }))
+    await seed(makeEntry({ id: 'other', habitId: 'habit-1', day: date(3) }))
+
+    expect(await repository.getEntryRecord({ habitId: entry.habitId, day: entry.day })).toEqual(
+      entry,
+    )
+  })
+
+  it('returns null when no Entry matches', async () => {
+    expect(await repository.getEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeNull()
+  })
+})
+
 describe('deleteEntryRecord', () => {
   it('deletes only the entry matching the habit and day', async () => {
     await seed(makeEntry({ id: 'entry-1', day: date(1) }))

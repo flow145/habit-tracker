@@ -34,7 +34,7 @@ export const buildComputedEntries = ({
 }: {
   start: Date
   end: Date
-  entries: Pick<Entry, 'day' | 'status'>[] // TODO use object type from the store
+  entries: Record<string, Pick<Entry, 'day' | 'status'>>
   schedule: Schedule
 }): ComputedEntry[] => {
   const dayCount = differenceInCalendarDays(end, start) + 1
@@ -42,7 +42,9 @@ export const buildComputedEntries = ({
 
   const effectiveStart = getWindowStart(start, schedule)
 
-  const statusByDate = new Map(entries.map((entry) => [getDayKey(entry.day), entry.status]))
+  const statusByDate = new Map(
+    Object.values(entries).map((entry) => [getDayKey(entry.day), entry.status]),
+  )
 
   let completedCount = 0
   let windowStart = effectiveStart
