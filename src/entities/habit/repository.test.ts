@@ -6,7 +6,7 @@ import {
   type Entry,
   getDb,
   type Habit,
-} from '~/shared/db'
+} from '~/shared/api'
 import { date, makeEntry, makeHabit, resetTestDb } from '~/shared/tests'
 
 import { repository } from './repository'

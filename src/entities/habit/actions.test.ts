@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createStore } from 'zustand/vanilla'
 
-import type { Entry } from '~/shared/db'
+import type { Entry } from '~/shared/api'
 import { date, makeEntry, makeHabit } from '~/shared/tests'
 
 import { createHabitActions } from './actions'

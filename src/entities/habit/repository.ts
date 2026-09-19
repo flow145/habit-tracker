@@ -4,7 +4,7 @@ import {
   type Entry,
   getDb,
   type Habit,
-} from '~/shared/db'
+} from '~/shared/api'
 import { isErrorNamed } from '~/shared/lib'
 
 export interface HabitData {

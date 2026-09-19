@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { Entry, Habit } from '~/shared/db'
+import type { Entry, Habit } from '~/shared/api'
 
 export type HydrationStatus = 'idle' | 'loading' | 'ready' | 'error'
 

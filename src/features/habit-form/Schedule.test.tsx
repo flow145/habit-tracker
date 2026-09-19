@@ -4,7 +4,7 @@ import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { Schedule as ISchedule } from '~/shared/db'
+import type { Schedule as ISchedule } from '~/shared/api'
 import { render, screen } from '~/shared/tests'
 
 import { Schedule } from './Schedule'

@@ -3,7 +3,7 @@ import { userEvent } from '@testing-library/user-event'
 import { IDBFactory } from 'fake-indexeddb'
 import type { ReactElement, ReactNode } from 'react'
 
-import { closeDb, type Entry, type Habit } from '~/shared/db'
+import { closeDb, type Entry, type Habit } from '~/shared/api'
 
 /**
  * @param [month=1] 1-12

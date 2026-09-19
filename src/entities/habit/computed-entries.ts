@@ -1,6 +1,6 @@
 import { add, differenceInCalendarDays, eachDayOfInterval, format, min, sub } from 'date-fns'
 
-import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
+import type { Entry, ExplicitStatus, Schedule } from '~/shared/api'
 
 type DerivedStatus = 'incomplete' | 'not-required'
 

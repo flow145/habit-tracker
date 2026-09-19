@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Schedule as ISchedule } from '~/shared/db'
+import type { Schedule as ISchedule } from '~/shared/api'
 import { Button } from '~/shared/ui/Button'
 import { TextField } from '~/shared/ui/TextField'
 
