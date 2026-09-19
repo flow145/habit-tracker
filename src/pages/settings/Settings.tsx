@@ -1,12 +1,12 @@
 import { ChevronLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { setThemePreference, type ThemePreference, useThemeStore } from '~/app/theme'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { Select, type SelectItem } from '~/shared/components/Select'
 import { Path } from '~/shared/constants'
 import { usePageTitle } from '~/shared/hooks'
+import { setThemePreference, type ThemePreference, useThemeStore } from '~/shared/theme'
 
 import styles from './Settings.module.css'
 
