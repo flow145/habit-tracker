@@ -5,12 +5,12 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '~/shared/components/Button'
-import { Schedule } from '~/shared/components/Schedule'
 import { TextField } from '~/shared/components/TextField'
 import { DEFAULT_SCHEDULE } from '~/shared/constants'
 import type { Schedule as ScheduleValue } from '~/shared/db'
 
 import styles from './HabitForm.module.css'
+import { Schedule } from './Schedule'
 
 const INITIAL_VALUES = { name: '', description: '', schedule: DEFAULT_SCHEDULE }
 
