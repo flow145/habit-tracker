@@ -3,9 +3,9 @@ import { Fieldset } from '@base-ui/react/fieldset'
 import { clsx } from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NumberField } from '~/shared/components/NumberField'
-import { Select, type SelectItem } from '~/shared/components/Select'
-import type { IntervalUnit, Schedule as ScheduleValue } from '~/shared/db'
+import type { IntervalUnit, Schedule as ISchedule } from '~/shared/db'
+import { NumberField } from '~/shared/ui/NumberField'
+import { Select, type SelectItem } from '~/shared/ui/Select'
 
 import styles from './Schedule.module.css'
 
@@ -16,8 +16,8 @@ const DAYS_IN_WEEK = 7
 const DAYS_IN_MONTH = 31
 
 export interface ScheduleProps {
-  value: ScheduleValue
-  onValueChange: (value: ScheduleValue) => void
+  value: ISchedule
+  onValueChange: (value: ISchedule) => void
   disabled?: boolean
   className?: string
 }

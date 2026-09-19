@@ -4,7 +4,7 @@ import { AddHabit } from '~/pages/add-habit'
 import { EditHabit } from '~/pages/edit-habit'
 import { Home } from '~/pages/home'
 import { Settings } from '~/pages/settings'
-import { Path } from '~/shared/constants'
+import { Path } from '~/shared/routes'
 import { ThemeSynchronizer } from '~/shared/theme'
 
 import { HabitStoreSynchronizer } from '../HabitStoreSynchronizer'

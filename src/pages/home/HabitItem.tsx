@@ -13,7 +13,7 @@ import {
   useHabitStore,
 } from '~/entities/habit'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
-import { Path } from '~/shared/constants'
+import { Path } from '~/shared/routes'
 
 import styles from './HabitItem.module.css'
 import type { DateRange } from './types'
