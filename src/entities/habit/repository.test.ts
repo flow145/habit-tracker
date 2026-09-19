@@ -7,9 +7,10 @@ import {
   getDb,
   type Habit,
 } from '~/shared/api'
-import { date, makeEntry, makeHabit, resetTestDb } from '~/shared/tests'
+import { date, resetTestDb } from '~/shared/tests'
 
 import { repository } from './repository'
+import { makeEntry, makeHabit } from './testUtils'
 
 const schedule = { frequency: 1, interval: 1, intervalUnit: 'days' } as const
 

@@ -2,11 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { createStore } from 'zustand/vanilla'
 
 import type { Entry } from '~/shared/api'
-import { date, makeEntry, makeHabit } from '~/shared/tests'
+import { date } from '~/shared/tests'
 
 import { createHabitActions } from './actions'
 import type { HabitData, HabitRepository } from './repository'
 import { createHabitState, type HabitState } from './store'
+import { makeEntry, makeHabit } from './testUtils'
 
 const deferred = <T>() => {
   let resolve!: (value: T | PromiseLike<T>) => void
