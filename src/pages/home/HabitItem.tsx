@@ -6,13 +6,13 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 
 import {
+  buildComputedEntries,
   type ComputedStatus,
   type DateRange,
   getNextStatus,
   toggleDay,
   useHabitStore,
 } from '~/features/habit'
-import { buildComputedEntries } from '~/features/habit/computed-entries'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
 import { Path } from '~/shared/constants'
 

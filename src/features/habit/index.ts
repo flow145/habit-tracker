@@ -1,5 +1,5 @@
 export { addHabit, deleteHabit, editHabit, hydrateHabitStore, toggleDay } from './actions'
-export { type ComputedStatus, getNextStatus } from './computed-entries'
+export { buildComputedEntries, type ComputedStatus, getNextStatus } from './computed-entries'
 export { HabitStoreSynchronizer } from './HabitStoreSynchronizer'
 export { useHabitStore } from './store'
 export type { DateRange } from './types'
