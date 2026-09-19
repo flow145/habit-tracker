@@ -12,10 +12,10 @@ import {
   toggleDay,
   useHabitStore,
 } from '~/entities/habit'
-import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
 import { Path } from '~/shared/routes'
 
 import styles from './HabitItem.module.css'
+import SquircleCheckIcon from './squircle-check.svg'
 import type { DateRange } from './types'
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {

@@ -26,7 +26,6 @@ export default defineConfig({
   plugins: [
     react(),
     svgr({
-      include: 'src/shared/assets/**/*.svg',
       svgrOptions: {
         ref: true,
         titleProp: true,
