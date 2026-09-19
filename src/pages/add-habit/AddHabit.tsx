@@ -5,11 +5,11 @@ import { useLocation } from 'wouter'
 
 import { addHabit, useHabitStore } from '~/features/habit'
 import { Button } from '~/shared/components/Button'
+import { HabitForm, type HabitFormValues } from '~/shared/components/HabitForm'
 import { Header } from '~/shared/components/Header'
 import { Path } from '~/shared/constants'
 import { usePageTitle } from '~/shared/hooks'
 
-import { HabitForm, type HabitFormValues } from '../habit-form'
 import styles from './AddHabit.module.css'
 
 export const AddHabit = () => {

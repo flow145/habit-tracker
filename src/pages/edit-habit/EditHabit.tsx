@@ -7,11 +7,11 @@ import { useLocation, useRoute } from 'wouter'
 import { deleteHabit, editHabit, useHabitStore } from '~/features/habit'
 import { AlertDialog } from '~/shared/components/AlertDialog'
 import { Button } from '~/shared/components/Button'
+import { HabitForm, type HabitFormValues } from '~/shared/components/HabitForm'
 import { Header } from '~/shared/components/Header'
 import { Path } from '~/shared/constants'
 import { usePageTitle } from '~/shared/hooks'
 
-import { HabitForm, type HabitFormValues } from '../habit-form'
 import styles from './EditHabit.module.css'
 
 const deletionDialog = AlertDialog.createHandle()
