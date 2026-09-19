@@ -8,15 +8,15 @@ import { Link } from 'wouter'
 import {
   buildComputedEntries,
   type ComputedStatus,
-  type DateRange,
   getNextStatus,
   toggleDay,
   useHabitStore,
-} from '~/features/habit'
+} from '~/entities/habit'
 import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
 import { Path } from '~/shared/constants'
 
 import styles from './HabitItem.module.css'
+import type { DateRange } from './types'
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
   complete: { icon: <Check />, i18nKey: 'complete' },

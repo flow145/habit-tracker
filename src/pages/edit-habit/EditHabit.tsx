@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useRoute } from 'wouter'
 
-import { deleteHabit, editHabit, useHabitStore } from '~/features/habit'
+import { deleteHabit, editHabit, useHabitStore } from '~/entities/habit'
 import { HabitForm, type HabitFormValues } from '~/features/habit-form'
 import { AlertDialog } from '~/shared/components/AlertDialog'
 import { Button } from '~/shared/components/Button'

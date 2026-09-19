@@ -1,7 +1,7 @@
 import { Plus, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { useHabitStore } from '~/features/habit'
+import { useHabitStore } from '~/entities/habit'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
 import { Path } from '~/shared/constants'

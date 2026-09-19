@@ -1,7 +1,7 @@
 import { isSameDay, subDays } from 'date-fns'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { DateRange } from '~/features/habit'
+import type { DateRange } from './types'
 
 const DAY_COUNT = 10
 const CHECK_INTERVAL = 60_000

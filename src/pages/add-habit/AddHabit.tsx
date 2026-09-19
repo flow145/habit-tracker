@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'wouter'
 
-import { addHabit, useHabitStore } from '~/features/habit'
+import { addHabit, useHabitStore } from '~/entities/habit'
 import { HabitForm, type HabitFormValues } from '~/features/habit-form'
 import { Button } from '~/shared/components/Button'
 import { Header } from '~/shared/components/Header'
