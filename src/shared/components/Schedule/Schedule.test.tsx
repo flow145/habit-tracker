@@ -1,4 +1,4 @@
-import '~/app/i18n'
+import '~/shared/i18n'
 
 import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
