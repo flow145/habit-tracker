@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'wouter'
 
 import { addHabit, useHabitStore } from '~/entities/habit'
-import { HabitForm, type HabitFormValues } from '~/features/habit-form'
+import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
 import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-
 import { useTranslation } from 'react-i18next'
+
 import { hydrateHabitStore } from '~/entities/habit'
 
 export const HabitStoreSynchronizer = () => {

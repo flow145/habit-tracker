@@ -3,6 +3,7 @@ import { Fieldset } from '@base-ui/react/fieldset'
 import { clsx } from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 import type { IntervalUnit, Schedule as ISchedule } from '~/shared/api'
 import { NumberField } from '~/shared/ui/NumberField'
 import { Select, type SelectItem } from '~/shared/ui/Select'

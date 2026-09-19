@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, useRoute } from 'wouter'
 
 import { deleteHabit, editHabit, useHabitStore } from '~/entities/habit'
-import { HabitForm, type HabitFormValues } from '~/features/habit-form'
+import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
 import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { AlertDialog } from '~/shared/ui/AlertDialog'
