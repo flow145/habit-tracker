@@ -2,11 +2,10 @@
 
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
-import mkcert from 'vite-plugin-mkcert'
 import { VitePWA } from 'vite-plugin-pwa'
 import svgr from 'vite-plugin-svgr'
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
@@ -26,7 +25,6 @@ export default defineConfig(({ mode }) => ({
 
   plugins: [
     react(),
-    ...(mode === 'test' ? [] : [mkcert()]),
     svgr({
       include: 'src/shared/assets/**/*.svg',
       svgrOptions: {
@@ -78,4 +76,4 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ],
-}))
+})
