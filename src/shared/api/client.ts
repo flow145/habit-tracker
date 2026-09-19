@@ -1,6 +1,6 @@
 import { type IDBPDatabase, openDB } from 'idb'
 
-import { i18n } from '~/app/i18n'
+import { i18n } from '~/shared/i18n'
 import type { DBSchema } from './schema'
 
 export const DB_VERSION = 1

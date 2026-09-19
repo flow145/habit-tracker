@@ -1,9 +1,8 @@
 import { clsx } from 'clsx'
 import { eachDayOfInterval, format } from 'date-fns'
 
-import type { DateRange } from '~/features/habit'
-
 import styles from './Timeline.module.css'
+import type { DateRange } from './types'
 
 export interface TimelineProps extends DateRange {}
 

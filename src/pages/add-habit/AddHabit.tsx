@@ -3,13 +3,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'wouter'
 
-import { addHabit, useHabitStore } from '~/features/habit'
-import { Button } from '~/shared/components/Button'
-import { Header } from '~/shared/components/Header'
-import { Path } from '~/shared/constants'
-import { usePageTitle } from '~/shared/hooks'
+import { addHabit, useHabitStore } from '~/entities/habit'
+import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
+import { usePageTitle } from '~/shared/lib'
+import { Path } from '~/shared/routes'
+import { Button } from '~/shared/ui/Button'
+import { Header } from '~/shared/ui/Header'
 
-import { HabitForm, type HabitFormValues } from '../habit-form'
 import styles from './AddHabit.module.css'
 
 export const AddHabit = () => {

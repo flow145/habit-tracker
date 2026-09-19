@@ -1,11 +1,11 @@
 import { Plus, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { useHabitStore } from '~/features/habit'
-import { Button } from '~/shared/components/Button'
-import { Header } from '~/shared/components/Header'
-import { Path } from '~/shared/constants'
-import { usePageTitle } from '~/shared/hooks'
+import { useHabitStore } from '~/entities/habit'
+import { usePageTitle } from '~/shared/lib'
+import { Path } from '~/shared/routes'
+import { Button } from '~/shared/ui/Button'
+import { Header } from '~/shared/ui/Header'
 
 import { HabitItem } from './HabitItem'
 import styles from './Home.module.css'

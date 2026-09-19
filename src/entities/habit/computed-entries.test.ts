@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Entry, ExplicitStatus, Schedule } from '~/shared/db'
+import type { Entry, ExplicitStatus, Schedule } from '~/shared/api'
 import { date } from '~/shared/tests'
 import {
   buildComputedEntries,

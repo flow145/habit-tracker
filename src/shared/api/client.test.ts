@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { resetTestDb } from '~/shared/tests'
+
 import { closeDb, getDb } from './client'
 
 afterEach(async () => {

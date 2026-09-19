@@ -1,12 +1,13 @@
 import { Redirect, Route, Router, Switch } from 'wouter'
 
-import { HabitStoreSynchronizer } from '~/features/habit'
 import { AddHabit } from '~/pages/add-habit'
 import { EditHabit } from '~/pages/edit-habit'
 import { Home } from '~/pages/home'
 import { Settings } from '~/pages/settings'
-import { Path } from '~/shared/constants'
-import { ThemeSynchronizer } from '../theme'
+import { Path } from '~/shared/routes'
+
+import { HabitStoreSynchronizer } from './HabitStoreSynchronizer'
+import { ThemeSynchronizer } from './ThemeSynchronizer'
 
 export const App = () => {
   return (

@@ -6,17 +6,17 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 
 import {
+  buildComputedEntries,
   type ComputedStatus,
-  type DateRange,
   getNextStatus,
   toggleDay,
   useHabitStore,
-} from '~/features/habit'
-import { buildComputedEntries } from '~/features/habit/computed-entries'
-import SquircleCheckIcon from '~/shared/assets/icons/squircle-check.svg'
-import { Path } from '~/shared/constants'
+} from '~/entities/habit'
+import { Path } from '~/shared/routes'
 
 import styles from './HabitItem.module.css'
+import SquircleCheckIcon from './squircle-check.svg'
+import type { DateRange } from './types'
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
   complete: { icon: <Check />, i18nKey: 'complete' },

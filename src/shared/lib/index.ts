@@ -1,3 +1,19 @@
+import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+
+export const usePageTitle = (title: string) => {
+  const { t } = useTranslation()
+  const appName = t('shared.appTitle')
+
+  useEffect(() => {
+    document.title = `${title} | ${appName}`
+
+    return () => {
+      document.title = appName
+    }
+  }, [title])
+}
+
 export const isErrorNamed = (error: unknown, name: string) => {
   if (typeof error !== 'object' || error === null) return false
   return 'name' in error && error.name === name

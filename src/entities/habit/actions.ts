@@ -1,7 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
 import type { StoreApi } from 'zustand'
 
-import { EntityNotFoundError, type Entry, type Habit, type Schedule } from '~/shared/db'
+import { EntityNotFoundError, type Entry, type Habit, type Schedule } from '~/shared/api'
 import { toError } from '~/shared/lib'
 
 import { type HabitData, type HabitRepository, repository } from './repository'

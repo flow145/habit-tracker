@@ -1,18 +1,24 @@
-import '~/app/i18n'
+import '~/shared/i18n'
 
 import { Form } from '@base-ui/react/form'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { DEFAULT_SCHEDULE } from '~/shared/constants'
-import type { Schedule as ScheduleValue } from '~/shared/db'
+import type { Schedule as ISchedule } from '~/shared/api'
 import { render, screen } from '~/shared/tests'
+
 import { Schedule } from './Schedule'
 
 type User = ReturnType<typeof render>['user']
 
+export const DEFAULT_SCHEDULE: ISchedule = {
+  frequency: 1,
+  interval: 1,
+  intervalUnit: 'days',
+}
+
 const ScheduleHarness = () => {
-  const [value, setValue] = useState<ScheduleValue>(DEFAULT_SCHEDULE)
+  const [value, setValue] = useState<ISchedule>(DEFAULT_SCHEDULE)
   return <Schedule value={value} onValueChange={setValue} />
 }
 
@@ -21,7 +27,7 @@ interface ScheduleFormHarnessProps {
 }
 
 const ScheduleFormHarness = ({ onSubmit = vi.fn() }: ScheduleFormHarnessProps) => {
-  const [value, setValue] = useState<ScheduleValue>(DEFAULT_SCHEDULE)
+  const [value, setValue] = useState<ISchedule>(DEFAULT_SCHEDULE)
 
   return (
     <Form onFormSubmit={onSubmit}>
