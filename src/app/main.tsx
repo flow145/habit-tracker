@@ -1,6 +1,6 @@
 import '@fontsource-variable/geist/wght.css'
-import '../styles/index.css'
 import '~/shared/i18n'
+import './styles/index.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

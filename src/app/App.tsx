@@ -5,9 +5,9 @@ import { EditHabit } from '~/pages/edit-habit'
 import { Home } from '~/pages/home'
 import { Settings } from '~/pages/settings'
 import { Path } from '~/shared/routes'
-import { ThemeSynchronizer } from '~/shared/theme'
 
-import { HabitStoreSynchronizer } from '../HabitStoreSynchronizer'
+import { HabitStoreSynchronizer } from './HabitStoreSynchronizer'
+import { ThemeSynchronizer } from './ThemeSynchronizer'
 
 export const App = () => {
   return (

@@ -1,7 +1,6 @@
 import { useLayoutEffect } from 'react'
 
-import type { ThemePreference } from './store'
-import { useThemeStore } from './store'
+import { type ThemePreference, useThemeStore } from '~/shared/theme'
 
 const DARK_MODE_QUERY = '(prefers-color-scheme: dark)'
 
