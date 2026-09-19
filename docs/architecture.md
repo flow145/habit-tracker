@@ -1,4 +1,4 @@
-## Frontend
+## Tools
 
 - package manager: pnpm
 - language: TypeScript
@@ -18,4 +18,4 @@
 
 ## Rules
 
-- Always use days from the same generator `buildComputedEntries()`
+Organize `src` using Feature-Sliced Design (FSD). Keep non-Shared layers and slices flat; use segment directories only within `shared`.
