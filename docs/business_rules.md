@@ -2,7 +2,7 @@
 
 ## Domain Terms
 
-- **Day**: A calendar day in the user's current time zone. Days are what entries and computed entries refer to, what the timeline shows as columns, and what schedules are evaluated against.
+- **Day**: A calendar date identified by a `YYYY-MM-DD` string. Its identity does not change when the user crosses time zones. Days are what entries and computed entries refer to, what the timeline shows as columns, and what schedules are evaluated against.
 - **Entry**: A persisted record for one habit and one day. In the current model, an entry records that the user marked a day complete and therefore has the explicit status `complete`. A missing entry does not represent an explicit `incomplete` status.
 - **Computed entry**: A generated representation of a habit for a day in the displayed timeline. Computed entries are used by the UI and are not persisted.
 - **Status**: The state of a habit for a day. There are three kinds of status:
@@ -21,7 +21,7 @@
 - A day-based interval of `n` days spans `n` days.
 - A week-based interval of `n` weeks spans `7 * n` days.
 - A month-based interval of `n` months spans the corresponding calendar-month period. A one-month interval can contain 28 to 31 days.
-- Schedules are evaluated in the user's current time zone.
+- Schedules are evaluated using calendar dates; a time-zone change does not change the computed status of a given day.
 
 ## Schedule Windows
 
@@ -40,6 +40,7 @@
 ## Entry Rules
 
 - Future days cannot be marked complete in the UI.
+- An entry remains attached to the local calendar date on which the user marked it. If travel makes that date future relative to the new local date, the entry is retained and appears again when the timeline reaches it.
 - Users may change the status of past days.
 - Users may mark a `not-required` day complete.
 - Marking a completed day incomplete removes its explicit status; it does not create an explicit `incomplete` status.

@@ -5,7 +5,7 @@ import {
   getDb,
   type Habit,
 } from '~/shared/api'
-import { isErrorNamed } from '~/shared/lib'
+import { type DayString, isErrorNamed } from '~/shared/lib'
 
 export interface HabitData {
   habits: Habit[]
@@ -16,14 +16,14 @@ export interface HabitRepository {
   loadData(): Promise<HabitData>
   addHabitRecord(habit: Habit): Promise<void>
   updateHabitRecord(habit: Habit): Promise<void>
-  getEntryRecord(input: { habitId: string; day: Date }): Promise<Entry | null>
+  getEntryRecord(input: { habitId: string; day: DayString }): Promise<Entry | null>
   addEntryRecord(entry: Entry): Promise<void>
-  deleteEntryRecord(input: { habitId: string; day: Date }): Promise<void>
+  deleteEntryRecord(input: { habitId: string; day: DayString }): Promise<void>
   deleteHabitRecord(id: string): Promise<void>
 }
 
 export const repository: HabitRepository = {
-  async loadData(): Promise<HabitData> {
+  async loadData() {
     const db = await getDb()
     const tx = db.transaction(['habits', 'entries'], 'readonly')
     const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
@@ -45,7 +45,7 @@ export const repository: HabitRepository = {
     }
   },
 
-  async updateHabitRecord(habit: Habit): Promise<void> {
+  async updateHabitRecord(habit) {
     const db = await getDb()
     const tx = db.transaction('habits', 'readwrite')
     const existing = await tx.store.get(habit.id)
@@ -65,7 +65,7 @@ export const repository: HabitRepository = {
     }
   },
 
-  async addEntryRecord(entry: Entry): Promise<void> {
+  async addEntryRecord(entry) {
     const db = await getDb()
 
     try {
@@ -82,7 +82,7 @@ export const repository: HabitRepository = {
     return (await db.getFromIndex('entries', 'byHabitAndDay', [habitId, day])) ?? null
   },
 
-  async deleteEntryRecord({ habitId, day }: { habitId: string; day: Date }) {
+  async deleteEntryRecord({ habitId, day }) {
     const db = await getDb()
     const tx = db.transaction('entries', 'readwrite')
     const existing = await tx.store.index('byHabitAndDay').get([habitId, day])
@@ -96,7 +96,7 @@ export const repository: HabitRepository = {
     await tx.done
   },
 
-  async deleteHabitRecord(id: string): Promise<void> {
+  async deleteHabitRecord(id) {
     const db = await getDb()
     const tx = db.transaction(['habits', 'entries'], 'readwrite')
     const habitsStore = tx.objectStore('habits')

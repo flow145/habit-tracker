@@ -1,5 +1,6 @@
 import type { Entry, Habit } from '~/shared/api'
-import { date } from '~/shared/tests'
+import type { Day } from '~/shared/lib'
+import { date, day } from '~/shared/tests'
 
 export const makeHabit = (overrides: Partial<Habit> = {}): Habit => ({
   id: 'habit-1',
@@ -11,11 +12,16 @@ export const makeHabit = (overrides: Partial<Habit> = {}): Habit => ({
   ...overrides,
 })
 
-export const makeEntry = (overrides: Partial<Entry> = {}): Entry => ({
+type EntryOverrides = Omit<Partial<Entry>, 'day'> & { day?: Day | Entry['day'] }
+
+export const makeEntry = ({
+  day: entryDay = day(1),
+  ...overrides
+}: EntryOverrides = {}): Entry => ({
   id: 'entry-1',
   habitId: 'habit-1',
   status: 'complete',
-  day: date(1),
+  day: typeof entryDay === 'string' ? entryDay : entryDay.value,
   createdAt: date(1),
   updatedAt: date(1),
   ...overrides,

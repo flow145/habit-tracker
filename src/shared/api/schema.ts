@@ -1,4 +1,5 @@
 import type { DBSchema as IDBSchema } from 'idb'
+import type { DayString } from '~/shared/lib'
 
 export type IntervalUnit = 'days' | 'weeks' | 'months'
 export type ExplicitStatus = 'complete'
@@ -22,7 +23,7 @@ export interface Entry {
   id: string
   habitId: string
   status: ExplicitStatus
-  day: Date
+  day: DayString
   createdAt: Date
   updatedAt: Date
 }
@@ -39,8 +40,8 @@ export interface DBSchema extends IDBSchema {
     key: string
     value: Entry
     indexes: {
-      byDay: Date
-      byHabitAndDay: [string, Date]
+      byDay: DayString
+      byHabitAndDay: [string, DayString]
     }
   }
 }

@@ -23,6 +23,4 @@ export const createHabitState = (): HabitState => ({
   entriesByHabitId: {},
 })
 
-export const getDayKey = (day: Date) => day.toISOString()
-
 export const useHabitStore = create<HabitState>()(createHabitState)

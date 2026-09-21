@@ -1,6 +1,5 @@
-import { add, differenceInCalendarDays, eachDayOfInterval, format, min, sub } from 'date-fns'
-
 import type { Entry, ExplicitStatus, Schedule } from '~/shared/api'
+import { Day } from '~/shared/lib'
 
 type DerivedStatus = 'incomplete' | 'not-required'
 
@@ -10,21 +9,15 @@ export const getNextStatus = (status: ComputedStatus) =>
   status === 'complete' ? 'incomplete' : 'complete'
 
 export interface ComputedEntry {
-  day: Date
+  day: Day
   status: ComputedStatus
 }
 
-export const getDayKey = (date: Date) => format(date, 'yyyy-MM-dd')
+export const getWindowEnd = (day: Day, { interval, intervalUnit }: Schedule) =>
+  day.add({ [intervalUnit]: interval }).subtract({ days: 1 })
 
-export const getWindowEnd = (date: Date, { interval, intervalUnit }: Schedule) => {
-  const firstDayAfterWindow = add(date, { [intervalUnit]: interval })
-  return sub(firstDayAfterWindow, { days: 1 })
-}
-
-export const getWindowStart = (date: Date, { interval, intervalUnit }: Schedule) => {
-  const firstDayAfterWindow = add(date, { days: 1 })
-  return sub(firstDayAfterWindow, { [intervalUnit]: interval })
-}
+export const getWindowStart = (day: Day, { interval, intervalUnit }: Schedule) =>
+  day.add({ days: 1 }).subtract({ [intervalUnit]: interval })
 
 export const buildComputedEntries = ({
   start,
@@ -32,19 +25,15 @@ export const buildComputedEntries = ({
   entries,
   schedule,
 }: {
-  start: Date
-  end: Date
+  start: Day
+  end: Day
   entries: Record<string, Pick<Entry, 'day' | 'status'>>
   schedule: Schedule
 }): ComputedEntry[] => {
-  const dayCount = differenceInCalendarDays(end, start) + 1
+  const dayCount = end.differenceInDays(start) + 1
   if (dayCount < 1) return []
 
   const effectiveStart = getWindowStart(start, schedule)
-
-  const statusByDate = new Map(
-    Object.values(entries).map((entry) => [getDayKey(entry.day), entry.status]),
-  )
 
   let completedCount = 0
   let windowStart = effectiveStart
@@ -52,28 +41,19 @@ export const buildComputedEntries = ({
   let windowStartIndex = 0
   let windowEndIndex = -1
 
-  const computedEntries: ComputedEntry[] = eachDayOfInterval({
-    start: effectiveStart,
-    end,
-  }).map((date) => ({
-    day: date,
-    status: 'incomplete',
-  }))
+  const computedEntries: ComputedEntry[] = Day.eachDayOfInterval(effectiveStart, end).map(
+    (day) => ({ day, status: 'incomplete' }),
+  )
 
   // Accumulating phase: count completed days for the first sliding window
-  for (
-    let date = windowStart;
-    differenceInCalendarDays(min([windowEnd, end]), date) >= 0;
-    date = add(date, { days: 1 })
-  ) {
-    if (statusByDate.get(getDayKey(date)) === 'complete') completedCount += 1
+  for (let day = windowStart; day <= windowEnd && day <= end; day = day.add({ days: 1 })) {
+    if (entries[day.value]?.status === 'complete') completedCount += 1
     windowEndIndex += 1
   }
 
-  // Sliding window phase: advance the window start one day at a time,
-  // recalculate the window end and completed count, and assign not-required statuses
-  while (differenceInCalendarDays(end, windowStart) >= 1) {
-    const windowStartExplicitStatus = statusByDate.get(getDayKey(windowStart))
+  // Sliding window phase: advance one calendar day at a time
+  while (windowStart < end) {
+    const windowStartExplicitStatus = entries[windowStart.value]?.status
 
     if (windowStartExplicitStatus === 'complete' && completedCount >= schedule.frequency)
       for (let i = windowStartIndex; i <= windowEndIndex; i += 1) {
@@ -82,22 +62,22 @@ export const buildComputedEntries = ({
       }
 
     if (windowStartExplicitStatus === 'complete') completedCount -= 1
-    windowStart = add(windowStart, { days: 1 })
+    windowStart = windowStart.add({ days: 1 })
     windowStartIndex += 1
 
     const nextWindowEnd = getWindowEnd(windowStart, schedule)
-    eachDayOfInterval({ start: windowEnd, end: nextWindowEnd })
+    Day.eachDayOfInterval(windowEnd, nextWindowEnd)
       .slice(1)
-      .forEach((date) => {
-        if (statusByDate.get(getDayKey(date)) === 'complete') completedCount += 1
+      .forEach((day) => {
+        if (entries[day.value]?.status === 'complete') completedCount += 1
         windowEndIndex += 1
       })
     windowEnd = nextWindowEnd
   }
 
-  // Assign explicit statuses over computedEntries
+  // Explicit completions override derived statuses
   computedEntries.forEach((computedEntry) => {
-    const explicitStatus = statusByDate.get(getDayKey(computedEntry.day))
+    const explicitStatus = entries[computedEntry.day.value]?.status
     if (explicitStatus) computedEntry.status = explicitStatus
   })
 
