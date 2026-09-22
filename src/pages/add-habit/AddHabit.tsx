@@ -5,7 +5,7 @@ import { useLocation } from 'wouter'
 
 import { addHabit, useHabitStore } from '~/entities/habit'
 import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
-import { usePageTitle } from '~/shared/lib'
+import { isErrorNamed, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
@@ -28,7 +28,9 @@ export const AddHabit = () => {
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
-      alert(t('shared.changeFailed'))
+      alert(
+        t(isErrorNamed(error, 'QuotaExceededError') ? 'shared.storageFull' : 'shared.changeFailed'),
+      )
     } finally {
       setIsSubmitting(false)
     }

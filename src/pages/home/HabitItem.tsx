@@ -11,7 +11,7 @@ import {
   toggleDay,
   useHabitStore,
 } from '~/entities/habit'
-import type { Day } from '~/shared/lib'
+import { type Day, isErrorNamed } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 
 import styles from './HabitItem.module.css'
@@ -52,7 +52,9 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const handleToggleDay = (day: Day) => {
     toggleDay({ habitId, day }).catch((error: unknown) => {
       console.error(error)
-      alert(t('shared.changeFailed'))
+      alert(
+        t(isErrorNamed(error, 'QuotaExceededError') ? 'shared.storageFull' : 'shared.changeFailed'),
+      )
     })
   }
 

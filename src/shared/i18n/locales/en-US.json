@@ -6,7 +6,8 @@
     "delete": "Delete",
     "initFailed": "Couldn’t initialize the app.",
     "updateBlocked": "Update pending, please close all the other Habit Tracker tabs",
-    "changeFailed": "Couldn’t save your changes. Please try again."
+    "changeFailed": "Couldn’t save your changes. Please try again.",
+    "storageFull": "Storage is full. Your change wasn’t saved"
   },
   "Home": {
     "title": "Habits",
