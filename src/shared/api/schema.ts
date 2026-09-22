@@ -32,9 +32,6 @@ export interface DBSchema extends IDBSchema {
   habits: {
     key: string
     value: Habit
-    indexes: {
-      byCreatedAt: string
-    }
   }
   entries: {
     key: string

@@ -60,7 +60,7 @@ const getHydratedState = ({
     if (habitEntries) habitEntries[entry.day] = entry
   }
 
-  return { habits, habitsById, entriesByHabitId }
+  return { habitsById, entriesByHabitId }
 }
 
 export const createHabitActions = ({
@@ -133,7 +133,6 @@ export const createHabitActions = ({
 
     await repository.addHabitRecord(habit)
     store.setState((state) => ({
-      habits: [...state.habits, habit],
       habitsById: { ...state.habitsById, [habit.id]: habit },
       entriesByHabitId: { ...state.entriesByHabitId, [habit.id]: {} },
     }))
@@ -165,7 +164,6 @@ export const createHabitActions = ({
 
     await repository.updateHabitRecord(habit)
     store.setState((state) => ({
-      habits: state.habits.map((state) => (state.id === id ? habit : state)),
       habitsById: { ...state.habitsById, [id]: habit },
     }))
   }
@@ -243,11 +241,7 @@ export const createHabitActions = ({
 
     const { [id]: _, ...habitsById } = store.getState().habitsById
     const { [id]: __, ...entriesByHabitId } = store.getState().entriesByHabitId
-    store.setState((state) => ({
-      habits: state.habits.filter((habit) => habit.id !== id),
-      habitsById,
-      entriesByHabitId,
-    }))
+    store.setState({ habitsById, entriesByHabitId })
   }
 
   return { addHabit, deleteHabit, editHabit, hydrateHabitStore, toggleDay }

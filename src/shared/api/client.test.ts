@@ -25,7 +25,7 @@ describe('database client', () => {
     const entries = tx.objectStore('entries')
 
     expect(habits.keyPath).toBe('id')
-    expect(habits.index('byCreatedAt').keyPath).toBe('createdAt')
+    expect([...habits.indexNames]).toEqual([])
     expect(entries.keyPath).toBe('id')
     expect(entries.index('byHabitAndDay').keyPath).toEqual(['habitId', 'day'])
     expect(entries.index('byHabitAndDay').unique).toBe(true)

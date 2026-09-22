@@ -26,7 +26,7 @@ export const repository: HabitRepository = {
   async loadData() {
     const db = await getDb()
     const tx = db.transaction(['habits', 'entries'], 'readonly')
-    const habits = await tx.objectStore('habits').index('byCreatedAt').getAll()
+    const habits = await tx.objectStore('habits').getAll()
     const entries = await tx.objectStore('entries').getAll()
 
     await tx.done

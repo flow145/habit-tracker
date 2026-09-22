@@ -15,8 +15,11 @@ import { useTimelineRange } from './useTimelineRange'
 export const Home = () => {
   const { t } = useTranslation()
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
-  const habits = useHabitStore((state) => state.habits)
+  const habitsById = useHabitStore((state) => state.habitsById)
   const range = useTimelineRange()
+  const habits = Object.values(habitsById).sort(
+    (first, second) => first.createdAt.getTime() - second.createdAt.getTime(),
+  )
 
   usePageTitle(t('Home.title'))
 
