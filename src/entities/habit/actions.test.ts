@@ -57,7 +57,7 @@ const createTestActions = ({
 }
 
 describe('Habit actions', () => {
-  it('hydrates one ordered, internally consistent dataset for concurrent callers', async () => {
+  it('hydrates one internally consistent dataset for concurrent callers', async () => {
     const first = makeHabit({ id: 'first', createdAt: date(2) })
     const second = makeHabit({ id: 'second', createdAt: date(1) })
     const entry = makeEntry({ habitId: first.id, day: day(2) })
@@ -77,7 +77,6 @@ describe('Habit actions', () => {
 
     expect(store.getState()).toMatchObject({
       hydrationStatus: 'ready',
-      habits: [first, second],
       habitsById: { first, second },
       entriesByHabitId: {
         first: { [entry.day]: entry },
@@ -120,17 +119,17 @@ describe('Habit actions', () => {
     expect(repository.addHabitRecord).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'generated-id', name: 'Exercise', description: 'Daily' }),
     )
-    expect(store.getState().habits).toEqual([])
+    expect(store.getState().habitsById).toEqual({})
     saved.resolve()
     await added
 
     expect(store.getState()).toMatchObject({
-      habits: [expect.objectContaining({ id: 'generated-id' })],
+      habitsById: { 'generated-id': expect.objectContaining({ id: 'generated-id' }) },
       entriesByHabitId: { 'generated-id': {} },
     })
   })
 
-  it('keeps edits pessimistic and replaces the existing ordered Habit position on success', async () => {
+  it('keeps edits pessimistic and replaces the existing Habit on success', async () => {
     const first = makeHabit({ id: 'first' })
     const second = makeHabit({ id: 'second' })
     const saved = deferred<void>()
@@ -140,11 +139,14 @@ describe('Habit actions', () => {
 
     const edited = actions.editHabit({ id: first.id, name: 'Exercise' })
     await settle()
-    expect(store.getState().habits).toEqual([first, second])
+    expect(store.getState().habitsById).toEqual({ first, second })
     saved.resolve()
     await edited
 
-    expect(store.getState().habits).toEqual([expect.objectContaining({ name: 'Exercise' }), second])
+    expect(store.getState().habitsById).toEqual({
+      first: expect.objectContaining({ name: 'Exercise' }),
+      second,
+    })
   })
 
   it('optimistically toggles a Day and rolls it back when persistence fails', async () => {

@@ -31,16 +31,16 @@ afterEach(async () => {
 })
 
 describe('loadHabitData', () => {
-  it('returns all habits in creation order and all entries', async () => {
+  it('returns all habits and entries', async () => {
     const oldest = await seed(makeHabit({ id: 'habit-1', createdAt: date(1) }))
     const newest = await seed(makeHabit({ id: 'habit-2', createdAt: date(2) }))
     const firstEntry = await seed(makeEntry({ id: 'entry-1', habitId: oldest.id }))
     const secondEntry = await seed(makeEntry({ id: 'entry-2', habitId: newest.id, day: day(2) }))
 
-    expect(await repository.loadData()).toEqual({
-      habits: [oldest, newest],
-      entries: [firstEntry, secondEntry],
-    })
+    const data = await repository.loadData()
+
+    expect(data.habits).toEqual(expect.arrayContaining([oldest, newest]))
+    expect(data.entries).toEqual(expect.arrayContaining([firstEntry, secondEntry]))
   })
 })
 

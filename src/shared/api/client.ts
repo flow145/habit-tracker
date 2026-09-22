@@ -13,12 +13,8 @@ export const getDb = () => {
   const opening = openDB<DBSchema>(import.meta.env.VITE_DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion, _newVersion, tx) {
       if (oldVersion < 1) {
-        const habitStore = db.objectStoreNames.contains('habits')
-          ? tx.objectStore('habits')
-          : db.createObjectStore('habits', { keyPath: 'id' })
-
-        if (!habitStore.indexNames.contains('byCreatedAt'))
-          habitStore.createIndex('byCreatedAt', 'createdAt')
+        if (!db.objectStoreNames.contains('habits'))
+          db.createObjectStore('habits', { keyPath: 'id' })
 
         const entryStore = db.objectStoreNames.contains('entries')
           ? tx.objectStore('entries')
