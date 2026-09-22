@@ -3,7 +3,9 @@
     "appTitle": "Habit tracker",
     "back": "Back",
     "save": "Save",
-    "delete": "Delete",
+    "delete": "Delete"
+  },
+  "notifications": {
     "initFailed": "Couldn’t initialize the app.",
     "updateBlocked": "Update pending, please close all the other Habit Tracker tabs",
     "changeFailed": "Couldn’t save your changes. Please try again.",

@@ -27,7 +27,7 @@ export const getDb = () => {
     },
 
     blocked() {
-      alert(i18n.t('shared.updateBlocked'))
+      alert(i18n.t('notifications.updateBlocked'))
     },
 
     async blocking() {

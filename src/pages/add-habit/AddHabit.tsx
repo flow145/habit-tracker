@@ -29,7 +29,11 @@ export const AddHabit = () => {
     } catch (error) {
       console.error(error)
       alert(
-        t(isErrorNamed(error, 'QuotaExceededError') ? 'shared.storageFull' : 'shared.changeFailed'),
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
       )
     } finally {
       setIsSubmitting(false)

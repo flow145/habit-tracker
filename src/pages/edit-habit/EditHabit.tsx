@@ -40,7 +40,11 @@ export const EditHabit = () => {
     } catch (error) {
       console.error(error)
       alert(
-        t(isErrorNamed(error, 'QuotaExceededError') ? 'shared.storageFull' : 'shared.changeFailed'),
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
       )
     } finally {
       setIsSubmitting(false)
@@ -58,7 +62,11 @@ export const EditHabit = () => {
     } catch (error) {
       console.error(error)
       alert(
-        t(isErrorNamed(error, 'QuotaExceededError') ? 'shared.storageFull' : 'shared.changeFailed'),
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
       )
     } finally {
       setIsDeleting(false)

@@ -53,7 +53,11 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
     toggleDay({ habitId, day }).catch((error: unknown) => {
       console.error(error)
       alert(
-        t(isErrorNamed(error, 'QuotaExceededError') ? 'shared.storageFull' : 'shared.changeFailed'),
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
       )
     })
   }
