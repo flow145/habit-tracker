@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import type { Entry, ExplicitStatus, Schedule } from '~/shared/api'
+import type { ExplicitStatus, Schedule } from '~/shared/api'
 import { Day } from '~/shared/lib'
 import { day } from '~/shared/tests'
 import {
@@ -10,13 +10,13 @@ import {
   getWindowStart,
 } from './computed-entries'
 
-type TestEntry = Pick<Entry, 'day' | 'status'>
+type TestEntries = Record<Day['value'], ExplicitStatus>
 
 interface BuildComputedEntriesTestCase {
   start: Day
   end: Day
   schedule: Schedule
-  entries: TestEntry[]
+  entries: TestEntries
   expected: { statuses: string[]; firstDay: Day; lastDay: Day }
 }
 
@@ -26,13 +26,10 @@ const twoIn3Days: Schedule = { frequency: 2, interval: 3, intervalUnit: 'days' }
 const threeIn1Week: Schedule = { frequency: 3, interval: 1, intervalUnit: 'weeks' }
 const everyMonth: Schedule = { frequency: 1, interval: 1, intervalUnit: 'months' }
 
-export const entry = (day: Day, status: ExplicitStatus = 'complete'): TestEntry => ({
-  day: day.value,
-  status,
-})
-
-const entriesByDay = (entries: readonly TestEntry[]) =>
-  Object.fromEntries(entries.map((entry) => [entry.day, entry]))
+const entriesByDay = (entries: TestEntries) =>
+  Object.fromEntries(
+    Object.entries(entries).map(([day, status]) => [day, { day: day as Day['value'], status }]),
+  )
 
 describe('getNextStatus', () => {
   it('cycles complete to incomplete', () => {
@@ -109,21 +106,21 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(1),
       schedule: everyDay,
-      entries: [],
+      entries: {},
       expected: { statuses: ['incomplete'], firstDay: day(1), lastDay: day(1) },
     },
     {
       start: day(1),
       end: day(1),
       schedule: everyDay,
-      entries: [entry(day(1))],
+      entries: { [day(1).value]: 'complete' },
       expected: { statuses: ['complete'], firstDay: day(1), lastDay: day(1) },
     },
     {
       start: day(1),
       end: day(3),
       schedule: everyDay,
-      entries: [entry(day(1)), entry(day(3))],
+      entries: { [day(1).value]: 'complete', [day(3).value]: 'complete' },
       expected: {
         statuses: ['complete', 'incomplete', 'complete'],
         firstDay: day(1),
@@ -154,7 +151,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(2),
       schedule: twoIn3Days,
-      entries: [],
+      entries: {},
       expected: {
         statuses: ['incomplete', 'incomplete'],
         firstDay: day(1),
@@ -165,21 +162,21 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(2),
       schedule: twoIn3Days,
-      entries: [entry(day(1))],
+      entries: { [day(1).value]: 'complete' },
       expected: { statuses: ['complete', 'incomplete'], firstDay: day(1), lastDay: day(2) },
     },
     {
       start: day(1),
       end: day(2),
       schedule: twoIn3Days,
-      entries: [entry(day(2))],
+      entries: { [day(2).value]: 'complete' },
       expected: { statuses: ['incomplete', 'complete'], firstDay: day(1), lastDay: day(2) },
     },
     {
       start: day(1),
       end: day(3),
       schedule: twoIn3Days,
-      entries: [entry(day(1))],
+      entries: { [day(1).value]: 'complete' },
       expected: {
         statuses: ['complete', 'incomplete', 'incomplete'],
         firstDay: day(1),
@@ -190,7 +187,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(3),
       schedule: twoIn3Days,
-      entries: [entry(day(2))],
+      entries: { [day(2).value]: 'complete' },
       expected: {
         statuses: ['incomplete', 'complete', 'incomplete'],
         firstDay: day(1),
@@ -201,7 +198,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(3),
       schedule: twoIn3Days,
-      entries: [entry(day(3))],
+      entries: { [day(3).value]: 'complete' },
       expected: {
         statuses: ['incomplete', 'incomplete', 'complete'],
         firstDay: day(1),
@@ -212,7 +209,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(3),
       schedule: twoIn3Days,
-      entries: [entry(day(1)), entry(day(3))],
+      entries: { [day(1).value]: 'complete', [day(3).value]: 'complete' },
       expected: {
         statuses: ['complete', 'not-required', 'complete'],
         firstDay: day(1),
@@ -223,7 +220,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(3),
       schedule: twoIn3Days,
-      entries: [entry(day(1)), entry(day(2))],
+      entries: { [day(1).value]: 'complete', [day(2).value]: 'complete' },
       expected: {
         statuses: ['complete', 'complete', 'not-required'],
         firstDay: day(1),
@@ -234,7 +231,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(3),
       schedule: twoIn3Days,
-      entries: [entry(day(2)), entry(day(3))],
+      entries: { [day(2).value]: 'complete', [day(3).value]: 'complete' },
       expected: {
         statuses: ['incomplete', 'complete', 'complete'],
         firstDay: day(1),
@@ -245,7 +242,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: twoIn3Days,
-      entries: [entry(day(2))],
+      entries: { [day(2).value]: 'complete' },
       expected: {
         statuses: ['incomplete', 'complete', 'incomplete', 'incomplete'],
         firstDay: day(1),
@@ -256,7 +253,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: twoIn3Days,
-      entries: [entry(day(1)), entry(day(4))],
+      entries: { [day(1).value]: 'complete', [day(4).value]: 'complete' },
       expected: {
         statuses: ['complete', 'incomplete', 'incomplete', 'complete'],
         firstDay: day(1),
@@ -267,7 +264,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: twoIn3Days,
-      entries: [entry(day(1)), entry(day(2))],
+      entries: { [day(1).value]: 'complete', [day(2).value]: 'complete' },
       expected: {
         statuses: ['complete', 'complete', 'not-required', 'incomplete'],
         firstDay: day(1),
@@ -278,7 +275,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: twoIn3Days,
-      entries: [entry(day(1)), entry(day(3))],
+      entries: { [day(1).value]: 'complete', [day(3).value]: 'complete' },
       expected: {
         statuses: ['complete', 'not-required', 'complete', 'incomplete'],
         firstDay: day(1),
@@ -289,7 +286,11 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: twoIn3Days,
-      entries: [entry(day(1)), entry(day(2)), entry(day(3))],
+      entries: {
+        [day(1).value]: 'complete',
+        [day(2).value]: 'complete',
+        [day(3).value]: 'complete',
+      },
       expected: {
         statuses: ['complete', 'complete', 'complete', 'not-required'],
         firstDay: day(1),
@@ -320,7 +321,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: threeIn1Week,
-      entries: [],
+      entries: {},
       expected: {
         statuses: Array(4).fill('incomplete'),
         firstDay: day(1),
@@ -331,7 +332,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: threeIn1Week,
-      entries: [entry(day(1))],
+      entries: { [day(1).value]: 'complete' },
       expected: {
         statuses: ['complete', 'incomplete', 'incomplete', 'incomplete'],
         firstDay: day(1),
@@ -342,7 +343,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: threeIn1Week,
-      entries: [entry(day(1)), entry(day(3))],
+      entries: { [day(1).value]: 'complete', [day(3).value]: 'complete' },
       expected: {
         statuses: ['complete', 'incomplete', 'complete', 'incomplete'],
         firstDay: day(1),
@@ -353,7 +354,11 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: threeIn1Week,
-      entries: [entry(day(1)), entry(day(2)), entry(day(3))],
+      entries: {
+        [day(1).value]: 'complete',
+        [day(2).value]: 'complete',
+        [day(3).value]: 'complete',
+      },
       expected: {
         statuses: ['complete', 'complete', 'complete', 'not-required'],
         firstDay: day(1),
@@ -364,7 +369,11 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(4),
       schedule: threeIn1Week,
-      entries: [entry(day(1)), entry(day(3)), entry(day(4))],
+      entries: {
+        [day(1).value]: 'complete',
+        [day(3).value]: 'complete',
+        [day(4).value]: 'complete',
+      },
       expected: {
         statuses: ['complete', 'not-required', 'complete', 'complete'],
         firstDay: day(1),
@@ -375,7 +384,7 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(7),
       schedule: threeIn1Week,
-      entries: [entry(day(1))],
+      entries: { [day(1).value]: 'complete' },
       expected: {
         statuses: [
           'complete',
@@ -394,7 +403,11 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(7),
       schedule: threeIn1Week,
-      entries: [entry(day(1)), entry(day(3)), entry(day(5))],
+      entries: {
+        [day(1).value]: 'complete',
+        [day(3).value]: 'complete',
+        [day(5).value]: 'complete',
+      },
       expected: {
         statuses: [
           'complete',
@@ -413,7 +426,11 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(7),
       schedule: threeIn1Week,
-      entries: [entry(day(2)), entry(day(4)), entry(day(6))],
+      entries: {
+        [day(2).value]: 'complete',
+        [day(4).value]: 'complete',
+        [day(6).value]: 'complete',
+      },
       expected: {
         statuses: [
           'incomplete',
@@ -432,7 +449,11 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(10),
       schedule: threeIn1Week,
-      entries: [entry(day(3)), entry(day(8)), entry(day(9))],
+      entries: {
+        [day(3).value]: 'complete',
+        [day(8).value]: 'complete',
+        [day(9).value]: 'complete',
+      },
       expected: {
         statuses: [
           'incomplete',
@@ -454,7 +475,12 @@ describe('buildComputedEntries', () => {
       start: day(1),
       end: day(10),
       schedule: threeIn1Week,
-      entries: [entry(day(1)), entry(day(3)), entry(day(5)), entry(day(8))],
+      entries: {
+        [day(1).value]: 'complete',
+        [day(3).value]: 'complete',
+        [day(5).value]: 'complete',
+        [day(8).value]: 'complete',
+      },
       expected: {
         statuses: [
           'complete',
@@ -496,7 +522,7 @@ describe('buildComputedEntries', () => {
       start: day(28),
       end: day(1, 3),
       schedule: everyMonth,
-      entries: [entry(day(28))],
+      entries: { [day(28).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(30).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(28),
@@ -507,7 +533,7 @@ describe('buildComputedEntries', () => {
       start: day(29),
       end: day(1, 3),
       schedule: everyMonth,
-      entries: [entry(day(29))],
+      entries: { [day(29).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(29).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(29),
@@ -518,7 +544,7 @@ describe('buildComputedEntries', () => {
       start: day(30),
       end: day(1, 3),
       schedule: everyMonth,
-      entries: [entry(day(30))],
+      entries: { [day(30).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(28).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(30),
@@ -529,7 +555,7 @@ describe('buildComputedEntries', () => {
       start: day(31),
       end: day(1, 3),
       schedule: everyMonth,
-      entries: [entry(day(31))],
+      entries: { [day(31).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(27).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(31),
@@ -540,7 +566,7 @@ describe('buildComputedEntries', () => {
       start: day(1, 2),
       end: day(2, 3),
       schedule: everyMonth,
-      entries: [entry(day(1, 2))],
+      entries: { [day(1, 2).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(27).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(1, 2),
@@ -551,7 +577,7 @@ describe('buildComputedEntries', () => {
       start: day(28, 2),
       end: day(29, 3),
       schedule: everyMonth,
-      entries: [entry(day(28, 2))],
+      entries: { [day(28, 2).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(27).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(28, 2),
@@ -562,7 +588,7 @@ describe('buildComputedEntries', () => {
       start: day(1, 3),
       end: day(2, 4),
       schedule: everyMonth,
-      entries: [entry(day(1, 3))],
+      entries: { [day(1, 3).value]: 'complete' },
       expected: {
         statuses: ['complete', ...Array(30).fill('not-required'), ...Array(2).fill('incomplete')],
         firstDay: day(1, 3),
@@ -592,7 +618,7 @@ describe('buildComputedEntries', () => {
     const computedEntries = buildComputedEntries({
       start: day(2),
       end: day(4),
-      entries: entriesByDay([entry(day(1))]),
+      entries: entriesByDay({ [day(1).value]: 'complete' }),
       schedule: every3Days,
     })
 
@@ -608,7 +634,7 @@ describe('buildComputedEntries', () => {
     const computedEntries = buildComputedEntries({
       start: day(4),
       end: day(6),
-      entries: entriesByDay([entry(day(1))]),
+      entries: entriesByDay({ [day(1).value]: 'complete' }),
       schedule: every3Days,
     })
 
@@ -619,7 +645,7 @@ describe('buildComputedEntries', () => {
     const computedEntries = buildComputedEntries({
       start: day(1),
       end: day(3),
-      entries: entriesByDay([entry(day(4))]),
+      entries: entriesByDay({ [day(4).value]: 'complete' }),
       schedule: every3Days,
     })
 
@@ -629,7 +655,10 @@ describe('buildComputedEntries', () => {
   it('keeps schedule results on the same dates after a time-zone change', () => {
     const start = new Day('2026-03-07')
     const end = new Day('2026-03-11')
-    const entries = entriesByDay([entry(start), entry(new Day('2026-03-09'))])
+    const entries = entriesByDay({
+      [start.value]: 'complete',
+      [new Day('2026-03-09').value]: 'complete',
+    })
 
     try {
       vi.stubEnv('TZ', 'America/New_York')
