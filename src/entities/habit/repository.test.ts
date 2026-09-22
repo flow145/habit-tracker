@@ -7,7 +7,7 @@ import {
   getDb,
   type Habit,
 } from '~/shared/api'
-import { date, resetTestDb } from '~/shared/tests'
+import { date, day, resetTestDb } from '~/shared/tests'
 
 import { repository } from './repository'
 import { makeEntry, makeHabit } from './testUtils'
@@ -35,7 +35,7 @@ describe('loadHabitData', () => {
     const oldest = await seed(makeHabit({ id: 'habit-1', createdAt: date(1) }))
     const newest = await seed(makeHabit({ id: 'habit-2', createdAt: date(2) }))
     const firstEntry = await seed(makeEntry({ id: 'entry-1', habitId: oldest.id }))
-    const secondEntry = await seed(makeEntry({ id: 'entry-2', habitId: newest.id, day: date(2) }))
+    const secondEntry = await seed(makeEntry({ id: 'entry-2', habitId: newest.id, day: day(2) }))
 
     expect(await repository.loadData()).toEqual({
       habits: [oldest, newest],
@@ -119,7 +119,7 @@ describe('addEntryRecord', () => {
       id: 'entry-1',
       habitId: 'habit-1',
       status: 'complete' as const,
-      day: date(1),
+      day: day(1).value,
       createdAt: date(1),
       updatedAt: date(1),
     }
@@ -138,12 +138,20 @@ describe('addEntryRecord', () => {
       cause: expect.objectContaining({ name: 'ConstraintError' }),
     })
   })
+
+  it('rejects a second entry for the same habit and calendar day', async () => {
+    await seed(makeEntry({ id: 'first', day: day(1) }))
+
+    await expect(
+      repository.addEntryRecord(makeEntry({ id: 'second', day: day(1) })),
+    ).rejects.toThrow(EntityConflictError)
+  })
 })
 
 describe('getEntryRecord', () => {
   it('returns the entry matching the supplied Habit and Day', async () => {
-    const entry = await seed(makeEntry({ habitId: 'habit-1', day: date(2) }))
-    await seed(makeEntry({ id: 'other', habitId: 'habit-1', day: date(3) }))
+    const entry = await seed(makeEntry({ habitId: 'habit-1', day: day(2) }))
+    await seed(makeEntry({ id: 'other', habitId: 'habit-1', day: day(3) }))
 
     expect(await repository.getEntryRecord({ habitId: entry.habitId, day: entry.day })).toEqual(
       entry,
@@ -151,22 +159,26 @@ describe('getEntryRecord', () => {
   })
 
   it('returns null when no Entry matches', async () => {
-    expect(await repository.getEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeNull()
+    expect(await repository.getEntryRecord({ habitId: 'habit-1', day: day(1).value })).toBeNull()
   })
 })
 
 describe('deleteEntryRecord', () => {
   it('deletes only the entry matching the habit and day', async () => {
-    await seed(makeEntry({ id: 'entry-1', day: date(1) }))
-    const kept = await seed(makeEntry({ id: 'entry-2', day: date(2) }))
-    const otherHabit = await seed(makeEntry({ id: 'entry-3', habitId: 'habit-2', day: date(1) }))
+    await seed(makeEntry({ id: 'entry-1', day: day(1) }))
+    const kept = await seed(makeEntry({ id: 'entry-2', day: day(2) }))
+    const otherHabit = await seed(makeEntry({ id: 'entry-3', habitId: 'habit-2', day: day(1) }))
 
-    expect(await repository.deleteEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeUndefined()
+    expect(
+      await repository.deleteEntryRecord({ habitId: 'habit-1', day: day(1).value }),
+    ).toBeUndefined()
     expect(await getAllEntries()).toEqual([kept, otherHabit])
   })
 
   it('does nothing when the entry is absent', async () => {
-    expect(await repository.deleteEntryRecord({ habitId: 'habit-1', day: date(1) })).toBeUndefined()
+    expect(
+      await repository.deleteEntryRecord({ habitId: 'habit-1', day: day(1).value }),
+    ).toBeUndefined()
   })
 })
 
@@ -175,7 +187,7 @@ describe('deleteHabitRecord', () => {
     const deleted = await seed(makeHabit({ id: 'habit-1' }))
     const kept = await seed(makeHabit({ id: 'habit-2' }))
     await seed(makeEntry({ id: 'entry-1', habitId: deleted.id }))
-    await seed(makeEntry({ id: 'entry-2', habitId: deleted.id, day: date(2) }))
+    await seed(makeEntry({ id: 'entry-2', habitId: deleted.id, day: day(2) }))
     const keptEntry = await seed(makeEntry({ id: 'entry-3', habitId: kept.id }))
 
     expect(await repository.deleteHabitRecord(deleted.id)).toBeUndefined()

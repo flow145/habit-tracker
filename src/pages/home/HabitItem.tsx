@@ -1,5 +1,4 @@
 import { clsx } from 'clsx'
-import { format } from 'date-fns'
 import { Check, Squircle } from 'lucide-react'
 import { type ReactElement, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,11 +11,12 @@ import {
   toggleDay,
   useHabitStore,
 } from '~/entities/habit'
+import type { Day } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 
 import styles from './HabitItem.module.css'
 import SquircleCheckIcon from './squircle-check.svg'
-import type { DateRange } from './types'
+import type { DayRange } from './types'
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
   complete: { icon: <Check />, i18nKey: 'complete' },
@@ -26,7 +26,7 @@ const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: strin
 
 export interface HabitItemProps {
   habitId: string
-  range: DateRange
+  range: DayRange
 }
 
 export const HabitItem = ({ habitId, range }: HabitItemProps) => {
@@ -49,7 +49,7 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
 
   if (!habit) return null
 
-  const handleToggleDay = (day: Date) => {
+  const handleToggleDay = (day: Day) => {
     toggleDay({ habitId, day }).catch((error: unknown) => {
       console.error(error)
       alert(t('shared.changeFailed'))
@@ -70,12 +70,12 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
           const { icon, i18nKey } = STATUS_CONFIG[status]
 
           return (
-            <li key={day.toISOString()} className={styles.dayItem}>
+            <li key={day.value} className={styles.dayItem}>
               <button
                 type='button'
                 className={clsx(styles.dayToggle, isMuted && styles.muted)}
                 aria-label={t('HabitItem.dayToggle', {
-                  date: format(day, 'MMMM d'),
+                  date: day.format('MMMM d'),
                   currentStatus: t(`HabitItem.dayStatus.${i18nKey}`),
                   nextStatus: t(`HabitItem.dayStatus.${nextStatus}`),
                 })}

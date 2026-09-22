@@ -1,25 +1,26 @@
-import { isSameDay, subDays } from 'date-fns'
 import { useEffect, useMemo, useState } from 'react'
 
-import type { DateRange } from './types'
+import { Day } from '~/shared/lib'
+
+import type { DayRange } from './types'
 
 const DAY_COUNT = 10
 const CHECK_INTERVAL = 60_000
 
-const getTimelineStart = (end = new Date()) => subDays(end, DAY_COUNT - 1)
+const getTimelineStart = (end: Day) => end.subtract({ days: DAY_COUNT - 1 })
 
-const getRange = (end: Date): DateRange => ({
+const getRange = (end: Day): DayRange => ({
   start: getTimelineStart(end),
   end,
 })
 
-export const useTimelineRange = (): DateRange => {
-  const [end, setEnd] = useState(new Date())
+export const useTimelineRange = (): DayRange => {
+  const [end, setEnd] = useState(() => new Day())
 
   useEffect(() => {
     const updateIfDayChanged = () => {
-      const next = new Date()
-      setEnd((current) => (isSameDay(current, next) ? current : next))
+      const next = new Day()
+      setEnd((current) => (current.value === next.value ? current : next))
     }
 
     const handleVisibilityChange = () => {

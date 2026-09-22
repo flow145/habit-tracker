@@ -4,17 +4,17 @@ import { IDBFactory } from 'fake-indexeddb'
 import type { ReactElement, ReactNode } from 'react'
 
 import { closeDb } from '~/shared/api'
+import { Day } from '~/shared/lib'
 
 interface ProvidersProps {
   children: ReactNode
 }
 
-/**
- * @param [month=1] 1-12
- * @returns local date
- */
+/** @param [month=1] 1-12 */
 export const date = (day: number, month = 1, hour = 0, minute = 0) =>
   new Date(2026, month - 1, day, hour, minute)
+
+export const day = (dayOfMonth: number, month = 1) => new Day(date(dayOfMonth, month))
 
 const Providers = ({ children }: ProvidersProps) => {
   return <div>{children}</div>

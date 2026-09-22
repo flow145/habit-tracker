@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { createStore } from 'zustand/vanilla'
 
 import type { Entry } from '~/shared/api'
-import { date } from '~/shared/tests'
+import { Day } from '~/shared/lib'
+import { date, day } from '~/shared/tests'
 
 import { createHabitActions } from './actions'
 import type { HabitData, HabitRepository } from './repository'
@@ -59,8 +60,8 @@ describe('Habit actions', () => {
   it('hydrates one ordered, internally consistent dataset for concurrent callers', async () => {
     const first = makeHabit({ id: 'first', createdAt: date(2) })
     const second = makeHabit({ id: 'second', createdAt: date(1) })
-    const entry = makeEntry({ habitId: first.id, day: date(2) })
-    const orphan = makeEntry({ id: 'orphan', habitId: 'missing', day: date(3) })
+    const entry = makeEntry({ habitId: first.id, day: day(2) })
+    const orphan = makeEntry({ id: 'orphan', habitId: 'missing', day: day(3) })
     const loading = deferred<HabitData>()
     const repository = mockRepository()
     repository.loadData.mockReturnValueOnce(loading.promise)
@@ -79,7 +80,7 @@ describe('Habit actions', () => {
       habits: [first, second],
       habitsById: { first, second },
       entriesByHabitId: {
-        first: { [entry.day.toISOString()]: entry },
+        first: { [entry.day]: entry },
         second: {},
       },
     })
@@ -154,9 +155,9 @@ describe('Habit actions', () => {
     const { actions, store } = createTestActions({ repository })
     await actions.hydrateHabitStore()
 
-    const toggled = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    const toggled = actions.toggleDay({ habitId: habit.id, day: day(2) })
     await settle()
-    expect(store.getState().entriesByHabitId[habit.id]?.[date(2).toISOString()]).toMatchObject({
+    expect(store.getState().entriesByHabitId[habit.id]?.[day(2).value]).toMatchObject({
       habitId: habit.id,
     })
 
@@ -173,9 +174,9 @@ describe('Habit actions', () => {
     const { actions, store } = createTestActions({ repository })
     await actions.hydrateHabitStore()
 
-    const first = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    const first = actions.toggleDay({ habitId: habit.id, day: day(2) })
     await settle()
-    const second = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    const second = actions.toggleDay({ habitId: habit.id, day: day(2) })
     await settle()
     expect(store.getState().entriesByHabitId[habit.id]).toEqual({})
 
@@ -188,7 +189,7 @@ describe('Habit actions', () => {
 
   it('uses the persisted Entry after a failed removal instead of adding a duplicate', async () => {
     const habit = makeHabit()
-    const entry = makeEntry({ habitId: habit.id, day: date(2) })
+    const entry = makeEntry({ habitId: habit.id, day: day(2) })
     const failedDeletion = deferred<void>()
     const repository = mockRepository({ habits: [habit], entries: [entry] })
     repository.getEntryRecord.mockResolvedValue(entry)
@@ -196,9 +197,9 @@ describe('Habit actions', () => {
     const { actions, store } = createTestActions({ repository })
     await actions.hydrateHabitStore()
 
-    const removal = actions.toggleDay({ habitId: habit.id, day: entry.day })
+    const removal = actions.toggleDay({ habitId: habit.id, day: new Day(entry.day) })
     await settle()
-    const completion = actions.toggleDay({ habitId: habit.id, day: entry.day })
+    const completion = actions.toggleDay({ habitId: habit.id, day: new Day(entry.day) })
     await settle()
 
     failedDeletion.reject(new Error('delete failed'))
@@ -207,7 +208,7 @@ describe('Habit actions', () => {
 
     expect(repository.getEntryRecord).toHaveBeenCalledTimes(2)
     expect(repository.addEntryRecord).not.toHaveBeenCalled()
-    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day.toISOString()]).toBeDefined()
+    expect(store.getState().entriesByHabitId[habit.id]?.[entry.day]).toBeDefined()
   })
 
   it('serializes mutations for one Habit while allowing another Habit to persist independently', async () => {
@@ -223,7 +224,7 @@ describe('Habit actions', () => {
     await actions.hydrateHabitStore()
 
     const firstEdit = actions.editHabit({ id: first.id, name: 'First edit' })
-    const firstToggle = actions.toggleDay({ habitId: first.id, day: date(2) })
+    const firstToggle = actions.toggleDay({ habitId: first.id, day: day(2) })
     const secondEdit = actions.editHabit({ id: second.id, name: 'Second edit' })
     await settle()
 
@@ -247,7 +248,7 @@ describe('Habit actions', () => {
     const { actions, store } = createTestActions({ repository })
     await actions.hydrateHabitStore()
 
-    const toggle = actions.toggleDay({ habitId: habit.id, day: date(2) })
+    const toggle = actions.toggleDay({ habitId: habit.id, day: day(2) })
     await settle()
     const deletion = actions.deleteHabit(habit.id)
     await settle()

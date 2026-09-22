@@ -1,23 +1,23 @@
 import { clsx } from 'clsx'
-import { eachDayOfInterval, format } from 'date-fns'
+import { Day } from '~/shared/lib'
 
 import styles from './Timeline.module.css'
-import type { DateRange } from './types'
+import type { DayRange } from './types'
 
-export interface TimelineProps extends DateRange {}
+export interface TimelineProps extends DayRange {}
 
 export const Timeline = ({ start, end }: TimelineProps) => {
-  const days = eachDayOfInterval({ start, end })
+  const days = Day.eachDayOfInterval(start, end)
 
   return (
     <div className={styles.timeline} aria-hidden>
       <div className={styles.grid}>
         {days.map((day, i) => (
-          <div key={day.toISOString()} className={clsx(styles.cell, 'hint')}>
+          <div key={day.value} className={clsx(styles.cell, 'hint')}>
             {i % 3 === 0 && (
               <>
-                <div>{format(day, 'd')}</div>
-                <div>{format(day, 'EEE')}</div>
+                <div>{day.format('d')}</div>
+                <div>{day.format('EEE')}</div>
               </>
             )}
           </div>
