@@ -9,7 +9,7 @@ export const HabitStoreSynchronizer = () => {
   useEffect(() => {
     hydrateHabitStore().catch((error: unknown) => {
       console.error(error)
-      alert(t('shared.initFailed'))
+      alert(t('notifications.initFailed'))
     })
   }, [])
 

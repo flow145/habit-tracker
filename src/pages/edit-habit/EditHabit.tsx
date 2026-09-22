@@ -6,7 +6,7 @@ import { useLocation, useRoute } from 'wouter'
 
 import { deleteHabit, editHabit, useHabitStore } from '~/entities/habit'
 import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
-import { usePageTitle } from '~/shared/lib'
+import { isErrorNamed, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { AlertDialog } from '~/shared/ui/AlertDialog'
 import { Button } from '~/shared/ui/Button'
@@ -39,7 +39,13 @@ export const EditHabit = () => {
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
-      alert(t('shared.changeFailed'))
+      alert(
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -55,7 +61,13 @@ export const EditHabit = () => {
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
-      alert(t('shared.changeFailed'))
+      alert(
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
+      )
     } finally {
       setIsDeleting(false)
     }
