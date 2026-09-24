@@ -1,5 +1,16 @@
-# Keep Habit UI state direct in Zustand
+---
+status: accepted
+---
 
-The Habit feature exposes its observable state through the bound `useHabitStore` Zustand hook. UI modules select stored state directly: Habits by identifier for individual views and list rendering, and Entries by Habit identifier and ISO Day key. The home page derives its list by sorting Habits by creation date. Stable named actions remain separate exports so Zustand is the only observable source of truth.
+# Keep Habit UI State Direct in Zustand
 
-Only the shared hydration promise and per-Habit queue for Day persistence and Habit deletion remain private to each action-factory instance; pessimistic Habit edits do not enter that queue, and deletion does not create a separate terminal state. An optimistic Day action queries the repository for the persisted Entry when its queued write begins, then reconciles that record with the captured intent and conditionally rolls back only its own store change. This keeps IndexedDB authoritative without persisted-entry shadows or pending-intent state. Day identity was subsequently changed to a calendar-date string; computed-entry calculation now uses that identity directly.
+The local-first UI needs immediate updates while IndexedDB remains the durable source of data. Concurrent Day changes and Habit deletion can overlap, and failed writes must not overwrite newer user intent.
+
+UI modules select Habit state directly from Zustand, and stable named actions are the mutation interface. IndexedDB remains authoritative for persisted data. Day changes are optimistic, while Habit creation, editing, and deletion update Zustand only after persistence succeeds. Day persistence and Habit deletion are serialized per Habit; Habit edits remain outside that queue.
+
+## Consequences
+
+- Components do not maintain separate copies of Habit data.
+- Day changes feel immediate but require rollback handling.
+- Mutation coordination is centralized in the Habit entity's action layer.
+- The action layer must preserve newer intent when earlier operations fail.
