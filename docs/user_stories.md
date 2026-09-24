@@ -9,7 +9,7 @@
 - As a user, I want to see the last few days of each habit so that
     - I remember whether I've recently completed it
     - I am inspired by my progress
-- As a user, I want to record whether I completed today's habit so that I can track my progress
+- As a user, I want to record or correct completion for today and recent past days so that my history remains accurate
 
 ## Update habits
 

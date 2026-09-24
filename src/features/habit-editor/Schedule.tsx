@@ -11,9 +11,6 @@ import { Select, type SelectItem } from '~/shared/ui/Select'
 import styles from './Schedule.module.css'
 
 const DAYS_IN_WEEK = 7
-// TODO One month is treated as 31 days (see docs/business_rules.md). Actual month-unit
-// windows can be shorter (28–31 days), so very high frequencies may be unreachable in
-// practice until buildComputedEntries caps the requirement at the window length.
 const DAYS_IN_MONTH = 31
 
 export interface ScheduleProps {
