@@ -1,7 +1,7 @@
 {
   "name": "habit-tracker",
   "description": "A simple, cross-platform habit tracker with flexible scheduling and a focus on long-term consistency over streaks.",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "private": true,
   "type": "module",
   "license": "MIT",
