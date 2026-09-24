@@ -6,15 +6,15 @@ Build a simple, cross-platform habit tracker that helps people build lasting hab
 
 Current habit trackers often:
 
-- create unnecessary friction before users can start
-- don't support flexible scheduling (X times in Y days/weeks/months)
-- emphasize ideal streaks without a single skipped day
-- aren't available across desktop and mobile with seamless sync
-- become bloated productivity suites
+1. aren't available across desktop and mobile with seamless sync
+2. don't support flexible scheduling (X times in Y days/weeks/months)
+3. emphasize ideal streaks without a single skipped day
+4. become bloated productivity suites
+5. create unnecessary friction before users can start
 
 ## Target users
 
-People building personal habits who value flexibility, simplicity, and cross-device access.
+People building personal habits who value simplicity, flexibility, and cross-device access.
 
 ## Product principles
 

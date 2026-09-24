@@ -12,10 +12,11 @@
 - styling: CSS Modules
 - headless accessible UI library: Base UI
 - forms and validation: Base UI's Form
-- testing: mostly integration (Vitest, Testing Library) and some e2e (Playwright)
+- testing: mostly integration (Vitest, Testing Library) and some e2e (Playwright, planned)
 - i18n: just English for now but use i18next to organize strings and pluralization
 - date and time: date-fns
 
 ## Rules
 
-Organize `src` using Feature-Sliced Design (FSD). Keep non-Shared layers and slices flat; use segment directories only within `shared`.
+- Organize `src` using Feature-Sliced Design (FSD). Keep non-Shared layers and slices flat; use segment directories only within `shared`.
+- Require habit-day identity and calendar arithmetic to use `Day`/`DayString`; reserve JavaScript `Date` for timestamps and determining the current local date.

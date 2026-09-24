@@ -15,12 +15,9 @@
 - A schedule defines a target frequency, interval length, and interval unit.
 - The target frequency is the minimum number of completed days required within a schedule window.
 - The frequency and interval must be positive integers.
-- The frequency must not exceed the interval length expressed in days.
-- Supported interval units are days, weeks, and months.
+- Supported interval units and their maximum lengths are `n` days, `7 * n` days for `n` weeks, and `31 * n` days for `n` months.
+- The frequency must not exceed the interval's maximum length.
 - Schedules are evaluated in schedule windows of the specified interval.
-- A day-based interval of `n` days spans `n` days.
-- A week-based interval of `n` weeks spans `7 * n` days.
-- A month-based interval of `n` months spans the corresponding calendar-month period. A one-month interval can contain 28 to 31 days.
 - Schedules are evaluated using calendar dates; a time-zone change does not change the computed status of a given day.
 
 ## Schedule Windows
@@ -29,6 +26,8 @@
 - At each position, if the window's start day is completed and the window contains at least the schedule's target frequency of completed days, every later day in the window that is not completed is derived as `not-required`.
 - The window's start day is never derived as `not-required` by that window.
 - Each schedule window is evaluated independently. A day is derived as `not-required` when at least one applicable window derives it as `not-required`.
+- Day windows contain the specified number of days, and week windows contain `7 * n` days.
+- Month windows use calendar-month arithmetic and may contain different numbers of days; a one-month window contains at most 31 days.
 
 ## Status Calculation
 

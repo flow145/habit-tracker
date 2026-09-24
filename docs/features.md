@@ -1,13 +1,13 @@
-## Alpha 1 (MVP)
+## Alpha 1
 
 - [x] create habits (only yes/no, name, description)
 - [x] habit schedule (X times in Y days/weeks/months)
 - [x] list of habits with a few recent days' statuses (expanded view)
 - [x] mark habits complete or not (in the list)
-- [x] automatically determine today's status from habit history and schedule
-- [x] edit habit (name, description, frequency)
+- [x] automatically determine displayed day statuses from habit history and schedule
+- [x] edit habit (name, description, schedule)
 - [x] delete habits
-- [x] light/dark theme
+- [x] system/light/dark theme
 - [x] local db
 - [x] installable (pwa)
 
@@ -15,8 +15,8 @@
 
 - [ ] habit strength / consistency score
 - [ ] habit colors
-- [ ] update habit history
-- [ ] sort habit list
+- [ ] view and edit full habit history
+- [ ] custom habit ordering
 - [ ] reminders
 - [ ] week start day option
 
