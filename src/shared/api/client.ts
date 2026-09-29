@@ -1,6 +1,7 @@
 import { type IDBPDatabase, openDB } from 'idb'
 
 import { i18n } from '~/shared/i18n'
+import { showSnackbar } from '~/shared/ui/Snackbar'
 import type { DBSchema } from './schema'
 
 export const DB_VERSION = 1
@@ -27,7 +28,7 @@ export const getDb = () => {
     },
 
     blocked() {
-      alert(i18n.t('notifications.updateBlocked'))
+      showSnackbar(i18n.t('notifications.updateBlocked'))
     },
 
     async blocking() {

@@ -9,6 +9,7 @@ import { isErrorNamed, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
+import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './AddHabit.module.css'
 
@@ -25,10 +26,11 @@ export const AddHabit = () => {
 
     try {
       await addHabit({ name, description, schedule })
+      showSnackbar(t('notifications.habitAdded'))
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
-      alert(
+      showSnackbar(
         t(
           isErrorNamed(error, 'QuotaExceededError')
             ? 'notifications.storageFull'

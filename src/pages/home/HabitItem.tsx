@@ -13,6 +13,7 @@ import {
 } from '~/entities/habit'
 import { type Day, isErrorNamed } from '~/shared/lib'
 import { Path } from '~/shared/routes'
+import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './HabitItem.module.css'
 import SquircleCheckIcon from './squircle-check.svg'
@@ -52,7 +53,7 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const handleToggleDay = (day: Day) => {
     toggleDay({ habitId, day }).catch((error: unknown) => {
       console.error(error)
-      alert(
+      showSnackbar(
         t(
           isErrorNamed(error, 'QuotaExceededError')
             ? 'notifications.storageFull'
