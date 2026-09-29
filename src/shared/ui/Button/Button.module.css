@@ -4,12 +4,12 @@
   align-items: center;
   justify-content: center;
   min-block-size: 40px;
-  padding: 8px 24px;
+  padding: 8px 16px;
   text-decoration: none;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
-  border-radius: 8px;
+  border-radius: 16px;
   transition:
     color 150ms,
     background-color 150ms,
@@ -29,7 +29,7 @@
 
 .icon {
   flex: 0 0 auto;
-  inline-size: 16px;
+  inline-size: 20px;
 }
 
 .icon :where(svg) {
@@ -39,20 +39,20 @@
 }
 
 .button[data-appearance='icon'] {
-  padding: 4px;
+  padding: 8px;
 }
 
 .button[data-appearance='icon'] :where(.icon) {
-  inline-size: 32px;
+  inline-size: 24px;
 }
 
 @media (width < 600px) {
   .button[data-appearance='responsive'] {
-    padding: 4px;
+    padding: 8px;
   }
 
   .button[data-appearance='responsive'] :where(.icon) {
-    inline-size: 32px;
+    inline-size: 24px;
   }
 
   .button[data-appearance='responsive'] :where(.text) {
