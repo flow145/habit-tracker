@@ -1,0 +1,36 @@
+.snackbar {
+  inline-size: 100%;
+  padding: 10px 14px;
+  color: var(--neutral-12);
+  background-color: var(--neutral-5);
+  border: 2px solid var(--neutral-8);
+  border-radius: 8px;
+  transform: translate(var(--toast-swipe-movement-x, 0px), var(--toast-swipe-movement-y, 0px));
+  transition:
+    opacity 150ms,
+    transform 150ms;
+}
+
+.snackbar[data-starting-style],
+.snackbar[data-ending-style] {
+  opacity: 0;
+}
+
+.title {
+  text-wrap: initial;
+}
+
+.viewport {
+  position: fixed;
+  inset-block-end: 32px;
+  inset-inline-start: 50%;
+  z-index: 20;
+  inline-size: min(360px, calc(100% - 48px));
+  transform: translateX(-50%);
+}
+
+@media (width >= 600px) {
+  .viewport {
+    inset-block-end: 48px;
+  }
+}
