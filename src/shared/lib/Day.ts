@@ -86,7 +86,7 @@ export class Day {
     this.value = value
   }
 
-  private toDate(): Date {
+  toDate(): Date {
     return parseCalendarDate(this.value)
   }
 
