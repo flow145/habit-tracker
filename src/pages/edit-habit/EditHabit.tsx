@@ -60,6 +60,7 @@ export const EditHabit = () => {
 
     try {
       await deleteHabit(habitId)
+      showSnackbar(t('notifications.habitDeleted'))
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)

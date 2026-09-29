@@ -11,7 +11,8 @@
     "changeFailed": "Couldn’t save your changes. Please try again.",
     "storageFull": "Storage is full. Your change wasn’t saved",
     "habitAdded": "Habit added",
-    "habitUpdated": "Habit updated"
+    "habitUpdated": "Habit updated",
+    "habitDeleted": "Habit deleted"
   },
   "Home": {
     "title": "Habits",
