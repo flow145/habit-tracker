@@ -41,7 +41,7 @@
   cursor: pointer;
   background-color: var(--neutral-2);
   border: 2px solid var(--neutral-7);
-  border-radius: 8px;
+  border-radius: 16px;
   transition: border-color 150ms;
 }
 
@@ -70,9 +70,6 @@
 }
 
 .icon {
-  inline-size: 24px;
-  block-size: 24px;
-  margin-block: -2px;
   transition: rotate 150ms;
 }
 
@@ -91,7 +88,7 @@
   overflow-y: auto;
   background-color: var(--neutral-2);
   border: 2px solid var(--neutral-7);
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: var(--shadow-400);
 }
 
@@ -107,17 +104,11 @@
   justify-content: space-between;
   padding: 8px;
   color: var(--neutral-12);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .item[data-highlighted] {
   background-color: var(--neutral-4);
-}
-
-.indicator {
-  inline-size: 24px;
-  block-size: 24px;
-  margin-block: -1px;
 }
 
 .error {

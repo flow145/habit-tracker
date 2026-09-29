@@ -57,7 +57,7 @@ export const Select = ({
               data-disabled={disabled}
             />
             <BaseSelect.Icon className={styles.icon}>
-              <ChevronDown />
+              <ChevronDown size={20} />
             </BaseSelect.Icon>
           </BaseSelect.Trigger>
           <Field.Error className={clsx(styles.error, 'hint')} />
@@ -80,8 +80,8 @@ export const Select = ({
                     className={clsx(styles.item, 'body')}
                   >
                     <BaseSelect.ItemText>{item.label}</BaseSelect.ItemText>
-                    <BaseSelect.ItemIndicator className={styles.indicator}>
-                      <Check size={24} />
+                    <BaseSelect.ItemIndicator>
+                      <Check size={20} />
                     </BaseSelect.ItemIndicator>
                   </BaseSelect.Item>
                 ))}
