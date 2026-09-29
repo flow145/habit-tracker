@@ -11,6 +11,7 @@ import { Path } from '~/shared/routes'
 import { AlertDialog } from '~/shared/ui/AlertDialog'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
+import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './EditHabit.module.css'
 
@@ -36,10 +37,11 @@ export const EditHabit = () => {
 
     try {
       await editHabit({ id: habitId, name, description, schedule })
+      showSnackbar(t('notifications.habitUpdated'))
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
-      alert(
+      showSnackbar(
         t(
           isErrorNamed(error, 'QuotaExceededError')
             ? 'notifications.storageFull'
@@ -58,10 +60,11 @@ export const EditHabit = () => {
 
     try {
       await deleteHabit(habitId)
+      showSnackbar(t('notifications.habitDeleted'))
       navigate(Path.Home, { replace: true })
     } catch (error) {
       console.error(error)
-      alert(
+      showSnackbar(
         t(
           isErrorNamed(error, 'QuotaExceededError')
             ? 'notifications.storageFull'
