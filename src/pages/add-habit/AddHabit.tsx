@@ -5,13 +5,15 @@ import { useLocation } from 'wouter'
 
 import { addHabit, useHabitStore } from '~/entities/habit'
 import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
+import type { HabitColor } from '~/shared/api'
 import { isErrorNamed, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
 import { showSnackbar } from '~/shared/ui/Snackbar'
-
 import styles from './AddHabit.module.css'
+
+const DEFAULT_HABIT_COLOR: HabitColor = 'indigo'
 
 export const AddHabit = () => {
   const { t } = useTranslation()
@@ -25,7 +27,7 @@ export const AddHabit = () => {
     setIsSubmitting(true)
 
     try {
-      await addHabit({ name, notes, schedule })
+      await addHabit({ name, notes, color: DEFAULT_HABIT_COLOR, schedule })
       showSnackbar(t('notifications.habitAdded'))
       navigate(Path.Home, { replace: true })
     } catch (error) {
