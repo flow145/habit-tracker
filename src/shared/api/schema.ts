@@ -13,7 +13,7 @@ export interface Schedule {
 export interface Habit {
   id: string
   name: string
-  description: string
+  notes: string
   schedule: Schedule
   createdAt: Date
   updatedAt: Date

@@ -112,11 +112,11 @@ export const createHabitActions = ({
 
   const addHabit = async ({
     name,
-    description,
+    notes,
     schedule,
   }: {
     name: string
-    description?: string
+    notes?: string
     schedule: Schedule
   }) => {
     await ensureHydrated()
@@ -125,7 +125,7 @@ export const createHabitActions = ({
     const habit: Habit = {
       id: generateId(),
       name: name.trim(),
-      description: description?.trim() ?? '',
+      notes: notes?.trim() ?? '',
       schedule,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -141,12 +141,12 @@ export const createHabitActions = ({
   const editHabit = async ({
     id,
     name,
-    description,
+    notes,
     schedule,
   }: {
     id: string
     name?: string
-    description?: string
+    notes?: string
     schedule?: Schedule
   }) => {
     await ensureHydrated()
@@ -157,7 +157,7 @@ export const createHabitActions = ({
     const habit: Habit = {
       ...existing,
       name: name === undefined ? existing.name : name.trim(),
-      description: description === undefined ? existing.description : description.trim(),
+      notes: notes === undefined ? existing.notes : notes.trim(),
       schedule: schedule ?? existing.schedule,
       updatedAt: now(),
     }

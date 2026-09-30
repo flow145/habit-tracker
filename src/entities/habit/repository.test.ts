@@ -49,7 +49,7 @@ describe('addHabitRecord', () => {
     const value = {
       id: 'habit-1',
       name: '  Read  ',
-      description: '  Before bed  ',
+      notes: '  Before bed  ',
       schedule,
       createdAt: date(1),
       updatedAt: date(1),
@@ -74,7 +74,7 @@ describe('addHabitRecord', () => {
 describe('updateHabitRecord', () => {
   it('replaces an existing record with the supplied value', async () => {
     const existing = await seed(makeHabit())
-    const updated = { ...existing, name: 'Exercise', description: 'Daily', updatedAt: date(3) }
+    const updated = { ...existing, name: 'Exercise', notes: 'Daily', updatedAt: date(3) }
 
     expect(await repository.updateHabitRecord(updated)).toBeUndefined()
     expect(await getOneHabit(updated.id)).toEqual(updated)
@@ -85,7 +85,7 @@ describe('updateHabitRecord', () => {
       repository.updateHabitRecord({
         id: 'habit-1',
         name: 'Read',
-        description: '',
+        notes: '',
         schedule,
         createdAt: date(1),
         updatedAt: date(1),

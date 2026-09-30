@@ -4,7 +4,7 @@ Domain terms are defined in the project [context glossary](../CONTEXT.md).
 
 ## Habits
 
-- A habit has a name, an optional description, and one current schedule.
+- A habit has a name, optional notes, and one current schedule.
 - Changing a habit's schedule recalculates its statuses for all days; schedules are not versioned by date.
 - Deleting a habit permanently deletes its completion history.
 

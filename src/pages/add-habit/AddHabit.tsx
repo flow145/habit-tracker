@@ -21,11 +21,11 @@ export const AddHabit = () => {
 
   usePageTitle(t('AddHabit.title'))
 
-  const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
+  const handleSubmit = async ({ name, notes, schedule }: HabitFormValues) => {
     setIsSubmitting(true)
 
     try {
-      await addHabit({ name, description, schedule })
+      await addHabit({ name, notes, schedule })
       showSnackbar(t('notifications.habitAdded'))
       navigate(Path.Home, { replace: true })
     } catch (error) {

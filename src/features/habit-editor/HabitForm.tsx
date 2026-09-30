@@ -17,11 +17,11 @@ export const DEFAULT_SCHEDULE: ISchedule = {
   intervalUnit: 'days',
 }
 
-const INITIAL_VALUES = { name: '', description: '', schedule: DEFAULT_SCHEDULE }
+const INITIAL_VALUES = { name: '', notes: '', schedule: DEFAULT_SCHEDULE }
 
 export interface HabitFormValues {
   name: string
-  description: string
+  notes: string
   schedule: ISchedule
 }
 
@@ -60,10 +60,10 @@ export const HabitForm = ({
       />
       <TextField
         component='textarea'
-        label={t('AddHabit.fields.description')}
-        name='description'
-        defaultValue={initialValues.description}
-        placeholder={t('AddHabit.fields.descriptionPlaceholder')}
+        label={t('AddHabit.fields.notes')}
+        name='notes'
+        defaultValue={initialValues.notes}
+        placeholder={t('AddHabit.fields.notesPlaceholder')}
         disabled={disabled}
       />
       <Schedule value={schedule} onValueChange={setSchedule} disabled={disabled} />

@@ -30,13 +30,13 @@ export const EditHabit = () => {
 
   usePageTitle(t('EditHabit.title'))
 
-  const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
+  const handleSubmit = async ({ name, notes, schedule }: HabitFormValues) => {
     if (!habitId) return
 
     setIsSubmitting(true)
 
     try {
-      await editHabit({ id: habitId, name, description, schedule })
+      await editHabit({ id: habitId, name, notes, schedule })
       showSnackbar(t('notifications.habitUpdated'))
       navigate(Path.Home, { replace: true })
     } catch (error) {
