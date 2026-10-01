@@ -33,8 +33,8 @@
     "fields": {
       "name": "Name",
       "namePlaceholder": "Habit name",
-      "description": "Description",
-      "descriptionPlaceholder": "Notes"
+      "notes": "Notes",
+      "notesPlaceholder": "Notes"
     }
   },
   "EditHabit": {
@@ -53,6 +53,37 @@
   "HabitForm": {
     "errors": {
       "nameRequired": "Name is required"
+    }
+  },
+  "ColorField": {
+    "legend": "Color",
+    "colors": {
+      "red": "Red",
+      "ruby": "Ruby",
+      "crimson": "Crimson",
+      "pink": "Pink",
+      "plum": "Plum",
+      "purple": "Purple",
+      "violet": "Violet",
+      "iris": "Iris",
+      "indigo": "Indigo",
+      "blue": "Blue",
+      "sky": "Sky",
+      "cyan": "Cyan",
+      "teal": "Teal",
+      "mint": "Mint",
+      "jade": "Jade",
+      "green": "Green",
+      "grass": "Grass",
+      "lime": "Lime",
+      "yellow": "Yellow",
+      "amber": "Amber",
+      "orange": "Orange",
+      "tomato": "Tomato",
+      "brown": "Brown",
+      "bronze": "Bronze",
+      "gold": "Gold",
+      "slate": "Slate"
     }
   },
   "Schedule": {

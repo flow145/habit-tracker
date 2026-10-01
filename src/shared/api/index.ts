@@ -4,6 +4,7 @@ export type {
   Entry,
   ExplicitStatus,
   Habit,
+  HabitColor,
   IntervalUnit,
   Schedule,
 } from './schema'

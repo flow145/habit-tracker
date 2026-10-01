@@ -24,6 +24,10 @@
   color: var(--neutral-12);
 }
 
+.root[data-disabled] :where(.timesIn) {
+  color: var(--neutral-8);
+}
+
 .errors {
   display: grid;
   gap: 6px;

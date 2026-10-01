@@ -133,7 +133,7 @@ export const Schedule = ({ value, onValueChange, disabled, className }: Schedule
           onValueChange={handleFrequencyChange}
           onValueCommitted={handleFrequencyCommit}
         />
-        <span className={clsx(styles.timesIn, 'body')} aria-hidden='true'>
+        <span className={clsx(styles.timesIn, 'body')} aria-hidden>
           {t('Schedule.timesIn')}
         </span>
         <NumberField

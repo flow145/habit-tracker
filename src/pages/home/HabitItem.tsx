@@ -50,6 +50,17 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
 
   if (!habit) return null
 
+  const { color } = habit
+  const colors = {
+    '--gradient-start': `var(--${color}-2)`,
+    '--gradient-end': `var(--${color}-3)`,
+    '--border-color': `var(--${color}-7)`,
+    '--name-color': `var(--${color}-12)`,
+    '--toggle-color': `var(--${color}-11)`,
+    '--toggle-hover-color': `var(--${color}-12)`,
+    '--muted-color': `var(--${color}-8)`,
+  }
+
   const handleToggleDay = (day: Day) => {
     toggleDay({ habitId, day }).catch((error: unknown) => {
       console.error(error)
@@ -64,7 +75,7 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   }
 
   return (
-    <article className={styles.habit}>
+    <article className={styles.habit} style={colors}>
       <h2 className={clsx(styles.name, 'subheading')}>
         <Link className={styles.nameLink} to={`${Path.EditHabit}/${habit.id}`}>
           {habit.name}

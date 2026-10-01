@@ -49,7 +49,8 @@ describe('database client', () => {
     const record = {
       id: 'habit-persistence',
       name: 'Persistence',
-      description: '',
+      notes: '',
+      color: 'indigo' as const,
       schedule: { frequency: 1, interval: 1, intervalUnit: 'days' as const },
       createdAt,
       updatedAt,

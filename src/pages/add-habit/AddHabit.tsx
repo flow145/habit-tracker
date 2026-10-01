@@ -10,7 +10,6 @@ import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
 import { showSnackbar } from '~/shared/ui/Snackbar'
-
 import styles from './AddHabit.module.css'
 
 export const AddHabit = () => {
@@ -21,11 +20,11 @@ export const AddHabit = () => {
 
   usePageTitle(t('AddHabit.title'))
 
-  const handleSubmit = async ({ name, description, schedule }: HabitFormValues) => {
+  const handleSubmit = async ({ name, notes, color, schedule }: HabitFormValues) => {
     setIsSubmitting(true)
 
     try {
-      await addHabit({ name, description, schedule })
+      await addHabit({ name, notes, color, schedule })
       showSnackbar(t('notifications.habitAdded'))
       navigate(Path.Home, { replace: true })
     } catch (error) {

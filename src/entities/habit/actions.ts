@@ -1,7 +1,13 @@
 import { v7 as uuidv7 } from 'uuid'
 import type { StoreApi } from 'zustand'
 
-import { EntityNotFoundError, type Entry, type Habit, type Schedule } from '~/shared/api'
+import {
+  EntityNotFoundError,
+  type Entry,
+  type Habit,
+  type HabitColor,
+  type Schedule,
+} from '~/shared/api'
 import { type Day, toError } from '~/shared/lib'
 
 import { type HabitData, type HabitRepository, repository } from './repository'
@@ -112,11 +118,13 @@ export const createHabitActions = ({
 
   const addHabit = async ({
     name,
-    description,
+    notes,
+    color,
     schedule,
   }: {
     name: string
-    description?: string
+    notes?: string
+    color: HabitColor
     schedule: Schedule
   }) => {
     await ensureHydrated()
@@ -125,7 +133,8 @@ export const createHabitActions = ({
     const habit: Habit = {
       id: generateId(),
       name: name.trim(),
-      description: description?.trim() ?? '',
+      notes: notes?.trim() ?? '',
+      color,
       schedule,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -141,12 +150,14 @@ export const createHabitActions = ({
   const editHabit = async ({
     id,
     name,
-    description,
+    notes,
+    color,
     schedule,
   }: {
     id: string
     name?: string
-    description?: string
+    notes?: string
+    color?: HabitColor
     schedule?: Schedule
   }) => {
     await ensureHydrated()
@@ -157,7 +168,8 @@ export const createHabitActions = ({
     const habit: Habit = {
       ...existing,
       name: name === undefined ? existing.name : name.trim(),
-      description: description === undefined ? existing.description : description.trim(),
+      notes: notes === undefined ? existing.notes : notes.trim(),
+      color: color ?? existing.color,
       schedule: schedule ?? existing.schedule,
       updatedAt: now(),
     }

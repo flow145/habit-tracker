@@ -111,13 +111,19 @@ describe('Habit actions', () => {
 
     const added = actions.addHabit({
       name: '  Exercise  ',
-      description: '  Daily  ',
+      notes: '  Daily  ',
+      color: 'violet',
       schedule: makeHabit().schedule,
     })
     await settle()
 
     expect(repository.addHabitRecord).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'generated-id', name: 'Exercise', description: 'Daily' }),
+      expect.objectContaining({
+        id: 'generated-id',
+        name: 'Exercise',
+        notes: 'Daily',
+        color: 'violet',
+      }),
     )
     expect(store.getState().habitsById).toEqual({})
     saved.resolve()
@@ -130,7 +136,7 @@ describe('Habit actions', () => {
   })
 
   it('keeps edits pessimistic and replaces the existing Habit on success', async () => {
-    const first = makeHabit({ id: 'first' })
+    const first = makeHabit({ id: 'first', notes: 'Original notes', color: 'amber' })
     const second = makeHabit({ id: 'second' })
     const saved = deferred<void>()
     const repository = mockRepository({ habits: [first, second], entries: [] })
@@ -140,6 +146,9 @@ describe('Habit actions', () => {
     const edited = actions.editHabit({ id: first.id, name: 'Exercise' })
     await settle()
     expect(store.getState().habitsById).toEqual({ first, second })
+    expect(repository.updateHabitRecord).toHaveBeenCalledWith(
+      expect.objectContaining({ notes: 'Original notes', color: 'amber' }),
+    )
     saved.resolve()
     await edited
 

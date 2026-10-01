@@ -1,0 +1,46 @@
+.radiogroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend {
+  color: var(--neutral-12);
+}
+
+.legend[data-disabled] {
+  color: var(--neutral-8);
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-inline: -4px;
+}
+
+.radio {
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.radio :where(svg) {
+  fill: var(--fill);
+  stroke: transparent;
+  transition: stroke 120ms;
+}
+
+.radio[data-checked] :where(svg) {
+  stroke: var(--stroke);
+}
+
+.radio[data-disabled] {
+  cursor: default;
+  opacity: 0.5;
+}
+
+@media (width >= 600px) {
+  .radiogroup {
+    gap: 16px;
+  }
+}

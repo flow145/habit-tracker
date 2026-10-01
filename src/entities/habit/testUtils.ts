@@ -5,7 +5,8 @@ import { date, day } from '~/shared/tests'
 export const makeHabit = (overrides: Partial<Habit> = {}): Habit => ({
   id: 'habit-1',
   name: 'Read',
-  description: '',
+  notes: '',
+  color: 'indigo',
   schedule: { frequency: 1, interval: 1, intervalUnit: 'days' },
   createdAt: date(1),
   updatedAt: date(1),
