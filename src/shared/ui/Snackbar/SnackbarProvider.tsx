@@ -8,6 +8,8 @@ export interface SnackbarProvider {
   children: ReactNode
 }
 
+const TIMEOUT = 4000
+
 export const SnackbarProvider = ({ children }: SnackbarProvider) => {
   useEffect(() => {
     let isCurrentMount = true
@@ -24,7 +26,7 @@ export const SnackbarProvider = ({ children }: SnackbarProvider) => {
   }, [])
 
   return (
-    <Toast.Provider toastManager={toastManager} limit={1}>
+    <Toast.Provider toastManager={toastManager} limit={1} timeout={TIMEOUT}>
       {children}
       <Toast.Portal>
         <Toast.Viewport className={styles.viewport}>

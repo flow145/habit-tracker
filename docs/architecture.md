@@ -24,6 +24,7 @@
 
 - Calendar dates are represented as `DayString` values in `YYYY-MM-DD` form and manipulated through `Day`.
 - JavaScript `Date` is used only for timestamps and determining the current local date.
+- Habit colors are persisted as stable identifiers. Supported identifiers remain valid for existing habits even if they are no longer offered for selection.
 - A persisted `Entry` represents one explicit completion.
 - Only `complete` is persisted. `incomplete` and `not-required` are calculated at runtime.
 - IndexedDB enforces at most one Entry per Habit and Day.

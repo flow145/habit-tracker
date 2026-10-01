@@ -13,8 +13,8 @@
 
 ## Alpha 2
 
-- [ ] show/hide hidden timeline dates on hover, click/tap
-- [ ] snackbar UI component for in-app notifications
-- [ ] habit colors
+- [x] show/hide hidden timeline dates on hover, click/tap
+- [x] snackbar UI component for in-app notifications
+- [x] habit colors
 - [ ] consistency score
 - [ ] view and edit full habit history

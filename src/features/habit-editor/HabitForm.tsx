@@ -4,24 +4,32 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Schedule as ISchedule } from '~/shared/api'
+import type { HabitColor, Schedule as ISchedule } from '~/shared/api'
 import { Button } from '~/shared/ui/Button'
 import { TextField } from '~/shared/ui/TextField'
 
+import { ColorField } from './ColorField'
 import styles from './HabitForm.module.css'
 import { Schedule } from './Schedule'
 
+export const DEFAULT_COLOR: HabitColor = 'slate'
 export const DEFAULT_SCHEDULE: ISchedule = {
   frequency: 1,
   interval: 1,
   intervalUnit: 'days',
 }
 
-const INITIAL_VALUES = { name: '', notes: '', schedule: DEFAULT_SCHEDULE }
+const DEFAULT_VALUES = {
+  name: '',
+  notes: '',
+  color: DEFAULT_COLOR,
+  schedule: DEFAULT_SCHEDULE,
+}
 
 export interface HabitFormValues {
   name: string
   notes: string
+  color: HabitColor
   schedule: ISchedule
 }
 
@@ -33,19 +41,20 @@ export interface HabitFormProps {
 }
 
 export const HabitForm = ({
-  initialValues = INITIAL_VALUES,
+  initialValues = DEFAULT_VALUES,
   onSubmit,
   additionalAction,
   disabled = false,
 }: HabitFormProps) => {
   const { t } = useTranslation()
   const [schedule, setSchedule] = useState(initialValues.schedule)
+  const [color, setColor] = useState(initialValues.color)
 
   const validateName = (value: unknown) =>
     typeof value === 'string' && value.trim() !== '' ? null : t('HabitForm.errors.nameRequired')
 
-  const handleSubmit = async (values: Omit<HabitFormValues, 'schedule'>) => {
-    await onSubmit({ ...values, schedule })
+  const handleSubmit = async ({ name, notes }: Omit<HabitFormValues, 'color' | 'schedule'>) => {
+    await onSubmit({ name, notes, color, schedule })
   }
 
   return (
@@ -58,6 +67,8 @@ export const HabitForm = ({
         validate={validateName}
         disabled={disabled}
       />
+      <Schedule value={schedule} onValueChange={setSchedule} disabled={disabled} />
+      <ColorField value={color} onValueChange={setColor} disabled={disabled} />
       <TextField
         component='textarea'
         label={t('AddHabit.fields.notes')}
@@ -66,7 +77,6 @@ export const HabitForm = ({
         placeholder={t('AddHabit.fields.notesPlaceholder')}
         disabled={disabled}
       />
-      <Schedule value={schedule} onValueChange={setSchedule} disabled={disabled} />
       <div className={styles.actions}>
         <Button icon={<Save />} type='submit' disabled={disabled}>
           {t('shared.save')}

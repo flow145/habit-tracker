@@ -5,7 +5,7 @@ This context describes personal habits, their schedules, and the user's record o
 ## Language
 
 **Habit**:
-A behavior the user wants to practice. It has a name, optional notes, and a schedule.
+A behavior the user wants to practice. It has a name, a schedule, a color, and optional notes.
 
 **Day**:
 A calendar date whose identity does not change when the user crosses time zones.
