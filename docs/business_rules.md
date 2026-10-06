@@ -36,6 +36,18 @@ Domain terms are defined in the project [context glossary](../CONTEXT.md).
 - Removing a completion recalculates every affected day.
 - Statuses are recalculated after a completion change, schedule change, or transition to a new day.
 
+## Habit Strength
+
+- Habit strength estimates how established a habit is based on its completion history.
+- A habit with no completions has 0% strength.
+- Strength is calculated chronologically starting from the first completion.
+- A complete day increases strength with diminishing returns as strength approaches 100%.
+- An incomplete day decreases strength. Decay is weighted by the habit's target frequency and schedule-window length and decreases as the habit becomes stronger.
+- A not-required day does not change strength.
+- Completing a not-required day increases strength normally.
+- Strength is recalculated when completion history, the schedule, or the current day changes.
+- Schedule changes apply the current schedule to the entire history.
+
 ## Calendar Dates and History
 
 - Completions remain attached to the local calendar date on which they were recorded, even after the user changes time zones.

@@ -46,7 +46,7 @@
 		{"id":"61a68fc9f67765c8","type":"text","text":"Habit details view with previous day status and error notification","x":1300,"y":700,"width":250,"height":100},
 		{"id":"479011b22d28970c","type":"text","text":"Check habit progress","x":660,"y":-480,"width":250,"height":60,"color":"2"},
 		{"id":"482df54b0fe3c90e","type":"text","text":" Open app","x":660,"y":-360,"width":250,"height":60,"color":"5"},
-		{"id":"fabadbf3bccf2646","type":"text","text":"Habit list with recent completion history and consistency score","x":660,"y":-260,"width":250,"height":100},
+		{"id":"fabadbf3bccf2646","type":"text","text":"Habit list with recent completion history and habit strength","x":660,"y":-260,"width":250,"height":100},
 		{"id":"de95127c7c4fb995","type":"text","text":"Change day's status","x":980,"y":-260,"width":250,"height":60,"color":"5"},
 		{"id":"7acf343b1c22449a","type":"text","text":"Habit list with updated day","x":980,"y":-160,"width":250,"height":60},
 		{"id":"98f06a29ba78716f","type":"text","text":"Habit list","x":980,"y":-360,"width":250,"height":60},

@@ -16,5 +16,5 @@
 - [x] show/hide hidden timeline dates on hover, click/tap
 - [x] snackbar UI component for in-app notifications
 - [x] habit colors
-- [ ] consistency score
+- [x] habit strength
 - [ ] view and edit full habit history

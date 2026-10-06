@@ -1,5 +1,6 @@
+import { Meter } from '@base-ui/react/meter'
 import { clsx } from 'clsx'
-import { Check, Squircle } from 'lucide-react'
+import { Check, ChevronRight, Squircle } from 'lucide-react'
 import { type ReactElement, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
@@ -7,17 +8,20 @@ import { Link } from 'wouter'
 import {
   buildComputedEntries,
   type ComputedStatus,
+  calculateStrength,
   getNextStatus,
   toggleDay,
   useHabitStore,
 } from '~/entities/habit'
-import { type Day, isErrorNamed } from '~/shared/lib'
+import { Day, type DayString, isErrorNamed } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './HabitItem.module.css'
 import SquircleCheckIcon from './squircle-check.svg'
 import type { DayRange } from './types'
+
+const PERCENTAGE_SCALE = 100
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
   complete: { icon: <Check />, i18nKey: 'complete' },
@@ -35,30 +39,39 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const habit = useHabitStore((state) => state.habitsById[habitId ?? ''])
   const entries = useHabitStore((state) => state.entriesByHabitId[habitId] ?? {})
 
-  const computedEntries = useMemo(
-    () =>
-      habit
-        ? buildComputedEntries({
-            start: range.start,
-            end: range.end,
-            entries,
-            schedule: habit.schedule,
-          })
-        : [],
-    [habit, entries, range.start, range.end],
-  )
+  const { computedEntriesInRange, strength } = useMemo(() => {
+    if (!habit) return { computedEntriesInRange: [], strength: 0 }
+
+    const start = new Day(
+      Object.values(entries).reduce<DayString>(
+        (start, { day }) => (day < start ? day : start),
+        range.start.value,
+      ),
+    )
+
+    const computedEntries = buildComputedEntries({
+      start,
+      end: range.end,
+      entries,
+      schedule: habit.schedule,
+    })
+
+    const computedEntriesInRange = computedEntries.filter(({ day }) => day >= range.start)
+    const strength =
+      (calculateStrength(computedEntries, habit.schedule).at(-1) ?? 0) * PERCENTAGE_SCALE
+
+    return { computedEntriesInRange, strength }
+  }, [habit, entries, range.start, range.end])
 
   if (!habit) return null
 
   const { color } = habit
   const colors = {
-    '--gradient-start': `var(--${color}-2)`,
-    '--gradient-end': `var(--${color}-3)`,
-    '--border-color': `var(--${color}-7)`,
-    '--name-color': `var(--${color}-12)`,
+    '--bg-color': `var(--${color}-2)`,
     '--toggle-color': `var(--${color}-11)`,
     '--toggle-hover-color': `var(--${color}-12)`,
     '--muted-color': `var(--${color}-8)`,
+    '--strength-color': `var(--${color}-8)`,
   }
 
   const handleToggleDay = (day: Day) => {
@@ -76,13 +89,12 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
 
   return (
     <article className={styles.habit} style={colors}>
-      <h2 className={clsx(styles.name, 'subheading')}>
-        <Link className={styles.nameLink} to={`${Path.EditHabit}/${habit.id}`}>
-          {habit.name}
-        </Link>
-      </h2>
+      <Link className={styles.link} to={`${Path.EditHabit}/${habit.id}`}>
+        <h2 className={clsx(styles.name, 'subheading')}>{habit.name}</h2>
+        <ChevronRight className={styles.chevron} />
+      </Link>
       <ol className={styles.dayList}>
-        {computedEntries.map(({ day, status }) => {
+        {computedEntriesInRange.map(({ day, status }) => {
           const nextStatus = getNextStatus(status)
           const isMuted = status === 'incomplete' || status === 'not-required'
           const { icon, i18nKey } = STATUS_CONFIG[status]
@@ -105,6 +117,17 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
           )
         })}
       </ol>
+      <Meter.Root
+        className={styles.strength}
+        aria-label={t('HabitItem.strength')}
+        min={0}
+        max={100}
+        value={strength}
+      >
+        <Meter.Track className={styles.strengthTrack}>
+          <Meter.Indicator className={styles.strengthBar} />
+        </Meter.Track>
+      </Meter.Root>
     </article>
   )
 }

@@ -1,12 +1,33 @@
 .habit {
+  position: relative;
   display: grid;
   grid-template-columns: auto;
   gap: 12px;
   padding: 22px 14px 14px;
   overflow: hidden;
-  background: linear-gradient(-160deg, var(--gradient-start), var(--gradient-end));
-  border: 2px solid var(--border-color);
+  background: var(--bg-color);
   border-radius: 24px;
+}
+
+.link {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 4px;
+  justify-content: space-between;
+  padding-inline: 6px;
+  color: var(--neutral-12);
+  text-decoration: none;
+}
+
+.link:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .link:hover {
+    text-decoration: underline;
+  }
 }
 
 .name {
@@ -16,24 +37,11 @@
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
   line-clamp: 2;
-  color: var(--name-color);
 }
 
-.nameLink {
-  padding-inline: 6px;
-  color: inherit;
-  text-decoration: none;
-}
-
-.nameLink:focus-visible {
-  text-decoration: underline;
-  outline: none;
-}
-
-@media (hover: hover) {
-  .nameLink:hover {
-    text-decoration: underline;
-  }
+.chevron {
+  width: 22px;
+  height: 22px;
 }
 
 .dayList {
@@ -76,6 +84,23 @@
   color: var(--muted-color);
 }
 
+.strength {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 9px;
+  block-size: 4px;
+}
+
+.strengthTrack {
+  block-size: 100%;
+}
+
+.strengthBar {
+  background: var(--strength-color);
+  border-radius: 2px;
+  transition: inline-size 150ms;
+}
+
 @media (width >= 600px) {
   .habit {
     grid-template-columns: 1fr 2fr;
@@ -86,8 +111,12 @@
     padding-inline: 30px;
   }
 
-  .nameLink {
+  .link {
     padding-inline: 0;
+  }
+
+  .chevron {
+    display: none;
   }
 }
 

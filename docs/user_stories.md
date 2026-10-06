@@ -15,7 +15,7 @@
 ## Review progress
 
 - As a user, I want to view and edit a habit's full history so that I can review my past progress and keep the record accurate
-- As a user, I want to see a habit consistency score so that I can understand my long-term progress without focusing on streaks
+- As a user, I want to see a habit's strength so that I can understand how established the habit has become
 
 ## Update habits
 
