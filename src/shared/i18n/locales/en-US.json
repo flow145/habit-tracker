@@ -21,6 +21,7 @@
     "empty": "No habits yet"
   },
   "HabitItem": {
+    "strength": "Habit strength",
     "dayToggle": "{{date}}: {{currentStatus}}. Press to mark {{nextStatus}}.",
     "dayStatus": {
       "complete": "complete",
