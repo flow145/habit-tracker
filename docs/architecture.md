@@ -29,6 +29,7 @@
 - Only `complete` is persisted. `incomplete` and `not-required` are calculated at runtime.
 - IndexedDB enforces at most one Entry per Habit and Day.
 - Computed entries are transient view data and are not persisted.
+- Habit strength is derived from completion history and the current schedule and is not persisted; IndexedDB continues storing explicit completions.
 
 ## State and Persistence
 

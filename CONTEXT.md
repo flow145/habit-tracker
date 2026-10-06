@@ -23,3 +23,6 @@ _Avoid_: Interval when referring to the evaluated period
 
 **Status**:
 The result shown for a habit on a day: `complete`, `incomplete`, or `not-required`.
+
+**Habit strength**:
+A product-defined estimate of how established a habit is, derived from its completion history, schedule, and resulting day statuses. It is not a direct measurement of psychological automaticity.

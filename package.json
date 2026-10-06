@@ -1,6 +1,6 @@
 {
   "name": "habit-tracker",
-  "description": "A simple, cross-platform habit tracker with flexible scheduling and a focus on long-term consistency over streaks.",
+  "description": "A simple, cross-platform, local-first habit tracker with flexible schedules and strength score instead of streaks.",
   "version": "1.0.0-alpha.1",
   "private": true,
   "type": "module",

@@ -39,7 +39,7 @@ export default defineConfig({
         name: 'Habit tracker',
         short_name: 'Habits',
         description:
-          'A simple, cross-platform habit tracker with flexible scheduling and a focus on long-term consistency over streaks.',
+          'A simple, cross-platform, local-first habit tracker with flexible schedules and strength score instead of streaks.',
         display: 'standalone',
         background_color: '#B9BBC6',
         theme_color: '#FCFCFD',

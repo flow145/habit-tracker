@@ -1,6 +1,6 @@
 # Vision
 
-Build a simple, cross-platform habit tracker that helps people build lasting habits through flexible scheduling and a long-term consistency score instead of rigid streaks.
+Build a simple, cross-platform habit tracker that helps people build lasting habits through flexible scheduling. Show habit strength so users can understand how established their habits are instead of focusing on rigid streaks.
 
 ## Problem
 
@@ -31,7 +31,7 @@ Users can:
 
 - create habits in seconds
 - log today's progress in seconds
-- understand their long-term consistency at a glance
+- understand how established their habits are at a glance
 - use the same app on desktop and mobile
 
 ## Non-goals
