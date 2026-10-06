@@ -6,7 +6,7 @@ export const usePageTitle = (title: string) => {
   const appName = t('shared.appTitle')
 
   useEffect(() => {
-    document.title = `${title} | ${appName}`
+    document.title = title
 
     return () => {
       document.title = appName
