@@ -9,10 +9,12 @@ import type { DayRange } from './types'
 
 const SHOW_INTERVAL = 3
 
-export interface TimelineProps extends DayRange {}
+export interface TimelineProps {
+  range: DayRange
+}
 
-export const Timeline = ({ start, end }: TimelineProps) => {
-  const days = Day.eachDayOfInterval(start, end)
+export const Timeline = ({ range }: TimelineProps) => {
+  const days = Day.eachDayOfInterval(range.start, range.end)
   const [visibleDate, setVisibleDate] = useState<string | null>(null)
 
   const toggleHiddenDate = (date: string) => {
