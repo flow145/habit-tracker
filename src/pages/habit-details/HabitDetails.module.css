@@ -1,0 +1,85 @@
+.main {
+  padding: 24px;
+}
+
+.container {
+  max-inline-size: 500px;
+  margin-inline: auto;
+  color: var(--neutral-12);
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 4px 1fr;
+  gap: 4px 8px;
+}
+
+.colorBar {
+  grid-row: 1 / 4;
+  background: var(--bar-color);
+  border-radius: 2px;
+}
+
+.name {
+  color: var(--name-color);
+  overflow-wrap: anywhere;
+}
+
+.created {
+  color: var(--neutral-11);
+}
+
+.strength {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-block-start: 16px;
+}
+
+.percentage {
+  color: var(--percentage-color);
+}
+
+.strengthTrack {
+  block-size: 4px;
+  overflow: hidden;
+  background: var(--neutral-3);
+  border-radius: 2px;
+}
+
+.strengthBar {
+  block-size: 100%;
+  background: var(--bar-color);
+  border-radius: inherit;
+  transition: inline-size 150ms;
+}
+
+.notes {
+  margin-block-start: 24px;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+  max-inline-size: 500px;
+  margin: 200px auto 0;
+  color: var(--neutral-11);
+  text-align: center;
+}
+
+@media (width >= 600px) {
+  .main {
+    padding-block-start: 20px;
+  }
+
+  .details {
+    gap: 6px 12px;
+  }
+
+  .strength {
+    margin-block-start: 20px;
+  }
+}

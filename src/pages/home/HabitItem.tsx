@@ -6,22 +6,19 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'wouter'
 
 import {
-  buildComputedEntries,
+  type ComputedEntry,
   type ComputedStatus,
-  calculateStrength,
   getNextStatus,
   toggleDay,
+  useHabitData,
   useHabitStore,
 } from '~/entities/habit'
-import { Day, type DayString, isErrorNamed } from '~/shared/lib'
-import { Path } from '~/shared/routes'
+import { Day, isErrorNamed } from '~/shared/lib'
 import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './HabitItem.module.css'
 import SquircleCheckIcon from './squircle-check.svg'
 import type { DayRange } from './types'
-
-const PERCENTAGE_SCALE = 100
 
 const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
   complete: { icon: <Check />, i18nKey: 'complete' },
@@ -37,31 +34,20 @@ export interface HabitItemProps {
 export const HabitItem = ({ habitId, range }: HabitItemProps) => {
   const { t } = useTranslation()
   const habit = useHabitStore((state) => state.habitsById[habitId ?? ''])
-  const entries = useHabitStore((state) => state.entriesByHabitId[habitId] ?? {})
+  const { computedEntries, strengths } = useHabitData(habitId)
+  const strength = Math.round((strengths.at(-1) ?? 0) * 100)
+  const start = range.start.value
+  const end = range.end.value
 
-  const { computedEntriesInRange, strength } = useMemo(() => {
-    if (!habit) return { computedEntriesInRange: [], strength: 0 }
+  const computedEntriesInRange = useMemo(() => {
+    // Full history contains consecutive days in chronological order.
+    const firstDay = computedEntries[0]?.day
 
-    const start = new Day(
-      Object.values(entries).reduce<DayString>(
-        (start, { day }) => (day < start ? day : start),
-        range.start.value,
-      ),
-    )
-
-    const computedEntries = buildComputedEntries({
-      start,
-      end: range.end,
-      entries,
-      schedule: habit.schedule,
+    return Day.eachDayOfInterval(new Day(start), new Day(end)).map<ComputedEntry>((day) => {
+      const entry = firstDay && computedEntries[day.differenceInDays(firstDay)]
+      return entry ?? { day, status: 'incomplete' }
     })
-
-    const computedEntriesInRange = computedEntries.filter(({ day }) => day >= range.start)
-    const strength =
-      (calculateStrength(computedEntries, habit.schedule).at(-1) ?? 0) * PERCENTAGE_SCALE
-
-    return { computedEntriesInRange, strength }
-  }, [habit, entries, range.start, range.end])
+  }, [computedEntries, start, end])
 
   if (!habit) return null
 
@@ -89,7 +75,7 @@ export const HabitItem = ({ habitId, range }: HabitItemProps) => {
 
   return (
     <article className={styles.habit} style={colors}>
-      <Link className={styles.link} to={`${Path.EditHabit}/${habit.id}`}>
+      <Link className={styles.link} to={`/${habit.id}`}>
         <h2 className={clsx(styles.name, 'subheading')}>{habit.name}</h2>
         <ChevronRight className={styles.chevron} />
       </Link>

@@ -1,26 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Day } from '~/shared/lib'
+import { Day } from './Day'
 
-import type { DayRange } from './types'
-
-const DAY_COUNT = 10
 const CHECK_INTERVAL = 60_000
 
-const getTimelineStart = (end: Day) => end.subtract({ days: DAY_COUNT - 1 })
-
-const getRange = (end: Day): DayRange => ({
-  start: getTimelineStart(end),
-  end,
-})
-
-export const useTimelineRange = (): DayRange => {
-  const [end, setEnd] = useState(() => new Day())
+export const useCurrentDay = (): Day => {
+  const [day, setDay] = useState(() => new Day())
 
   useEffect(() => {
     const updateIfDayChanged = () => {
       const next = new Day()
-      setEnd((current) => (current.value === next.value ? current : next))
+      setDay((current) => (current.value === next.value ? current : next))
     }
 
     const handleVisibilityChange = () => {
@@ -36,5 +26,5 @@ export const useTimelineRange = (): DayRange => {
     }
   }, [])
 
-  return useMemo(() => getRange(end), [end])
+  return day
 }

@@ -2,6 +2,7 @@ import { Redirect, Route, Router, Switch } from 'wouter'
 
 import { AddHabit } from '~/pages/add-habit'
 import { EditHabit } from '~/pages/edit-habit'
+import { HabitDetails } from '~/pages/habit-details'
 import { Home } from '~/pages/home'
 import { Settings } from '~/pages/settings'
 import { Path } from '~/shared/routes'
@@ -21,6 +22,7 @@ export const App = () => {
           <Route path={Path.AddHabit} component={AddHabit} />
           <Route path={`${Path.EditHabit}/:id`} component={EditHabit} />
           <Route path={Path.Settings} component={Settings} />
+          <Route path='/:id' component={HabitDetails} />
           <Route>
             <Redirect to={Path.Home} />
           </Route>

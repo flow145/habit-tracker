@@ -38,7 +38,7 @@ export const EditHabit = () => {
     try {
       await editHabit({ id: habitId, name, notes, color, schedule })
       showSnackbar(t('notifications.habitUpdated'))
-      navigate(Path.Home, { replace: true })
+      navigate(`/${habitId}`, { replace: true })
     } catch (error) {
       console.error(error)
       showSnackbar(
@@ -84,77 +84,72 @@ export const EditHabit = () => {
           variant='ghost'
           icon={<ChevronLeft />}
           as='Link'
-          to={Path.Home}
+          to={habitId ? `/${habitId}` : Path.Home}
           aria-label={t('shared.back')}
         />
       }
     />
   )
 
-  if (!habit)
-    return (
-      <>
-        {header}
+  return (
+    <>
+      {header}
+
+      {hydrationStatus === 'ready' && !habit && (
         <main className={styles.empty}>
           <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
           <Button as='Link' to={Path.Home}>
             {t('EditHabit.empty.button')}
           </Button>
         </main>
-      </>
-    )
+      )}
 
-  return (
-    <>
-      {header}
-      <main className={styles.main}>
-        {hydrationStatus === 'ready' && (
-          <>
-            <HabitForm
-              initialValues={habit}
-              onSubmit={handleSubmit}
-              disabled={isSubmitting || isDeleting}
-              additionalAction={
-                <AlertDialog.Trigger handle={deletionDialog}>
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    color='danger'
-                    icon={<Trash2 />}
-                    aria-label={t('EditHabit.deleteLabel')}
-                    disabled={isSubmitting || isDeleting}
-                  >
-                    {t('shared.delete')}
-                  </Button>
-                </AlertDialog.Trigger>
-              }
-            />
-            <AlertDialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-              title={t('EditHabit.deleteDialog.title')}
-              handle={deletionDialog}
-            >
-              <AlertDialog.Title className='title'>
-                {t('EditHabit.deleteDialog.title')}
-              </AlertDialog.Title>
-              <AlertDialog.Description className={clsx(styles.dialogDescription, 'body')}>
-                {t('EditHabit.deleteDialog.description', { habit: habit.name })}
-              </AlertDialog.Description>
-              <div className={styles.dialogActions}>
-                <AlertDialog.Close>
-                  <Button type='button' variant='ghost'>
-                    {t('EditHabit.deleteDialog.cancel')}
-                  </Button>
-                </AlertDialog.Close>
-                <Button type='button' color='danger' onClick={handleDelete} disabled={isDeleting}>
+      {hydrationStatus === 'ready' && habit && (
+        <main className={styles.main}>
+          <HabitForm
+            initialValues={habit}
+            onSubmit={handleSubmit}
+            disabled={isSubmitting || isDeleting}
+            additionalAction={
+              <AlertDialog.Trigger handle={deletionDialog}>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  color='danger'
+                  icon={<Trash2 />}
+                  aria-label={t('EditHabit.deleteLabel')}
+                  disabled={isSubmitting || isDeleting}
+                >
                   {t('shared.delete')}
                 </Button>
-              </div>
-            </AlertDialog>
-          </>
-        )}
-      </main>
+              </AlertDialog.Trigger>
+            }
+          />
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+            title={t('EditHabit.deleteDialog.title')}
+            handle={deletionDialog}
+          >
+            <AlertDialog.Title className='title'>
+              {t('EditHabit.deleteDialog.title')}
+            </AlertDialog.Title>
+            <AlertDialog.Description className={clsx(styles.dialogDescription, 'body')}>
+              {t('EditHabit.deleteDialog.description', { habit: habit.name })}
+            </AlertDialog.Description>
+            <div className={styles.dialogActions}>
+              <AlertDialog.Close>
+                <Button type='button' variant='ghost'>
+                  {t('EditHabit.deleteDialog.cancel')}
+                </Button>
+              </AlertDialog.Close>
+              <Button type='button' color='danger' onClick={handleDelete} disabled={isDeleting}>
+                {t('shared.delete')}
+              </Button>
+            </div>
+          </AlertDialog>
+        </main>
+      )}
     </>
   )
 }

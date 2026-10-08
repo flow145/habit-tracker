@@ -2,7 +2,7 @@ import { Plus, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useHabitStore } from '~/entities/habit'
-import { usePageTitle } from '~/shared/lib'
+import { useCurrentDay, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
@@ -10,13 +10,16 @@ import { Header } from '~/shared/ui/Header'
 import { HabitItem } from './HabitItem'
 import styles from './Home.module.css'
 import { Timeline } from './Timeline'
-import { useTimelineRange } from './useTimelineRange'
+
+const DAYS_TO_DISPLAY = 10
 
 export const Home = () => {
   const { t } = useTranslation()
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
   const habitsById = useHabitStore((state) => state.habitsById)
-  const range = useTimelineRange()
+  const end = useCurrentDay()
+  const start = end.subtract({ days: DAYS_TO_DISPLAY - 1 })
+  const range = { start, end }
   const habits = Object.values(habitsById).sort(
     (first, second) => first.createdAt.getTime() - second.createdAt.getTime(),
   )
@@ -53,7 +56,7 @@ export const Home = () => {
         )}
         {hydrationStatus === 'ready' && habits.length > 0 && (
           <>
-            <Timeline start={range.start} end={range.end} />
+            <Timeline range={range} />
             <ul className={styles.habitList}>
               {habits.map((habit) => (
                 <li key={habit.id}>

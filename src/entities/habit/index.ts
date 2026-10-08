@@ -6,4 +6,4 @@ export {
   getNextStatus,
 } from './computed-entries'
 export { useHabitStore } from './store'
-export { calculateStrength } from './strength'
+export { useHabitData } from './useHabitData'
