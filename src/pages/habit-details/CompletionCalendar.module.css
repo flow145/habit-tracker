@@ -1,14 +1,3 @@
-.history {
-  margin-block-start: 16px;
-}
-
-.header {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .calendar {
   --day-size: 24px;
   --day-gap: 2px;
@@ -89,66 +78,7 @@
   block-size: var(--content-height);
 }
 
-.year {
-  position: absolute;
-  block-size: var(--content-height);
-}
-
-.yearLabel {
-  position: sticky;
-  inset-inline-start: 0;
-  display: block;
-  inline-size: max-content;
-  block-size: var(--label-height);
-  margin-block-end: var(--label-gap);
-  margin-inline-end: 8px;
-}
-
-.dayGrid {
-  display: grid;
-  grid-template-rows: repeat(7, var(--day-size));
-  grid-auto-columns: var(--day-size);
-  grid-auto-flow: column;
-  gap: var(--day-gap);
-  block-size: var(--day-grid-height);
-  user-select: none;
-}
-
-.day {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: var(--day-size);
-  block-size: var(--day-size);
-  color: var(--neutral-12);
-  background: var(--neutral-2);
-  border-radius: 4px;
-}
-
-.day[data-status='not-required'] {
-  background: var(--not-required-color);
-}
-
-.day[data-status='complete'] {
-  background: var(--complete-color);
-}
-
-.monthLabels {
-  position: relative;
-  block-size: var(--label-height);
-  margin-block-start: var(--label-gap);
-}
-
-.month {
-  position: absolute;
-  inset-block-start: 0;
-}
-
 @media (width >= 600px) {
-  .history {
-    margin-block-start: 32px;
-  }
-
   .calendar {
     margin-block-start: 8px;
   }
