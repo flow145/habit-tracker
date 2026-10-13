@@ -10,9 +10,13 @@
 }
 
 .calendar {
-  --year-label-height: 22px;
-  --year-block-height: 180px;
-  --content-height: calc(var(--year-label-height) + var(--year-block-height));
+  --day-size: 24px;
+  --day-gap: 2px;
+  --day-grid-height: calc(var(--day-size) * 7 + var(--day-gap) * 6);
+  --label-height: 16px;
+  --label-gap: 6px;
+  --label-full-height: calc(var(--label-height) + var(--label-gap));
+  --content-height: calc(var(--label-full-height) * 2 + var(--day-grid-height));
   --fade-width: 24px;
 
   display: grid;
@@ -24,10 +28,10 @@
 .weekdays {
   display: grid;
   grid-template-rows: repeat(7, 1fr);
-  gap: 2px;
+  gap: var(--day-gap);
   align-items: center;
   justify-items: end;
-  padding-block-start: var(--year-label-height);
+  padding-block-start: var(--label-full-height);
 }
 
 .scrollArea,
@@ -39,8 +43,8 @@
   -webkit-mask-image:
     linear-gradient(
       to bottom,
-      black 0 var(--year-label-height),
-      transparent var(--year-label-height)
+      black 0 var(--label-full-height),
+      transparent var(--label-full-height)
     ),
     linear-gradient(
       to right,
@@ -52,8 +56,8 @@
   mask-image:
     linear-gradient(
       to bottom,
-      black 0 var(--year-label-height),
-      transparent var(--year-label-height)
+      black 0 var(--label-full-height),
+      transparent var(--label-full-height)
     ),
     linear-gradient(
       to right,
@@ -95,24 +99,49 @@
   inset-inline-start: 0;
   display: block;
   inline-size: max-content;
-  block-size: var(--year-label-height);
+  block-size: var(--label-height);
+  margin-block-end: var(--label-gap);
   margin-inline-end: 8px;
 }
 
-.yearBlock {
-  display: flex;
-  align-items: center;
-  justify-content: end;
-  block-size: var(--year-block-height);
-  padding: 24px;
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--neutral-12);
-  background: linear-gradient(to right, var(--neutral-3), var(--neutral-8));
+.dayGrid {
+  display: grid;
+  grid-template-rows: repeat(7, var(--day-size));
+  grid-auto-columns: var(--day-size);
+  grid-auto-flow: column;
+  gap: var(--day-gap);
+  block-size: var(--day-grid-height);
+  user-select: none;
 }
 
-.yearBlock[data-tone='odd'] {
-  background: linear-gradient(to right, var(--indigo-3), var(--indigo-8));
+.day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--day-size);
+  block-size: var(--day-size);
+  color: var(--neutral-12);
+  background: var(--neutral-2);
+  border-radius: 4px;
+}
+
+.day[data-status='not-required'] {
+  background: var(--not-required-color);
+}
+
+.day[data-status='complete'] {
+  background: var(--complete-color);
+}
+
+.monthLabels {
+  position: relative;
+  block-size: var(--label-height);
+  margin-block-start: var(--label-gap);
+}
+
+.month {
+  position: absolute;
+  inset-block-start: 0;
 }
 
 @media (width >= 600px) {

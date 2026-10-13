@@ -26,7 +26,7 @@
     "dayStatus": {
       "complete": "complete",
       "incomplete": "incomplete",
-      "notRequired": "not required"
+      "not-required": "not required"
     }
   },
   "AddHabit": {
@@ -123,7 +123,8 @@
     "completionHistory": {
       "title": "Completion history",
       "edit": "Edit",
-      "years": "Completion history years"
+      "calendar": "Completion history calendar",
+      "day": "{{date}}: {{status}}"
     },
     "schedule": {
       "summary": "{{frequency}} every {{interval}}",

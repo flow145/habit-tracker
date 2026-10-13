@@ -99,7 +99,7 @@ export const HabitDetails = () => {
             </Meter.Track>
           </Meter.Root>
           {habit.notes && <p className={clsx(styles.notes, 'body')}>{habit.notes}</p>}
-          <CompletionHistory />
+          <CompletionHistory habitId={habitId} />
         </div>
       </main>
     </>
