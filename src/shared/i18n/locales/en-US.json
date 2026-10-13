@@ -120,6 +120,11 @@
     "title": "Habit details",
     "created": "Created {{date}}",
     "strength": "Strength",
+    "completionHistory": {
+      "title": "Completion history",
+      "edit": "Edit",
+      "years": "Completion history years"
+    },
     "schedule": {
       "summary": "{{frequency}} every {{interval}}",
       "frequency_one": "{{count}} time",

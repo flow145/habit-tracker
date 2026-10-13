@@ -1,0 +1,126 @@
+.history {
+  margin-block-start: 16px;
+}
+
+.header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar {
+  --year-label-height: 22px;
+  --year-block-height: 180px;
+  --content-height: calc(var(--year-label-height) + var(--year-block-height));
+  --fade-width: 24px;
+
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  margin-block-start: 4px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 2px;
+  align-items: center;
+  justify-items: end;
+  padding-block-start: var(--year-label-height);
+}
+
+.scrollArea,
+.viewport {
+  min-inline-size: 0;
+}
+
+.viewport {
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      black 0 var(--year-label-height),
+      transparent var(--year-label-height)
+    ),
+    linear-gradient(
+      to right,
+      transparent 0,
+      black min(var(--fade-width), var(--scroll-area-overflow-x-start)),
+      black calc(100% - min(var(--fade-width), var(--scroll-area-overflow-x-end))),
+      transparent 100%
+    );
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black 0 var(--year-label-height),
+      transparent var(--year-label-height)
+    ),
+    linear-gradient(
+      to right,
+      transparent 0,
+      black min(var(--fade-width), var(--scroll-area-overflow-x-start)),
+      black calc(100% - min(var(--fade-width), var(--scroll-area-overflow-x-end))),
+      transparent 100%
+    );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.viewport:focus {
+  outline: none;
+}
+
+.focusArea {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.viewport:focus-visible + .focusArea {
+  outline: auto;
+}
+
+.content {
+  position: relative;
+  block-size: var(--content-height);
+}
+
+.year {
+  position: absolute;
+  block-size: var(--content-height);
+}
+
+.yearLabel {
+  position: sticky;
+  inset-inline-start: 0;
+  display: block;
+  inline-size: max-content;
+  block-size: var(--year-label-height);
+  margin-inline-end: 8px;
+}
+
+.yearBlock {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  block-size: var(--year-block-height);
+  padding: 24px;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--neutral-12);
+  background: linear-gradient(to right, var(--neutral-3), var(--neutral-8));
+}
+
+.yearBlock[data-tone='odd'] {
+  background: linear-gradient(to right, var(--indigo-3), var(--indigo-8));
+}
+
+@media (width >= 600px) {
+  .history {
+    margin-block-start: 32px;
+  }
+
+  .calendar {
+    margin-block-start: 8px;
+  }
+}

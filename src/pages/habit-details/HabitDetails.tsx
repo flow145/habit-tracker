@@ -9,6 +9,7 @@ import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
+import { CompletionHistory } from './CompletionHistory'
 import styles from './HabitDetails.module.css'
 
 export const HabitDetails = () => {
@@ -98,6 +99,7 @@ export const HabitDetails = () => {
             </Meter.Track>
           </Meter.Root>
           {habit.notes && <p className={clsx(styles.notes, 'body')}>{habit.notes}</p>}
+          <CompletionHistory />
         </div>
       </main>
     </>
