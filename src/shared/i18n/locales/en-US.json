@@ -3,6 +3,7 @@
     "appTitle": "Habit tracker",
     "back": "Back",
     "save": "Save",
+    "done": "Done",
     "delete": "Delete"
   },
   "notifications": {
@@ -124,7 +125,8 @@
       "title": "Completion history",
       "edit": "Edit",
       "calendar": "Completion history calendar",
-      "day": "{{date}}: {{status}}"
+      "day": "{{date}}: {{status}}",
+      "editDialogTitle": "Edit completion history"
     },
     "schedule": {
       "summary": "{{frequency}} every {{interval}}",

@@ -1,47 +1,51 @@
 import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog'
 import type { ReactElement, ReactNode } from 'react'
 
-import styles from './AlertDialog.module.css'
+import styles from './Dialog.module.css'
 
-export interface AlertDialogProps extends Omit<BaseAlertDialog.Root.Props, 'children'> {
+export interface DialogProps
+  extends Omit<BaseAlertDialog.Root.Props, 'children'>,
+    Pick<BaseAlertDialog.Popup.Props, 'initialFocus'> {
   title: ReactNode
   children: ReactNode
 }
 
-export interface AlertDialogTriggerProps
+export interface DialogTriggerProps
   extends Omit<BaseAlertDialog.Trigger.Props, 'children' | 'render'> {
   children: ReactElement
 }
 
-export interface AlertDialogCloseProps {
+export interface DialogCloseProps {
   children: ReactElement
 }
 
-const AlertDialog = ({ title, children, ...props }: AlertDialogProps) => {
+const Dialog = ({ title, children, initialFocus, ...props }: DialogProps) => {
   return (
     <BaseAlertDialog.Root {...props}>
       <BaseAlertDialog.Portal>
         <BaseAlertDialog.Backdrop className={styles.backdrop} />
         <BaseAlertDialog.Viewport className={styles.viewport}>
-          <BaseAlertDialog.Popup className={styles.popup}>{children}</BaseAlertDialog.Popup>
+          <BaseAlertDialog.Popup className={styles.popup} initialFocus={initialFocus}>
+            {children}
+          </BaseAlertDialog.Popup>
         </BaseAlertDialog.Viewport>
       </BaseAlertDialog.Portal>
     </BaseAlertDialog.Root>
   )
 }
 
-const AlertDialogTrigger = ({ children, ...props }: AlertDialogTriggerProps) => {
+const DialogTrigger = ({ children, ...props }: DialogTriggerProps) => {
   return <BaseAlertDialog.Trigger render={children} {...props} />
 }
 
-const AlertDialogClose = ({ children }: AlertDialogCloseProps) => {
+const DialogClose = ({ children }: DialogCloseProps) => {
   return <BaseAlertDialog.Close render={children} />
 }
 
-export const AlertDialogExtended = Object.assign(AlertDialog, {
+export const DialogExtended = Object.assign(Dialog, {
   createHandle: BaseAlertDialog.createHandle,
-  Trigger: AlertDialogTrigger,
+  Trigger: DialogTrigger,
   Title: BaseAlertDialog.Title,
   Description: BaseAlertDialog.Description,
-  Close: AlertDialogClose,
+  Close: DialogClose,
 })

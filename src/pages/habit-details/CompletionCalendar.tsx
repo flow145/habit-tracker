@@ -1,10 +1,12 @@
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { clsx } from 'clsx'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { type RefObject, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Day, useCurrentDay } from '~/shared/lib'
+import { toggleDay } from '~/entities/habit'
+import { Day, isErrorNamed, useCurrentDay } from '~/shared/lib'
+import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './CompletionCalendar.module.css'
 import { DAYS_IN_WEEK, FIRST_DAY_OF_WEEK, getYearWidth, YearGrid } from './YearGrid'
@@ -21,22 +23,29 @@ const weekdayLabels = Day.eachDayOfInterval(
 
 export interface CompletionCalendarProps {
   habitId: string
+  mode?: 'view' | 'edit'
+  viewportRef?: RefObject<HTMLDivElement | null>
 }
 
-export const CompletionCalendar = ({ habitId }: CompletionCalendarProps) => {
+export const CompletionCalendar = ({
+  habitId,
+  mode = 'view',
+  viewportRef: externalViewportRef,
+}: CompletionCalendarProps) => {
   const { t } = useTranslation()
   const today = useCurrentDay()
   const currentYear = today.year
   const [oldestLoadedYear, setOldestLoadedYear] = useState(currentYear - INITIAL_YEARS + 1)
   const isPrepending = useRef(false)
-  const viewportRef = useRef<HTMLDivElement>(null)
+  const internalViewportRef = useRef<HTMLDivElement>(null)
+  const viewportRef = externalViewportRef ?? internalViewportRef
 
   const getItemKey = useCallback((index: number) => oldestLoadedYear + index, [oldestLoadedYear])
 
   const virtualizer = useVirtualizer({
     count: currentYear - oldestLoadedYear + 1,
     getScrollElement: () => viewportRef.current,
-    estimateSize: (index) => getYearWidth(oldestLoadedYear + index, today),
+    estimateSize: (index) => getYearWidth(oldestLoadedYear + index, today, mode),
     getItemKey,
     horizontal: true,
     anchorTo: 'end',
@@ -49,7 +58,7 @@ export const CompletionCalendar = ({ habitId }: CompletionCalendarProps) => {
 
   useLayoutEffect(() => {
     virtualizer.measure()
-  }, [today.value, virtualizer])
+  }, [mode, today.value, virtualizer])
 
   useLayoutEffect(() => {
     isPrepending.current = false
@@ -83,15 +92,30 @@ export const CompletionCalendar = ({ habitId }: CompletionCalendarProps) => {
     setOldestLoadedYear((year) => year - YEARS_PER_LOAD)
   }
 
+  const handleToggleDay = (day: Day) => {
+    toggleDay({ habitId, day }).catch((error: unknown) => {
+      console.error(error)
+      showSnackbar(
+        t(
+          isErrorNamed(error, 'QuotaExceededError')
+            ? 'notifications.storageFull'
+            : 'notifications.changeFailed',
+        ),
+      )
+    })
+  }
+
   return (
-    <div className={styles.calendar}>
-      <div className={clsx(styles.weekdays, 'hint')}>
-        {weekdayLabels.map((weekday) => (
-          <div className={styles.weekday} key={weekday}>
-            {weekday}
-          </div>
-        ))}
-      </div>
+    <div className={styles.calendar} data-mode={mode}>
+      {mode === 'view' && (
+        <div className={clsx(styles.weekdays, 'hint')}>
+          {weekdayLabels.map((weekday) => (
+            <div className={styles.weekday} key={weekday}>
+              {weekday}
+            </div>
+          ))}
+        </div>
+      )}
       <ScrollArea.Root className={styles.scrollArea}>
         <ScrollArea.Viewport
           ref={viewportRef}
@@ -108,6 +132,8 @@ export const CompletionCalendar = ({ habitId }: CompletionCalendarProps) => {
                 key={item.key}
                 habitId={habitId}
                 year={oldestLoadedYear + item.index}
+                mode={mode}
+                onToggleDay={handleToggleDay}
                 style={{ left: item.start, width: item.size }}
               />
             ))}

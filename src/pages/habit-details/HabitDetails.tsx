@@ -1,19 +1,26 @@
 import { Meter } from '@base-ui/react/meter'
 import { clsx } from 'clsx'
 import { format } from 'date-fns'
-import { ChevronLeft, SquarePen } from 'lucide-react'
+import { Check, ChevronLeft, SquarePen } from 'lucide-react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRoute } from 'wouter'
+
 import { useHabitData, useHabitStore } from '~/entities/habit'
 import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
+import { Dialog } from '~/shared/ui/Dialog'
 import { Header } from '~/shared/ui/Header'
+
 import { CompletionCalendar } from './CompletionCalendar'
 import styles from './HabitDetails.module.css'
 
+const historyDialog = Dialog.createHandle()
+
 export const HabitDetails = () => {
   const { t } = useTranslation()
+  const calendarViewportRef = useRef<HTMLDivElement>(null)
   const [, params] = useRoute('/:id')
   const habitId = params?.id ?? ''
   const hydrationStatus = useHabitStore((state) => state.hydrationStatus)
@@ -102,14 +109,38 @@ export const HabitDetails = () => {
           <section className={styles.history}>
             <div className={styles.historyHeader}>
               <h3 className='subheading'>{t('HabitDetails.completionHistory.title')}</h3>
-              <Button variant='ghost' icon={<SquarePen />}>
-                {t('HabitDetails.completionHistory.edit')}
-              </Button>
+              <Dialog.Trigger handle={historyDialog}>
+                <Button variant='ghost' icon={<SquarePen />}>
+                  {t('HabitDetails.completionHistory.edit')}
+                </Button>
+              </Dialog.Trigger>
             </div>
             <CompletionCalendar habitId={habitId} />
           </section>
         </div>
       </main>
+      <Dialog
+        title={t('HabitDetails.completionHistory.editDialogTitle')}
+        handle={historyDialog}
+        initialFocus={calendarViewportRef}
+      >
+        <div className={styles.historyDialog}>
+          <div className={styles.historyDialogText}>
+            <Dialog.Title className='title'>
+              {t('HabitDetails.completionHistory.editDialogTitle')}
+            </Dialog.Title>
+            <p className='body'>{habit.name}</p>
+          </div>
+          <div className={styles.historyDialogCalendar}>
+            <CompletionCalendar habitId={habitId} mode='edit' viewportRef={calendarViewportRef} />
+          </div>
+          <div className={styles.historyDialogActions}>
+            <Dialog.Close>
+              <Button icon={<Check />}>{t('shared.done')}</Button>
+            </Dialog.Close>
+          </div>
+        </div>
+      </Dialog>
     </>
   )
 }
