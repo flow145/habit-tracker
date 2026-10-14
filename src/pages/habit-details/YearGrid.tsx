@@ -43,7 +43,7 @@ export const YearGrid = ({ habitId, year, mode, onToggleDay, style }: YearGridPr
   const today = useCurrentDay()
   const start = getYearStart(year)
   const end = getYearEnd(year, today)
-  const color = habit?.color ?? 'neutfral'
+  const color = habit?.color ?? 'neutral'
   const labelTypography = mode === 'view' ? 'hint' : 'label'
 
   const computedEntries = useMemo(
