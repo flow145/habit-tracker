@@ -1,6 +1,6 @@
 # Business Rules
 
-Domain terms are defined in the project [context glossary](../CONTEXT.md).
+Domain terms are defined in the project [glossary](../GLOSSARY.md).
 
 ## Habits
 

@@ -66,7 +66,7 @@ class CalendarDate extends Date {
 const parseCalendarDate = (value: DayString) =>
   parseISO(value, { in: (timestamp) => new CalendarDate(timestamp) })
 
-/** A calendar date with no time or time-zone identity. */
+/** A calendar date with no time or time-zone identity. Numeric fields follow Date's conventions. */
 export class Day {
   readonly value: DayString
 
@@ -86,6 +86,28 @@ export class Day {
     this.value = value
   }
 
+  /** Month is zero-based, as in the Date constructor. */
+  static fromParts({ year, month, day }: { year: number; month: number; day: number }): Day {
+    const value = `${String(year).padStart(4, '0')}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    return new Day(value as DayString)
+  }
+
+  get year(): number {
+    return Number(this.value.slice(0, 4))
+  }
+
+  get month(): number {
+    return Number(this.value.slice(5, 7)) - 1
+  }
+
+  get dayOfMonth(): number {
+    return Number(this.value.slice(8, 10))
+  }
+
+  get dayOfWeek(): number {
+    return this.toDate().getDay()
+  }
+
   toDate(): Date {
     return parseCalendarDate(this.value)
   }
@@ -96,6 +118,10 @@ export class Day {
 
   subtract(duration: Duration): Day {
     return new Day(sub(this.toDate(), duration))
+  }
+
+  startOfWeek(weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6): Day {
+    return this.subtract({ days: (this.dayOfWeek - weekStartsOn + 7) % 7 })
   }
 
   differenceInDays(other: Day): number {

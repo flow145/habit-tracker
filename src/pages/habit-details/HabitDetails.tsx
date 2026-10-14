@@ -1,7 +1,7 @@
 import { Meter } from '@base-ui/react/meter'
 import { clsx } from 'clsx'
 import { format } from 'date-fns'
-import { ChevronLeft, Pen } from 'lucide-react'
+import { ChevronLeft, SquarePen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useRoute } from 'wouter'
 import { useHabitData, useHabitStore } from '~/entities/habit'
@@ -9,6 +9,7 @@ import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Header } from '~/shared/ui/Header'
+import { CompletionCalendar } from './CompletionCalendar'
 import styles from './HabitDetails.module.css'
 
 export const HabitDetails = () => {
@@ -37,7 +38,7 @@ export const HabitDetails = () => {
       endSlot={
         <Button
           variant='ghost'
-          icon={<Pen />}
+          icon={<SquarePen />}
           as='Link'
           to={`${Path.EditHabit}/${habitId}`}
           aria-label={t('EditHabit.title')}
@@ -98,6 +99,15 @@ export const HabitDetails = () => {
             </Meter.Track>
           </Meter.Root>
           {habit.notes && <p className={clsx(styles.notes, 'body')}>{habit.notes}</p>}
+          <section className={styles.history}>
+            <div className={styles.historyHeader}>
+              <h3 className='subheading'>{t('HabitDetails.completionHistory.title')}</h3>
+              <Button variant='ghost' icon={<SquarePen />}>
+                {t('HabitDetails.completionHistory.edit')}
+              </Button>
+            </div>
+            <CompletionCalendar habitId={habitId} />
+          </section>
         </div>
       </main>
     </>

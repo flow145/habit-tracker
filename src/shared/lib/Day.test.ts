@@ -29,6 +29,8 @@ describe('Day', () => {
 
     const skipped = new Day('2011-12-30')
     expect(skipped.format('MMMM d')).toBe('December 30')
+    expect(skipped.dayOfWeek).toBe(5)
+    expect(skipped.startOfWeek(1).value).toBe('2011-12-26')
     expect(String(skipped.add({ days: 1 }))).toBe('2011-12-31')
     expect(Day.eachDayOfInterval(new Day('2011-12-29'), new Day('2011-12-31')).map(String)).toEqual(
       ['2011-12-29', '2011-12-30', '2011-12-31'],
@@ -48,8 +50,25 @@ describe('Day', () => {
     expect(String(lastDay)).toBe('2025-12-31')
   })
 
+  it('uses Date-style month and weekday numbers for constructed calendar dates', () => {
+    const day = Day.fromParts({ year: 2026, month: 0, day: 1 })
+
+    expect(day.value).toBe('2026-01-01')
+    expect([day.year, day.month, day.dayOfMonth, day.dayOfWeek]).toEqual([2026, 0, 1, 4])
+    expect(Day.fromParts({ year: 2025, month: 11, day: 31 }).value).toBe('2025-12-31')
+  })
+
+  it('starts a week on the requested weekday across a year boundary', () => {
+    const day = Day.fromParts({ year: 2026, month: 0, day: 1 })
+
+    expect(day.startOfWeek(1).value).toBe('2025-12-29')
+    expect(day.startOfWeek(0).value).toBe('2025-12-28')
+  })
+
   it('rejects invalid or noncanonical dates', () => {
     expect(() => new Day('2026-02-30')).toThrow(RangeError)
     expect(() => new Day('2026-1-01')).toThrow(RangeError)
+    expect(() => Day.fromParts({ year: 2026, month: 12, day: 1 })).toThrow(RangeError)
+    expect(() => Day.fromParts({ year: 2026, month: 1, day: 30 })).toThrow(RangeError)
   })
 })

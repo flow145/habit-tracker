@@ -26,7 +26,7 @@
     "dayStatus": {
       "complete": "complete",
       "incomplete": "incomplete",
-      "notRequired": "not required"
+      "not-required": "not required"
     }
   },
   "AddHabit": {
@@ -120,6 +120,12 @@
     "title": "Habit details",
     "created": "Created {{date}}",
     "strength": "Strength",
+    "completionHistory": {
+      "title": "Completion history",
+      "edit": "Edit",
+      "calendar": "Completion history calendar",
+      "day": "{{date}}: {{status}}"
+    },
     "schedule": {
       "summary": "{{frequency}} every {{interval}}",
       "frequency_one": "{{count}} time",

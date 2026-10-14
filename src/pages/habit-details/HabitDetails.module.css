@@ -60,6 +60,17 @@
   overflow-wrap: anywhere;
 }
 
+.history {
+  margin-block-start: 16px;
+}
+
+.historyHeader {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .empty {
   display: grid;
   gap: 24px;
@@ -81,5 +92,9 @@
 
   .strength {
     margin-block-start: 20px;
+  }
+
+  .history {
+    margin-block-start: 32px;
   }
 }

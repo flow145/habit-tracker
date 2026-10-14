@@ -20,10 +20,10 @@ import styles from './HabitItem.module.css'
 import SquircleCheckIcon from './squircle-check.svg'
 import type { DayRange } from './types'
 
-const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: string }> = {
+const STATUS_CONFIG: Record<ComputedStatus, { icon: ReactElement; i18nKey: ComputedStatus }> = {
   complete: { icon: <Check />, i18nKey: 'complete' },
   incomplete: { icon: <Squircle />, i18nKey: 'incomplete' },
-  'not-required': { icon: <SquircleCheckIcon />, i18nKey: 'notRequired' },
+  'not-required': { icon: <SquircleCheckIcon />, i18nKey: 'not-required' },
 }
 
 export interface HabitItemProps {

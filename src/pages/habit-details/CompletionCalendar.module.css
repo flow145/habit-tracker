@@ -1,0 +1,85 @@
+.calendar {
+  --day-size: 24px;
+  --day-gap: 2px;
+  --day-grid-height: calc(var(--day-size) * 7 + var(--day-gap) * 6);
+  --label-height: 16px;
+  --label-gap: 6px;
+  --label-full-height: calc(var(--label-height) + var(--label-gap));
+  --content-height: calc(var(--label-full-height) * 2 + var(--day-grid-height));
+  --fade-width: 24px;
+
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  margin-block-start: 4px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-rows: repeat(7, 1fr);
+  gap: var(--day-gap);
+  align-items: center;
+  justify-items: end;
+  padding-block-start: var(--label-full-height);
+}
+
+.scrollArea,
+.viewport {
+  min-inline-size: 0;
+}
+
+.viewport {
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      black 0 var(--label-full-height),
+      transparent var(--label-full-height)
+    ),
+    linear-gradient(
+      to right,
+      transparent 0,
+      black min(var(--fade-width), var(--scroll-area-overflow-x-start)),
+      black calc(100% - min(var(--fade-width), var(--scroll-area-overflow-x-end))),
+      transparent 100%
+    );
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black 0 var(--label-full-height),
+      transparent var(--label-full-height)
+    ),
+    linear-gradient(
+      to right,
+      transparent 0,
+      black min(var(--fade-width), var(--scroll-area-overflow-x-start)),
+      black calc(100% - min(var(--fade-width), var(--scroll-area-overflow-x-end))),
+      transparent 100%
+    );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.viewport:focus {
+  outline: none;
+}
+
+.focusArea {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.viewport:focus-visible + .focusArea {
+  outline: auto;
+}
+
+.content {
+  position: relative;
+  block-size: var(--content-height);
+}
+
+@media (width >= 600px) {
+  .calendar {
+    margin-block-start: 8px;
+  }
+}
