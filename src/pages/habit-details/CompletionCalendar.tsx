@@ -55,6 +55,26 @@ export const CompletionCalendar = ({ habitId }: CompletionCalendarProps) => {
     isPrepending.current = false
   }, [oldestLoadedYear])
 
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
+    let previousWidth = viewport.clientWidth
+    const resizeObserver = new ResizeObserver(() => {
+      const width = viewport.clientWidth
+      if (width === previousWidth) return
+
+      const previousMaxScrollLeft = Math.max(0, viewport.scrollWidth - previousWidth)
+      if (Math.abs(viewport.scrollLeft - previousMaxScrollLeft) <= 1)
+        viewport.scrollLeft = Math.max(0, viewport.scrollWidth - width)
+
+      previousWidth = width
+    })
+
+    resizeObserver.observe(viewport)
+    return () => resizeObserver.disconnect()
+  }, [])
+
   const loadMore = () => {
     if (isPrepending.current || !viewportRef.current || oldestLoadedYear <= 1) return
     if (viewportRef.current.scrollLeft > LOAD_MORE_THRESHOLD) return
