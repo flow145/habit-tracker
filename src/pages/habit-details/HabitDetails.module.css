@@ -71,6 +71,25 @@
   justify-content: space-between;
 }
 
+.historyDialog {
+  display: grid;
+  gap: 24px;
+}
+
+.historyDialogText {
+  display: grid;
+  gap: 12px;
+}
+
+.historyDialogCalendar {
+  margin-inline: -24px;
+}
+
+.historyDialogActions {
+  display: flex;
+  justify-content: end;
+}
+
 .empty {
   display: grid;
   gap: 24px;
@@ -96,5 +115,9 @@
 
   .history {
     margin-block-start: 32px;
+  }
+
+  .historyDialogCalendar {
+    margin-inline: -32px;
   }
 }

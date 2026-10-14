@@ -3,7 +3,9 @@ import type { ReactElement, ReactNode } from 'react'
 
 import styles from './Dialog.module.css'
 
-export interface DialogProps extends Omit<BaseAlertDialog.Root.Props, 'children'> {
+export interface DialogProps
+  extends Omit<BaseAlertDialog.Root.Props, 'children'>,
+    Pick<BaseAlertDialog.Popup.Props, 'initialFocus'> {
   title: ReactNode
   children: ReactNode
 }
@@ -17,13 +19,15 @@ export interface DialogCloseProps {
   children: ReactElement
 }
 
-const Dialog = ({ title, children, ...props }: DialogProps) => {
+const Dialog = ({ title, children, initialFocus, ...props }: DialogProps) => {
   return (
     <BaseAlertDialog.Root {...props}>
       <BaseAlertDialog.Portal>
         <BaseAlertDialog.Backdrop className={styles.backdrop} />
         <BaseAlertDialog.Viewport className={styles.viewport}>
-          <BaseAlertDialog.Popup className={styles.popup}>{children}</BaseAlertDialog.Popup>
+          <BaseAlertDialog.Popup className={styles.popup} initialFocus={initialFocus}>
+            {children}
+          </BaseAlertDialog.Popup>
         </BaseAlertDialog.Viewport>
       </BaseAlertDialog.Portal>
     </BaseAlertDialog.Root>

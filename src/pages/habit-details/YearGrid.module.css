@@ -42,6 +42,15 @@
   background: var(--complete-color);
 }
 
+.editableDay {
+  cursor: pointer;
+  transition: filter 100ms;
+}
+
+.editableDay:hover {
+  filter: brightness(1.3);
+}
+
 .monthLabels {
   position: relative;
   block-size: var(--label-height);
