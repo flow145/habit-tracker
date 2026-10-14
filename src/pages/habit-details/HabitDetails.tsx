@@ -1,7 +1,7 @@
 import { Meter } from '@base-ui/react/meter'
 import { clsx } from 'clsx'
 import { format } from 'date-fns'
-import { ChevronLeft, Pen, SquarePen } from 'lucide-react'
+import { ChevronLeft, SquarePen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useRoute } from 'wouter'
 import { useHabitData, useHabitStore } from '~/entities/habit'
@@ -38,7 +38,7 @@ export const HabitDetails = () => {
       endSlot={
         <Button
           variant='ghost'
-          icon={<Pen />}
+          icon={<SquarePen />}
           as='Link'
           to={`${Path.EditHabit}/${habitId}`}
           aria-label={t('EditHabit.title')}

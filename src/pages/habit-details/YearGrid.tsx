@@ -55,24 +55,23 @@ export const YearGrid = ({ habitId, year, style }: YearGridProps) => {
         '--complete-color': `var(--${color}-6)`,
       }}
     >
-      <span className={clsx(styles.yearLabel, 'hint')}>{year}</span>
-      <div className={styles.dayGrid}>
+      <h4 className={clsx(styles.yearLabel, 'hint')}>{year}</h4>
+      <ol className={styles.dayGrid}>
         {computedEntries.map(({ day, status }) => (
-          <span
+          <li
             key={day.value}
             className={clsx(styles.day, 'hint')}
             data-status={status}
-            role='img'
             aria-label={t('HabitDetails.completionHistory.day', {
               date: day.format('MMMM d, yyyy'),
               status: t(`HabitItem.dayStatus.${status}`),
             })}
           >
             {day.dayOfMonth}
-          </span>
+          </li>
         ))}
-      </div>
-      <div className={clsx(styles.monthLabels, 'hint')}>
+      </ol>
+      <div className={clsx(styles.monthLabels, 'hint')} aria-hidden>
         {computedEntries
           .filter(({ day }) => day.dayOfMonth === 1)
           .map(({ day }) => (
