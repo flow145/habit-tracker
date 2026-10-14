@@ -106,19 +106,17 @@ export const YearGrid = ({ habitId, year, mode, onToggleDay, style }: YearGridPr
       <div className={clsx(styles.monthLabels, labelTypography)} aria-hidden>
         {computedEntries
           .filter(({ day }) => day.dayOfMonth === 1)
-          .map(({ day }) => (
-            <span
-              key={day.value}
-              className={styles.month}
-              style={{
-                left:
-                  Math.floor(day.differenceInDays(start) / DAYS_IN_WEEK) *
-                  (DAY_SIZE[mode] + DAY_GAP[mode]),
-              }}
-            >
-              {day.format('MMM')}
-            </span>
-          ))}
+          .map(({ day }) => {
+            const weekColumnIndex = Math.floor(day.differenceInDays(start) / DAYS_IN_WEEK)
+            const monthLabelCenterX =
+              weekColumnIndex * (DAY_SIZE[mode] + DAY_GAP[mode]) + DAY_SIZE[mode] / 2
+
+            return (
+              <span key={day.value} className={styles.month} style={{ left: monthLabelCenterX }}>
+                {day.format('MMM')}
+              </span>
+            )
+          })}
       </div>
     </div>
   )

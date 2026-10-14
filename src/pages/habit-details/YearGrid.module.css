@@ -60,4 +60,5 @@
 .month {
   position: absolute;
   inset-block-start: 0;
+  transform: translateX(-50%);
 }
