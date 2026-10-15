@@ -105,7 +105,8 @@
       "months_other": "Months"
     },
     "errors": {
-      "frequencyOverInterval": "Number of times must not exceed the interval ({{count}} days)"
+      "frequencyOverInterval_one": "Number of times must not exceed the interval ({{count}} day)",
+      "frequencyOverInterval_other": "Number of times must not exceed the interval ({{count}} days)"
     }
   },
   "Settings": {

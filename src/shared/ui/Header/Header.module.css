@@ -14,7 +14,7 @@
 
 .slot {
   display: flex;
-  gap: 12px;
+  gap: 8px;
 }
 
 .slot:last-of-type {
@@ -29,6 +29,7 @@
 
 @media (width >= 600px) {
   .container {
+    gap: 12px;
     padding-block: 20px;
   }
 }
