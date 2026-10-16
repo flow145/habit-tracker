@@ -12,7 +12,7 @@ html {
 body {
   position: relative;
   font-family: var(--family-sans);
-  min-block-size: 100vh;
+  min-block-size: 100dvb;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
