@@ -5,7 +5,7 @@ import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { setThemePreference, type ThemePreference, useThemeStore } from '~/shared/theme'
 import { Button } from '~/shared/ui/Button'
-import { Header } from '~/shared/ui/Header'
+import { Layout } from '~/shared/ui/Layout'
 import { Select, type SelectItem } from '~/shared/ui/Select'
 
 import styles from './Settings.module.css'
@@ -28,32 +28,29 @@ export const Settings = () => {
   }
 
   return (
-    <>
-      <Header
-        title={t('Settings.title')}
-        startSlot={
-          <Button
-            variant='ghost'
-            icon={<ChevronLeft />}
-            as='Link'
-            to={Path.Home}
-            aria-label={t('shared.back')}
+    <Layout
+      title={t('Settings.title')}
+      startSlot={
+        <Button
+          variant='ghost'
+          icon={<ChevronLeft />}
+          as='Link'
+          to={Path.Home}
+          aria-label={t('shared.back')}
+        />
+      }
+    >
+      <ul className={styles.list}>
+        <li className={styles.item}>
+          <Select
+            label={t('Settings.colorTheme')}
+            items={themeItems}
+            layout='inline'
+            value={themeItems.find(({ value }) => value === theme)}
+            onValueChange={handleThemeChange}
           />
-        }
-      />
-      <main className={styles.main}>
-        <ul className={styles.list}>
-          <li className={styles.item}>
-            <Select
-              label={t('Settings.colorTheme')}
-              items={themeItems}
-              layout='inline'
-              value={themeItems.find(({ value }) => value === theme)}
-              onValueChange={handleThemeChange}
-            />
-          </li>
-        </ul>
-      </main>
-    </>
+        </li>
+      </ul>
+    </Layout>
   )
 }

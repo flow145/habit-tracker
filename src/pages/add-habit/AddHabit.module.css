@@ -1,9 +1,0 @@
-.main {
-  padding: 24px;
-}
-
-@media (width >= 600px) {
-  .main {
-    padding-block-start: 20px;
-  }
-}

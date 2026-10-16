@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  min-height: 100dvh;
+  min-height: 100dvb;
   background-color: var(--backdrop);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
@@ -51,7 +51,7 @@
   scale: 0.98;
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .popup {
     padding: 32px;
   }

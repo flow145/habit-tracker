@@ -1,13 +1,8 @@
-.main {
-  padding: 24px;
-}
-
 .empty {
   display: grid;
   gap: 24px;
+  align-self: center;
   justify-items: center;
-  max-inline-size: 500px;
-  margin: 200px auto 0;
   color: var(--neutral-11);
   text-align: center;
 }
@@ -23,11 +18,7 @@
   margin-block-start: 24px;
 }
 
-@media (width >= 600px) {
-  .main {
-    padding-block-start: 20px;
-  }
-
+@media (width >= 450px) {
   .dialogActions {
     gap: 12px;
   }

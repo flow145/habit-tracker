@@ -34,7 +34,7 @@
   font: 500 13px / 16px var(--family-sans);
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .title {
     font-size: 26px;
     line-height: 32px;

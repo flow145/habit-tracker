@@ -1,18 +1,7 @@
-.main {
-  padding: 24px;
-}
-
 .list {
-  max-inline-size: 500px;
-  margin-inline: auto;
+  padding-block: 16px;
 }
 
 .item {
   display: block;
-}
-
-@media (width >= 600px) {
-  .main {
-    padding-block-start: 20px;
-  }
 }

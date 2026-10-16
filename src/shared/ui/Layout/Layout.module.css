@@ -1,0 +1,20 @@
+.page {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-block-size: 100dvb;
+}
+
+.main {
+  display: grid;
+  grid-template-rows: 1fr;
+  /* TODO udpate design, also check content vertical paddings */
+  padding-inline: 16px;
+}
+
+.container {
+  display: grid;
+  grid-template-rows: 1fr;
+  inline-size: 100%;
+  max-inline-size: 500px;
+  margin-inline: auto;
+}

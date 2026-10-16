@@ -1,7 +1,5 @@
 .timeline {
-  max-inline-size: 800px;
   padding-inline: 16px;
-  margin-inline: auto;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -33,19 +31,6 @@
 @media (hover: hover) {
   .hidden:hover {
     opacity: 1;
-  }
-}
-
-@media (width >= 600px) {
-  .timeline {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 24px;
-    padding-inline: 32px;
-  }
-
-  .grid {
-    grid-column: 2;
   }
 }
 

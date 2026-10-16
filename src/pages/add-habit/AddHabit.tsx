@@ -8,9 +8,8 @@ import { HabitForm, type HabitFormValues } from '~/features/habit-editor'
 import { isErrorNamed, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
-import { Header } from '~/shared/ui/Header'
+import { Layout } from '~/shared/ui/Layout'
 import { showSnackbar } from '~/shared/ui/Snackbar'
-import styles from './AddHabit.module.css'
 
 export const AddHabit = () => {
   const { t } = useTranslation()
@@ -42,24 +41,19 @@ export const AddHabit = () => {
   }
 
   return (
-    <>
-      <Header
-        title={t('AddHabit.title')}
-        startSlot={
-          <Button
-            variant='ghost'
-            icon={<ChevronLeft />}
-            as='Link'
-            to={Path.Home}
-            aria-label={t('shared.back')}
-          />
-        }
-      />
-      <main className={styles.main}>
-        {hydrationStatus === 'ready' && (
-          <HabitForm onSubmit={handleSubmit} disabled={isSubmitting} />
-        )}
-      </main>
-    </>
+    <Layout
+      title={t('AddHabit.title')}
+      startSlot={
+        <Button
+          variant='ghost'
+          icon={<ChevronLeft />}
+          as='Link'
+          to={Path.Home}
+          aria-label={t('shared.back')}
+        />
+      }
+    >
+      {hydrationStatus === 'ready' && <HabitForm onSubmit={handleSubmit} disabled={isSubmitting} />}
+    </Layout>
   )
 }

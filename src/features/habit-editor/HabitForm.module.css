@@ -1,8 +1,7 @@
 .form {
   display: grid;
   gap: 24px;
-  max-inline-size: 500px;
-  margin-inline: auto;
+  padding-block: 16px;
 }
 
 .actions {
@@ -11,7 +10,7 @@
   justify-content: space-between;
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .form {
     gap: 32px;
   }

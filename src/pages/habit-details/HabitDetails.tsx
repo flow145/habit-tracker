@@ -11,7 +11,7 @@ import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Dialog } from '~/shared/ui/Dialog'
-import { Header } from '~/shared/ui/Header'
+import { Layout } from '~/shared/ui/Layout'
 
 import { CompletionCalendar } from './CompletionCalendar'
 import styles from './HabitDetails.module.css'
@@ -30,43 +30,38 @@ export const HabitDetails = () => {
 
   usePageTitle(t('HabitDetails.title'))
 
-  const header = (
-    <Header
-      title={t('HabitDetails.title')}
-      startSlot={
-        <Button
-          variant='ghost'
-          icon={<ChevronLeft />}
-          as='Link'
-          to={Path.Home}
-          aria-label={t('shared.back')}
-        />
-      }
-      endSlot={
-        <Button
-          variant='ghost'
-          icon={<SquarePen />}
-          as='Link'
-          to={`${Path.EditHabit}/${habitId}`}
-          aria-label={t('EditHabit.title')}
-        />
-      }
+  const startSlot = (
+    <Button
+      variant='ghost'
+      icon={<ChevronLeft />}
+      as='Link'
+      to={Path.Home}
+      aria-label={t('shared.back')}
+    />
+  )
+  const endSlot = (
+    <Button
+      variant='ghost'
+      icon={<SquarePen />}
+      as='Link'
+      to={`${Path.EditHabit}/${habitId}`}
+      aria-label={t('EditHabit.title')}
     />
   )
 
-  if (hydrationStatus !== 'ready') return header
+  if (hydrationStatus !== 'ready')
+    return <Layout title={t('HabitDetails.title')} startSlot={startSlot} endSlot={endSlot} />
 
   if (!habit)
     return (
-      <>
-        {header}
-        <main className={styles.empty}>
+      <Layout title={t('HabitDetails.title')} startSlot={startSlot} endSlot={endSlot}>
+        <div className={styles.empty}>
           <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
           <Button as='Link' to={Path.Home}>
             {t('EditHabit.empty.button')}
           </Button>
-        </main>
-      </>
+        </div>
+      </Layout>
     )
 
   const { frequency, interval, intervalUnit } = habit.schedule
@@ -82,43 +77,40 @@ export const HabitDetails = () => {
   }
 
   return (
-    <>
-      {header}
-      <main className={styles.main} style={colors}>
-        <div className={styles.container}>
-          <div className={styles.details}>
-            <div className={styles.colorBar} />
-            <h2 className={clsx(styles.name, 'heading')}>{habit.name}</h2>
-            <p className='body'>{schedule}</p>
-            <p className={clsx(styles.created, 'hint')}>
-              {t('HabitDetails.created', {
-                date: format(habit.createdAt, 'MMMM d, yyyy'),
-              })}
-            </p>
-          </div>
-          <Meter.Root className={styles.strength} min={0} max={100} value={strength}>
-            <Meter.Label className='body'>
-              {t('HabitDetails.strength')}{' '}
-              <span className={clsx(styles.percentage, 'label')}>{strength}%</span>
-            </Meter.Label>
-            <Meter.Track className={styles.strengthTrack}>
-              <Meter.Indicator className={styles.strengthBar} />
-            </Meter.Track>
-          </Meter.Root>
-          {habit.notes && <p className={clsx(styles.notes, 'body')}>{habit.notes}</p>}
-          <section className={styles.history}>
-            <div className={styles.historyHeader}>
-              <h3 className='subheading'>{t('HabitDetails.completionHistory.title')}</h3>
-              <Dialog.Trigger handle={historyDialog}>
-                <Button variant='ghost' icon={<SquarePen />}>
-                  {t('HabitDetails.completionHistory.edit')}
-                </Button>
-              </Dialog.Trigger>
-            </div>
-            <CompletionCalendar habitId={habitId} />
-          </section>
+    <Layout title={t('HabitDetails.title')} startSlot={startSlot} endSlot={endSlot}>
+      <div className={styles.container} style={colors}>
+        <div className={styles.details}>
+          <div className={styles.colorBar} />
+          <h2 className={clsx(styles.name, 'heading')}>{habit.name}</h2>
+          <p className='body'>{schedule}</p>
+          <p className={clsx(styles.created, 'hint')}>
+            {t('HabitDetails.created', {
+              date: format(habit.createdAt, 'MMMM d, yyyy'),
+            })}
+          </p>
         </div>
-      </main>
+        <Meter.Root className={styles.strength} min={0} max={100} value={strength}>
+          <Meter.Label className='body'>
+            {t('HabitDetails.strength')}{' '}
+            <span className={clsx(styles.percentage, 'label')}>{strength}%</span>
+          </Meter.Label>
+          <Meter.Track className={styles.strengthTrack}>
+            <Meter.Indicator className={styles.strengthBar} />
+          </Meter.Track>
+        </Meter.Root>
+        {habit.notes && <p className={clsx(styles.notes, 'body')}>{habit.notes}</p>}
+        <section className={styles.history}>
+          <div className={styles.historyHeader}>
+            <h3 className='subheading'>{t('HabitDetails.completionHistory.title')}</h3>
+            <Dialog.Trigger handle={historyDialog}>
+              <Button variant='ghost' icon={<SquarePen />}>
+                {t('HabitDetails.completionHistory.edit')}
+              </Button>
+            </Dialog.Trigger>
+          </div>
+          <CompletionCalendar habitId={habitId} />
+        </section>
+      </div>
       <Dialog
         title={t('HabitDetails.completionHistory.editDialogTitle')}
         handle={historyDialog}
@@ -141,6 +133,6 @@ export const HabitDetails = () => {
           </div>
         </div>
       </Dialog>
-    </>
+    </Layout>
   )
 }
