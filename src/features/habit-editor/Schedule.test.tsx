@@ -149,7 +149,7 @@ describe('Schedule', () => {
     await user.tab()
 
     expect(
-      screen.queryByText(/Number of times must not exceed the interval \(1 days\)/i),
+      screen.queryByText(/Number of times must not exceed the interval \(1 day\)/i),
     ).not.toBeInTheDocument()
   })
 
@@ -161,7 +161,7 @@ describe('Schedule', () => {
 
     expect(onSubmit).not.toHaveBeenCalled()
     expect(
-      screen.getByText(/Number of times must not exceed the interval \(1 days\)/i),
+      screen.getByText(/Number of times must not exceed the interval \(1 day\)/i),
     ).toBeInTheDocument()
   })
 
@@ -193,13 +193,13 @@ describe('Schedule', () => {
     await setFrequency(user, '2')
     await user.click(screen.getByRole('button', { name: 'Save' }))
     expect(
-      screen.getByText(/Number of times must not exceed the interval \(1 days\)/i),
+      screen.getByText(/Number of times must not exceed the interval \(1 day\)/i),
     ).toBeInTheDocument()
 
     await change(user)
 
     expect(
-      screen.queryByText(/Number of times must not exceed the interval \(1 days\)/i),
+      screen.queryByText(/Number of times must not exceed the interval \(1 day\)/i),
     ).not.toBeInTheDocument()
   })
 
