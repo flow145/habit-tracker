@@ -17,4 +17,4 @@
 - [x] snackbar UI component for in-app notifications
 - [x] habit colors
 - [x] habit strength
-- [ ] view and edit full habit history
+- [x] view and edit full habit history

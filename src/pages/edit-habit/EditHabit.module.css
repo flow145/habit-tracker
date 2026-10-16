@@ -1,5 +1,5 @@
 .main {
-  padding: 24px;
+  padding-inline: 24px;
 }
 
 .empty {
@@ -23,11 +23,7 @@
   margin-block-start: 24px;
 }
 
-@media (width >= 600px) {
-  .main {
-    padding-block-start: 20px;
-  }
-
+@media (width >= 450px) {
   .dialogActions {
     gap: 12px;
   }

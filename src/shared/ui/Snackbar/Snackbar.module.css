@@ -28,7 +28,7 @@
   transform: translateX(-50%);
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .viewport {
     inset-block-end: 48px;
   }

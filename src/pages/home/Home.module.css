@@ -1,6 +1,18 @@
 .main {
-  padding-block-start: 24px;
   padding-inline: 12px;
+}
+
+.container {
+  display: grid;
+  gap: 16px;
+  max-inline-size: 500px;
+  padding-block: 12px;
+  margin-inline: auto;
+}
+
+.habitList {
+  display: grid;
+  gap: 16px;
 }
 
 .empty {
@@ -8,21 +20,14 @@
   gap: 24px;
   justify-items: center;
   max-inline-size: 500px;
-  margin: 200px auto 0;
+  margin-block-start: 200px;
+  margin-inline: auto;
   color: var(--neutral-11);
   text-align: center;
 }
 
-.habitList {
-  display: grid;
-  gap: 16px;
-  max-inline-size: 800px;
-  margin-block-start: 16px;
-  margin-inline: auto;
-}
-
-@media (width >= 600px) {
-  .habitList {
-    margin-block-start: 20px;
+@media (width >= 450px) {
+  .main {
+    padding-inline: 24px;
   }
 }

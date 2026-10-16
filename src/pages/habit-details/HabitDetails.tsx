@@ -60,11 +60,13 @@ export const HabitDetails = () => {
     return (
       <>
         {header}
-        <main className={styles.empty}>
-          <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
-          <Button as='Link' to={Path.Home}>
-            {t('EditHabit.empty.button')}
-          </Button>
+        <main className={styles.main}>
+          <div className={styles.empty}>
+            <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
+            <Button as='Link' to={Path.Home}>
+              {t('EditHabit.empty.button')}
+            </Button>
+          </div>
         </main>
       </>
     )

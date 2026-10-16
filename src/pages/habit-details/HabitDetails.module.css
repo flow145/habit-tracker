@@ -1,9 +1,10 @@
 .main {
-  padding: 24px;
+  padding-inline: 24px;
 }
 
 .container {
   max-inline-size: 500px;
+  padding-block: 12px;
   margin-inline: auto;
   color: var(--neutral-12);
 }
@@ -56,17 +57,17 @@
 }
 
 .notes {
-  margin-block-start: 24px;
+  margin-block-start: 16px;
   overflow-wrap: anywhere;
 }
 
 .history {
-  margin-block-start: 16px;
+  margin-block-start: 24px;
 }
 
 .historyHeader {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
 }
@@ -100,17 +101,9 @@
   text-align: center;
 }
 
-@media (width >= 600px) {
-  .main {
-    padding-block-start: 20px;
-  }
-
+@media (width >= 450px) {
   .details {
     gap: 6px 12px;
-  }
-
-  .strength {
-    margin-block-start: 20px;
   }
 
   .history {

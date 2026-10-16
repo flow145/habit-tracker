@@ -51,7 +51,7 @@
   scale: 0.98;
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .popup {
     padding: 32px;
   }

@@ -47,7 +47,7 @@
   color: var(--neutral-8);
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .field {
     gap: 16px;
   }

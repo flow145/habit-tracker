@@ -24,6 +24,7 @@
   grid-auto-flow: column;
   gap: var(--day-gap);
   block-size: var(--day-grid-height);
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -67,7 +68,7 @@
   transform: translateX(-50%);
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .year[data-mode='edit'] .yearLabel {
     inset-inline-start: 32px;
   }

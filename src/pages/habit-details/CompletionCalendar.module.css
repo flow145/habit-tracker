@@ -87,7 +87,7 @@
   block-size: var(--content-height);
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .calendar {
     margin-block-start: 8px;
   }

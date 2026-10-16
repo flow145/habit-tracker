@@ -56,7 +56,7 @@
   color: var(--neutral-8);
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .root {
     gap: 16px;
   }

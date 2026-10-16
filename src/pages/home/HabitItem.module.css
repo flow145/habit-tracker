@@ -1,7 +1,6 @@
 .habit {
   position: relative;
   display: grid;
-  grid-template-columns: auto;
   gap: 12px;
   padding: 22px 16px 16px;
   overflow: hidden;
@@ -17,17 +16,6 @@
   padding-inline: 6px;
   color: var(--neutral-12);
   text-decoration: none;
-}
-
-.link:focus-visible {
-  text-decoration: underline;
-  outline: none;
-}
-
-@media (hover: hover) {
-  .link:hover {
-    text-decoration: underline;
-  }
 }
 
 .name {
@@ -101,22 +89,15 @@
   transition: inline-size 150ms;
 }
 
-@media (width >= 600px) {
+@media (width >= 450px) {
   .habit {
-    grid-template-columns: 1fr 2fr;
-    gap: 24px;
-    align-items: center;
-    min-block-size: 104px;
-    padding-block: 24px;
-    padding-inline: 32px;
-  }
-
-  .link {
-    padding-inline: 0;
+    gap: 16px;
+    padding-block: 24px 20px;
   }
 
   .chevron {
-    display: none;
+    width: 24px;
+    height: 24px;
   }
 }
 
