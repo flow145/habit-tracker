@@ -1,11 +1,5 @@
-.main {
-  padding-inline: 24px;
-}
-
 .list {
-  max-inline-size: 500px;
   padding-block: 16px;
-  margin-inline: auto;
 }
 
 .item {

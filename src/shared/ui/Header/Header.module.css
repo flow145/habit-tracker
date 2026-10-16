@@ -1,5 +1,32 @@
 .header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 5;
   padding-inline: 12px;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--neutral-1), transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(115%);
+  backdrop-filter: blur(24px) saturate(115%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 20%,
+    rgb(0 0 0 / 60%) 60%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 20%,
+    rgb(0 0 0 / 70%) 60%,
+    transparent 100%
+  );
 }
 
 .container {

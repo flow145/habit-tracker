@@ -11,6 +11,7 @@ export interface HeaderProps {
 export const Header = ({ title, startSlot, endSlot }: HeaderProps) => {
   return (
     <header className={styles.header}>
+      <div className={styles.bg} />
       <div className={styles.container}>
         <div className={styles.slot}>{startSlot}</div>
         <h1 className='title'>{title}</h1>

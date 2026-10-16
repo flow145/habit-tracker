@@ -1,13 +1,7 @@
-.main {
-  padding-inline: 12px;
-}
-
-.container {
+.content {
   display: grid;
   gap: 16px;
-  max-inline-size: 500px;
-  padding-block: 12px;
-  margin-inline: auto;
+  padding-block: 16px;
 }
 
 .habitList {
@@ -18,16 +12,9 @@
 .empty {
   display: grid;
   gap: 24px;
+  align-self: center;
   justify-items: center;
-  max-inline-size: 500px;
-  margin-block-start: 200px;
-  margin-inline: auto;
+  padding-block: 16px;
   color: var(--neutral-11);
   text-align: center;
-}
-
-@media (width >= 450px) {
-  .main {
-    padding-inline: 24px;
-  }
 }

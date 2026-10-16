@@ -10,7 +10,7 @@ import { isErrorNamed, usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Dialog } from '~/shared/ui/Dialog'
-import { Header } from '~/shared/ui/Header'
+import { Layout } from '~/shared/ui/Layout'
 import { showSnackbar } from '~/shared/ui/Snackbar'
 
 import styles from './EditHabit.module.css'
@@ -76,8 +76,8 @@ export const EditHabit = () => {
     }
   }
 
-  const header = (
-    <Header
+  return (
+    <Layout
       title={t('EditHabit.title')}
       startSlot={
         <Button
@@ -88,26 +88,18 @@ export const EditHabit = () => {
           aria-label={t('shared.back')}
         />
       }
-    />
-  )
-
-  return (
-    <>
-      {header}
-
+    >
       {hydrationStatus === 'ready' && !habit && (
-        <main className={styles.main}>
-          <div className={styles.empty}>
-            <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
-            <Button as='Link' to={Path.Home}>
-              {t('EditHabit.empty.button')}
-            </Button>
-          </div>
-        </main>
+        <div className={styles.empty}>
+          <h2 className='subheading'>{t('EditHabit.empty.text')}</h2>
+          <Button as='Link' to={Path.Home}>
+            {t('EditHabit.empty.button')}
+          </Button>
+        </div>
       )}
 
       {hydrationStatus === 'ready' && habit && (
-        <main className={styles.main}>
+        <>
           <HabitForm
             initialValues={habit}
             onSubmit={handleSubmit}
@@ -148,8 +140,8 @@ export const EditHabit = () => {
               </Button>
             </div>
           </Dialog>
-        </main>
+        </>
       )}
-    </>
+    </Layout>
   )
 }

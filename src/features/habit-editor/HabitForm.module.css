@@ -1,9 +1,7 @@
 .form {
   display: grid;
   gap: 24px;
-  max-inline-size: 500px;
   padding-block: 16px;
-  margin-inline: auto;
 }
 
 .actions {
