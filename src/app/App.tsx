@@ -10,13 +10,14 @@ import { SnackbarProvider } from '~/shared/ui/Snackbar'
 
 import { HabitStoreSynchronizer } from './HabitStoreSynchronizer'
 import { ThemeSynchronizer } from './ThemeSynchronizer'
+import { viewTransitionHandler } from './viewTransitions'
 
 export const App = () => {
   return (
     <SnackbarProvider>
       <HabitStoreSynchronizer />
       <ThemeSynchronizer />
-      <Router>
+      <Router aroundNav={viewTransitionHandler}>
         <Switch>
           <Route path={Path.Home} component={Home} />
           <Route path={Path.AddHabit} component={AddHabit} />

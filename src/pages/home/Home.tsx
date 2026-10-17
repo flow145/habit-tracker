@@ -29,6 +29,7 @@ export const Home = () => {
   return (
     <Layout
       title={t('Home.title')}
+      compact
       endSlot={
         <>
           <Button

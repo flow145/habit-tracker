@@ -78,7 +78,7 @@ export const HabitDetails = () => {
 
   return (
     <Layout title={t('HabitDetails.title')} startSlot={startSlot} endSlot={endSlot}>
-      <div className={styles.container} style={colors}>
+      <div className={styles.content} style={colors}>
         <div className={styles.details}>
           <div className={styles.colorBar} />
           <h2 className={clsx(styles.name, 'heading')}>{habit.name}</h2>
