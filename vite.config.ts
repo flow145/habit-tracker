@@ -42,7 +42,7 @@ export default defineConfig({
           'A simple, cross-platform, local-first habit tracker with flexible schedules and strength score instead of streaks.',
         display: 'standalone',
         background_color: '#B9BBC6',
-        theme_color: '#FCFCFD',
+        theme_color: '#FCFCFD', // slate-1
         icons: [
           {
             src: '/pwa-192x192.png',
