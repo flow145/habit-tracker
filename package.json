@@ -1,7 +1,7 @@
 {
   "name": "habit-tracker",
   "description": "A simple, cross-platform, local-first habit tracker with flexible schedules and strength score instead of streaks.",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "private": true,
   "type": "module",
   "license": "MIT",
