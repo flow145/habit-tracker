@@ -127,24 +127,21 @@ describe('buildComputedEntries', () => {
         lastDay: day(3),
       },
     },
-  ])('returns expected statuses for a schedule of every day (%$)', ({
-    start,
-    end,
-    schedule,
-    entries,
-    expected,
-  }) => {
-    const computedEntries = buildComputedEntries({
-      start,
-      end,
-      entries: entriesByDay(entries),
-      schedule,
-    })
+  ])(
+    'returns expected statuses for a schedule of every day (%$)',
+    ({ start, end, schedule, entries, expected }) => {
+      const computedEntries = buildComputedEntries({
+        start,
+        end,
+        entries: entriesByDay(entries),
+        schedule,
+      })
 
-    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
-    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
-  })
+      expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+      expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+      expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
+    },
+  )
 
   it.each<BuildComputedEntriesTestCase>([
     {
@@ -297,24 +294,21 @@ describe('buildComputedEntries', () => {
         lastDay: day(4),
       },
     },
-  ])('returns expected statuses for 2 times in 3 days (%$)', ({
-    start,
-    end,
-    schedule,
-    entries,
-    expected,
-  }) => {
-    const computedEntries = buildComputedEntries({
-      start,
-      end,
-      entries: entriesByDay(entries),
-      schedule,
-    })
+  ])(
+    'returns expected statuses for 2 times in 3 days (%$)',
+    ({ start, end, schedule, entries, expected }) => {
+      const computedEntries = buildComputedEntries({
+        start,
+        end,
+        entries: entriesByDay(entries),
+        schedule,
+      })
 
-    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
-    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
-  })
+      expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+      expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+      expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
+    },
+  )
 
   it.each<BuildComputedEntriesTestCase>([
     {
@@ -498,24 +492,21 @@ describe('buildComputedEntries', () => {
         lastDay: day(10),
       },
     },
-  ])('returns expected statuses for 3 times in a week (%$)', ({
-    start,
-    end,
-    schedule,
-    entries,
-    expected,
-  }) => {
-    const computedEntries = buildComputedEntries({
-      start,
-      end,
-      entries: entriesByDay(entries),
-      schedule,
-    })
+  ])(
+    'returns expected statuses for 3 times in a week (%$)',
+    ({ start, end, schedule, entries, expected }) => {
+      const computedEntries = buildComputedEntries({
+        start,
+        end,
+        entries: entriesByDay(entries),
+        schedule,
+      })
 
-    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
-    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
-  })
+      expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+      expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+      expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
+    },
+  )
 
   it.each<BuildComputedEntriesTestCase>([
     {
@@ -595,24 +586,21 @@ describe('buildComputedEntries', () => {
         lastDay: day(2, 4),
       },
     },
-  ])('returns expected statuses for once in a month (%$)', ({
-    start,
-    end,
-    schedule,
-    entries,
-    expected,
-  }) => {
-    const computedEntries = buildComputedEntries({
-      start,
-      end,
-      entries: entriesByDay(entries),
-      schedule,
-    })
+  ])(
+    'returns expected statuses for once in a month (%$)',
+    ({ start, end, schedule, entries, expected }) => {
+      const computedEntries = buildComputedEntries({
+        start,
+        end,
+        entries: entriesByDay(entries),
+        schedule,
+      })
 
-    expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
-    expect(computedEntries[0]?.day).toEqual(expected.firstDay)
-    expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
-  })
+      expect(computedEntries.map(({ status }) => status)).toEqual(expected.statuses)
+      expect(computedEntries[0]?.day).toEqual(expected.firstDay)
+      expect(computedEntries.at(-1)?.day).toEqual(expected.lastDay)
+    },
+  )
 
   it('derives not-required from entries before the range within the schedule margin', () => {
     const computedEntries = buildComputedEntries({

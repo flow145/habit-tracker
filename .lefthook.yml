@@ -2,11 +2,11 @@ pre-commit:
   commands:
     check:
       run: pnpm check:fix {staged_files}
-      glob: "*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,json,jsonc,html,css}"
+      glob: '*.{js,cjs,mjs,jsx,ts,cts,mts,tsx,json,jsonc,html,css,md,yaml,yml}'
       stage_fixed: true
     test:
       run: pnpm vitest related --run --passWithNoTests {staged_files}
-      glob: "*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
+      glob: '*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}'
 
 commit-msg:
   commands:

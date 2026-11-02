@@ -47,24 +47,23 @@ describe('calculateStrength', () => {
       schedule: { frequency: 31, interval: 1, intervalUnit: 'months' },
       expected: 0.05 - (0.00333375 * 31) / (365.25 / 12),
     },
-  ])('normalizes decay for the schedule without capping monthly weights (%$)', ({
-    schedule,
-    expected,
-  }) => {
-    expect(calculateStrength(computedEntries('complete', 'incomplete'), schedule)[1]).toBeCloseTo(
-      expected,
-      12,
-    )
-  })
+  ])(
+    'normalizes decay for the schedule without capping monthly weights (%$)',
+    ({ schedule, expected }) => {
+      expect(calculateStrength(computedEntries('complete', 'incomplete'), schedule)[1]).toBeCloseTo(
+        expected,
+        12,
+      )
+    },
+  )
 
-  it.each<Schedule>([
-    everyDay,
-    twoIn3Days,
-    everyMonth,
-  ])('uses fixed growth per completion regardless of schedule (%$)', (schedule) => {
-    const history = computedEntries(...Array<ComputedStatus>(100).fill('complete'))
-    expect(calculateStrength(history, schedule).at(-1)).toBeCloseTo(1 - 0.95 ** 100, 12)
-  })
+  it.each<Schedule>([everyDay, twoIn3Days, everyMonth])(
+    'uses fixed growth per completion regardless of schedule (%$)',
+    (schedule) => {
+      const history = computedEntries(...Array<ComputedStatus>(100).fill('complete'))
+      expect(calculateStrength(history, schedule).at(-1)).toBeCloseTo(1 - 0.95 ** 100, 12)
+    },
+  )
 
   it('keeps strength finite and bounded over long growth and decay histories', () => {
     const history = computedEntries(
