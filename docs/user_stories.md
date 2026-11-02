@@ -7,8 +7,8 @@
 
 - As a user, I want to see all my habits on a shared timeline with their day statuses so that I can understand recent progress and know what needs my attention today
 - As a user, I want to see the last few days of each habit so that
-    - I remember whether I've recently completed it
-    - I am inspired by my progress
+  - I remember whether I've recently completed it
+  - I am inspired by my progress
 - As a user, I want to record or correct completion for today and recent past days so that my history remains accurate
 - As a user, I want to reveal dates in the timeline when I need them so that I can identify a day without the timeline always feeling cluttered
 
@@ -20,9 +20,9 @@
 ## Update habits
 
 - As a user, I want to edit existing habits so that
-    - I can update schedule
-    - I can update the habit details and keep it meaningful
-    - I can correct mistakes
+  - I can update schedule
+  - I can update the habit details and keep it meaningful
+  - I can correct mistakes
 - As a user, I want to give each habit a color so that I can distinguish my habits at a glance
 - As a user, I want to delete habits that I no longer need so that my habit list stays relevant
 
