@@ -1,0 +1,36 @@
+.content {
+  display: grid;
+  gap: 24px;
+  padding-block: 16px;
+}
+
+.description {
+  text-wrap: initial;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.dialogDescription {
+  margin-block-start: 12px;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 8px;
+  justify-content: end;
+  margin-block-start: 24px;
+}
+
+@media (width >= 450px) {
+  .form {
+    gap: 32px;
+  }
+
+  .dialogActions {
+    gap: 12px;
+  }
+}

@@ -5,6 +5,7 @@ import { EditHabit } from '~/pages/edit-habit'
 import { HabitDetails } from '~/pages/habit-details'
 import { Home } from '~/pages/home'
 import { Settings } from '~/pages/settings'
+import { Sync } from '~/pages/sync'
 import { Path } from '~/shared/routes'
 import { SnackbarProvider } from '~/shared/ui/Snackbar'
 
@@ -23,6 +24,7 @@ export const App = () => {
           <Route path={Path.AddHabit} component={AddHabit} />
           <Route path={`${Path.EditHabit}/:id`} component={EditHabit} />
           <Route path={Path.Settings} component={Settings} />
+          <Route path={Path.Sync} component={Sync} />
           <Route path='/:id' component={HabitDetails} />
           <Route>
             <Redirect to={Path.Home} />

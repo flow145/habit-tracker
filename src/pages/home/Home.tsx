@@ -1,4 +1,4 @@
-import { Plus, Settings } from 'lucide-react'
+import { Cloud, Plus, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useHabitStore } from '~/entities/habit'
@@ -30,6 +30,15 @@ export const Home = () => {
     <Layout
       title={t('Home.title')}
       compact
+      startSlot={
+        <Button
+          variant='ghost'
+          icon={<Cloud />}
+          as='Link'
+          to={Path.Sync}
+          aria-label={t('Home.sync')}
+        />
+      }
       endSlot={
         <>
           <Button

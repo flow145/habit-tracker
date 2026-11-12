@@ -3,4 +3,5 @@ export enum Path {
   AddHabit = '/add',
   EditHabit = '/edit',
   Settings = '/settings',
+  Sync = '/sync',
 }

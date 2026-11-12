@@ -19,6 +19,7 @@
     "title": "Habits",
     "addHabit": "Add habit",
     "settings": "Settings",
+    "sync": "Sync",
     "empty": "No habits yet"
   },
   "HabitItem": {
@@ -116,6 +117,28 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
+    }
+  },
+  "Sync": {
+    "title": "Sync",
+    "description": "Sign in to sync your habits across devices",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "sendCode": "Send code",
+    "otpLabel": "One-time code from your email",
+    "signIn": "Sign in",
+    "resendCode": "Resend code ({{seconds}}s)",
+    "signedInAs": "You are signed in as {{email}}",
+    "signOut": "Sign out",
+    "deleteAccount": "Delete account",
+    "cancel": "Cancel",
+    "signOutDialog": {
+      "title": "Sign out?",
+      "description": "Your habits will remain on this device, but synchronization will stop"
+    },
+    "deleteAccountDialog": {
+      "title": "Delete your account?",
+      "description": "Your account and synchronized data will be permanently deleted. Your local habits will remain on this device"
     }
   },
   "OTPField": {
