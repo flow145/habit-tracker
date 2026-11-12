@@ -118,6 +118,9 @@
       "dark": "Dark"
     }
   },
+  "OTPField": {
+    "characterLabel": "Character {{position}} of {{length}}"
+  },
   "HabitDetails": {
     "title": "Habit details",
     "created": "Created {{date}}",
