@@ -1,4 +1,5 @@
 import { clsx } from 'clsx'
+import { LoaderCircle } from 'lucide-react'
 import type { ComponentProps, ReactElement } from 'react'
 import { Link } from 'wouter'
 
@@ -16,6 +17,7 @@ interface ButtonSharedProps {
 
 type ButtonAsButtonProps = Omit<ComponentProps<'button'>, 'color'> & {
   as?: 'button'
+  loading?: boolean
 }
 
 type ButtonAsAnchorProps = Omit<ComponentProps<'a'>, 'color'> & {
@@ -75,10 +77,18 @@ export const Button = ({
     )
   }
 
-  const { as, ...rest } = props
+  const { as, loading = false, ...rest } = props
   return (
-    <button type='button' className={classes} data-appearance={appearance} {...rest}>
+    <button
+      type='button'
+      className={clsx(classes, loading && styles.loading)}
+      data-appearance={appearance}
+      aria-busy={loading || undefined}
+      disabled={loading}
+      {...rest}
+    >
       {content}
+      {loading && <LoaderCircle size={20} className={styles.loader} />}
     </button>
   )
 }
