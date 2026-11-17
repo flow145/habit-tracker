@@ -1,0 +1,87 @@
+.content {
+  display: grid;
+  gap: 24px;
+  padding-block: 16px;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  padding-block: 48px;
+}
+
+.spinner {
+  animation: spinner-spin 1s linear infinite;
+}
+
+.empty {
+  display: grid;
+  gap: 24px;
+  align-self: center;
+  justify-items: center;
+  padding-block: 16px;
+  color: var(--neutral-11);
+  text-align: center;
+}
+
+.description {
+  text-wrap: initial;
+}
+
+.reveal {
+  display: grid;
+  animation: otp-reveal 200ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.otp {
+  min-block-size: 0;
+  overflow: clip;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.dialogDescription {
+  margin-block-start: 12px;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 8px;
+  justify-content: end;
+  margin-block-start: 24px;
+}
+
+@media (width >= 450px) {
+  .form {
+    gap: 32px;
+  }
+
+  .dialogActions {
+    gap: 12px;
+  }
+}
+
+@keyframes spinner-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* also collapses the 24px `.content` gap above the field so it grows with the field */
+@keyframes otp-reveal {
+  from {
+    grid-template-rows: 0fr;
+    margin-block-start: -24px;
+    opacity: 0;
+  }
+
+  to {
+    grid-template-rows: 1fr;
+    margin-block-start: 0;
+    opacity: 1;
+  }
+}

@@ -1,3 +1,5 @@
+# Web app architecture
+
 ## Tools
 
 - package manager: pnpm

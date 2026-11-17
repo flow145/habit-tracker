@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly MODE: 'production' | 'development' | 'test'
   readonly TEST: boolean
   readonly VITE_DB_NAME: string
+  readonly VITE_BACKEND_URL: string
 }
 
 interface ImportMeta {

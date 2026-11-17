@@ -1,3 +1,5 @@
+# Web app features
+
 ## Alpha 1
 
 - [x] create habits (only yes/no, name, notes)
@@ -18,3 +20,8 @@
 - [x] habit colors
 - [x] habit strength
 - [x] view and edit full habit history
+
+## Alpha 3
+
+- [ ] auth
+- [ ] sync
