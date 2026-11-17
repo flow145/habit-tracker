@@ -11,7 +11,7 @@
 }
 
 .spinner {
-  animation: sync-spinner-spin 1s linear infinite;
+  animation: spinner-spin 1s linear infinite;
 }
 
 .empty {
@@ -26,6 +26,16 @@
 
 .description {
   text-wrap: initial;
+}
+
+.reveal {
+  display: grid;
+  animation: otp-reveal 200ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.otp {
+  min-block-size: 0;
+  overflow: clip;
 }
 
 .actions {
@@ -45,12 +55,6 @@
   margin-block-start: 24px;
 }
 
-@keyframes sync-spinner-spin {
-  to {
-    rotate: 1turn;
-  }
-}
-
 @media (width >= 450px) {
   .form {
     gap: 32px;
@@ -58,5 +62,26 @@
 
   .dialogActions {
     gap: 12px;
+  }
+}
+
+@keyframes spinner-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* also collapses the 24px `.content` gap above the field so it grows with the field */
+@keyframes otp-reveal {
+  from {
+    grid-template-rows: 0fr;
+    margin-block-start: -24px;
+    opacity: 0;
+  }
+
+  to {
+    grid-template-rows: 1fr;
+    margin-block-start: 0;
+    opacity: 1;
   }
 }

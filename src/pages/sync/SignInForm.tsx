@@ -154,18 +154,21 @@ export const SignInForm = () => {
           ref={emailFieldRef}
         />
         {step === 'otp' && (
-          <OTPField
-            name='otp'
-            label={t('Sync.otpLabel')}
-            autoComplete='one-time-code'
-            autoSubmit
-            value={otp}
-            onValueChange={setOtp}
-            validate={validateOtp}
-            length={OTP_LENGTH}
-            disabled={isSignInPending}
-            firstInputRef={otpInputRef}
-          />
+          <div className={styles.reveal}>
+            <OTPField
+              className={styles.otp}
+              name='otp'
+              label={t('Sync.otpLabel')}
+              autoComplete='one-time-code'
+              autoSubmit
+              value={otp}
+              onValueChange={setOtp}
+              validate={validateOtp}
+              length={OTP_LENGTH}
+              disabled={isSignInPending}
+              firstInputRef={otpInputRef}
+            />
+          </div>
         )}
         <div className={styles.actions}>
           {step === 'email' && (
