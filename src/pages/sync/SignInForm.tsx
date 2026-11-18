@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 
+import { signIn as signInWithOtp } from '~/entities/auth'
 import { authClient, authErrors, OTP_LENGTH } from '~/shared/auth'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
@@ -82,9 +83,11 @@ export const SignInForm = () => {
     setIsSignInPending(true)
 
     try {
-      const { error } = await authClient.signIn.emailOtp({ email: trimmedEmail, otp })
+      const { error } = await signInWithOtp(trimmedEmail, otp)
 
       if (!error) return
+
+      setIsSignInPending(false)
 
       if (error.code === authErrors.INVALID_OTP) {
         setErrors({ otp: t('Sync.errors.otpInvalid') })
@@ -96,9 +99,8 @@ export const SignInForm = () => {
         showSnackbar(t('notifications.requestFailed'))
       }
     } catch {
-      showSnackbar(t('notifications.requestFailed'))
-    } finally {
       setIsSignInPending(false)
+      showSnackbar(t('notifications.requestFailed'))
     }
   }
 
