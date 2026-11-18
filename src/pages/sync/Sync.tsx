@@ -1,7 +1,7 @@
 import { ChevronLeft, LoaderCircle, RotateCcw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { authClient } from '~/shared/auth'
+import { checkAuth, useAuthState } from '~/entities/auth'
 import { usePageTitle } from '~/shared/lib'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
@@ -13,17 +13,13 @@ import { SyncStatus } from './SyncStatus'
 
 export const Sync = () => {
   const { t } = useTranslation()
-  const { data: auth, error, isPending, refetch } = authClient.useSession()
-
-  const isUnreachable = !isPending && !auth && error && error.status !== 401
-  const isNotAuthenticated = !isPending && !auth && !isUnreachable
-  const isAuthenticated = !isPending && auth
+  const auth = useAuthState()
 
   usePageTitle(t('Sync.title'))
 
   return (
     <>
-      {(isPending || isUnreachable) && (
+      {(auth.status === 'checking' || auth.status === 'unreachable') && (
         <Layout
           title={t('Sync.title')}
           startSlot={
@@ -36,23 +32,23 @@ export const Sync = () => {
             />
           }
         >
-          {isPending && (
+          {auth.status === 'checking' && (
             <div className={styles.loading} aria-busy>
               <LoaderCircle className={styles.spinner} />
             </div>
           )}
-          {isUnreachable && (
+          {auth.status === 'unreachable' && (
             <div className={styles.empty}>
               <h2 className={'subheading'}>{t('Sync.unreachable')}</h2>
-              <Button icon={<RotateCcw />} onClick={() => refetch()}>
+              <Button icon={<RotateCcw />} loading={auth.isRetrying} onClick={() => checkAuth()}>
                 {t('Sync.retry')}
               </Button>
             </div>
           )}
         </Layout>
       )}
-      {isNotAuthenticated && <SignInForm />}
-      {isAuthenticated && <SyncStatus email={auth.user.email} />}
+      {auth.status === 'signedOut' && <SignInForm />}
+      {auth.status === 'signedIn' && <SyncStatus email={auth.email} />}
     </>
   )
 }

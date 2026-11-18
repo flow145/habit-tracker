@@ -3,7 +3,7 @@ import { ChevronLeft, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { authClient } from '~/shared/auth'
+import { signOut } from '~/entities/auth'
 import { Path } from '~/shared/routes'
 import { Button } from '~/shared/ui/Button'
 import { Dialog } from '~/shared/ui/Dialog'
@@ -33,18 +33,15 @@ export const SyncStatus = ({ email }: SyncStatusProps) => {
     setIsSignOutPending(true)
 
     try {
-      const { error } = await authClient.signOut()
+      const { error } = await signOut()
 
-      if (error) {
-        showSnackbar(t('notifications.requestFailed'))
-        return
-      }
+      if (!error) return
 
-      setIsSignOutDialogOpen(false)
-    } catch {
-      showSnackbar(t('notifications.requestFailed'))
-    } finally {
       setIsSignOutPending(false)
+      showSnackbar(t('notifications.requestFailed'))
+    } catch {
+      setIsSignOutPending(false)
+      showSnackbar(t('notifications.requestFailed'))
     }
   }
 
