@@ -23,12 +23,7 @@ export const Sync = () => {
 
   return (
     <>
-      {isPending && (
-        <div className={styles.loading} aria-busy>
-          <LoaderCircle className={styles.spinner} />
-        </div>
-      )}
-      {isUnreachable && (
+      {(isPending || isUnreachable) && (
         <Layout
           title={t('Sync.title')}
           startSlot={
@@ -41,12 +36,19 @@ export const Sync = () => {
             />
           }
         >
-          <div className={styles.empty}>
-            <h2 className={'subheading'}>{t('Sync.unreachable')}</h2>
-            <Button icon={<RotateCcw />} onClick={() => refetch()}>
-              {t('Sync.retry')}
-            </Button>
-          </div>
+          {isPending && (
+            <div className={styles.loading} aria-busy>
+              <LoaderCircle className={styles.spinner} />
+            </div>
+          )}
+          {isUnreachable && (
+            <div className={styles.empty}>
+              <h2 className={'subheading'}>{t('Sync.unreachable')}</h2>
+              <Button icon={<RotateCcw />} onClick={() => refetch()}>
+                {t('Sync.retry')}
+              </Button>
+            </div>
+          )}
         </Layout>
       )}
       {isNotAuthenticated && <SignInForm />}
