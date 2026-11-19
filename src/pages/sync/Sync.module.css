@@ -4,26 +4,6 @@
   padding-block: 16px;
 }
 
-.loading {
-  display: grid;
-  place-items: center;
-  padding-block: 48px;
-}
-
-.spinner {
-  animation: spinner-spin 1s linear infinite;
-}
-
-.empty {
-  display: grid;
-  gap: 24px;
-  align-self: center;
-  justify-items: center;
-  padding-block: 16px;
-  color: var(--neutral-11);
-  text-align: center;
-}
-
 .description {
   text-wrap: initial;
 }
@@ -61,12 +41,6 @@
 
   .dialogActions {
     gap: 12px;
-  }
-}
-
-@keyframes spinner-spin {
-  to {
-    rotate: 1turn;
   }
 }
 

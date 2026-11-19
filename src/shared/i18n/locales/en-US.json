@@ -123,8 +123,6 @@
   "Sync": {
     "title": "Sync",
     "description": "Sign in to sync your habits across devices",
-    "unreachable": "Can’t reach the server",
-    "retry": "Try again",
     "email": "Email",
     "emailPlaceholder": "email@example.com",
     "sendCode": "Send code",
