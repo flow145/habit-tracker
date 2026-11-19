@@ -30,12 +30,11 @@
 
 .reveal {
   display: grid;
-  animation: otp-reveal 200ms cubic-bezier(0.2, 0, 0, 1) both;
+  animation: otp-reveal 300ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 .otp {
   min-block-size: 0;
-  overflow: clip;
 }
 
 .actions {
