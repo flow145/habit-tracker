@@ -1,1 +1,1 @@
-export { type AuthState, checkAuth, signIn, signOut, useAuthState } from './auth-state'
+export { type AuthState, signIn, signOut, useAuthState } from './auth-state'

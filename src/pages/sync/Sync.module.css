@@ -4,38 +4,17 @@
   padding-block: 16px;
 }
 
-.loading {
-  display: grid;
-  place-items: center;
-  padding-block: 48px;
-}
-
-.spinner {
-  animation: spinner-spin 1s linear infinite;
-}
-
-.empty {
-  display: grid;
-  gap: 24px;
-  align-self: center;
-  justify-items: center;
-  padding-block: 16px;
-  color: var(--neutral-11);
-  text-align: center;
-}
-
 .description {
   text-wrap: initial;
 }
 
 .reveal {
   display: grid;
-  animation: otp-reveal 200ms cubic-bezier(0.2, 0, 0, 1) both;
+  animation: otp-reveal 300ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
 .otp {
   min-block-size: 0;
-  overflow: clip;
 }
 
 .actions {
@@ -62,12 +41,6 @@
 
   .dialogActions {
     gap: 12px;
-  }
-}
-
-@keyframes spinner-spin {
-  to {
-    rotate: 1turn;
   }
 }
 
