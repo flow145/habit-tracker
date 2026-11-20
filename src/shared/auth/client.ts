@@ -9,6 +9,7 @@ export const authErrors = {
   INVALID_EMAIL: 'INVALID_EMAIL',
   INVALID_OTP: 'INVALID_OTP',
   OTP_EXPIRED: 'OTP_EXPIRED',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
   TOO_MANY_ATTEMPTS: 'TOO_MANY_ATTEMPTS',
 } as const satisfies { [Code in AuthErrorCode]?: Code }
 

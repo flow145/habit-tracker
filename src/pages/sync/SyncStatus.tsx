@@ -10,6 +10,7 @@ import { Dialog } from '~/shared/ui/Dialog'
 import { Layout } from '~/shared/ui/Layout'
 import { showSnackbar } from '~/shared/ui/Snackbar'
 
+import { DeleteAccountDialog } from './DeleteAccountDialog'
 import styles from './Sync.module.css'
 
 const signOutDialog = Dialog.createHandle()
@@ -22,7 +23,6 @@ export interface SyncStatusProps {
 export const SyncStatus = ({ email }: SyncStatusProps) => {
   const { t } = useTranslation()
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isSignOutPending, setIsSignOutPending] = useState(false)
 
   const handleSignOutDialogOpenChange = (open: boolean) => {
@@ -97,29 +97,7 @@ export const SyncStatus = ({ email }: SyncStatusProps) => {
         </div>
       </Dialog>
 
-      <Dialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-        title={t('Sync.deleteAccountDialog.title')}
-        handle={deleteAccountDialog}
-      >
-        <Dialog.Title className='title'>{t('Sync.deleteAccountDialog.title')}</Dialog.Title>
-        <Dialog.Description className={clsx(styles.dialogDescription, 'body')}>
-          {t('Sync.deleteAccountDialog.description')}
-        </Dialog.Description>
-        <div className={styles.dialogActions}>
-          <Dialog.Close>
-            <Button type='button' variant='ghost'>
-              {t('Sync.cancel')}
-            </Button>
-          </Dialog.Close>
-          <Dialog.Close>
-            <Button type='button' color='danger'>
-              {t('shared.delete')}
-            </Button>
-          </Dialog.Close>
-        </div>
-      </Dialog>
+      <DeleteAccountDialog email={email} handle={deleteAccountDialog} />
     </Layout>
   )
 }

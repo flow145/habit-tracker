@@ -75,3 +75,15 @@ export const signOut = async () => {
   if (!result.error) confirmSignedOut()
   return result
 }
+
+export const deleteUser = async () => {
+  const result = await authClient.deleteUser()
+  if (!result.error) confirmSignedOut()
+  return result
+}
+
+export const requestDeletionOtp = (email: string) =>
+  authClient.emailOtp.sendVerificationOtp({ email, type: 'email-verification' })
+
+export const verifyDeletionOtp = (email: string, otp: string) =>
+  authClient.emailOtp.verifyEmail({ email, otp })
