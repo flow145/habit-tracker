@@ -1,0 +1,38 @@
+.form {
+  display: grid;
+  gap: 24px;
+}
+
+.text {
+  display: grid;
+  gap: 12px;
+}
+
+.reveal {
+  display: grid;
+  animation: otp-reveal 300ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.otp {
+  min-block-size: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actionGroup {
+  display: flex;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+@media (width >= 450px) {
+  .actionGroup {
+    gap: 12px;
+  }
+}

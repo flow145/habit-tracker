@@ -12,6 +12,7 @@
     "changeFailed": "Couldn’t save your changes. Please try again.",
     "storageFull": "Storage is full. Your change wasn’t saved",
     "habitAdded": "Habit added",
+    "accountDeleted": "Account deleted",
     "habitUpdated": "Habit updated",
     "habitDeleted": "Habit deleted",
     "requestFailed": "Something went wrong. Please try again."
@@ -139,7 +140,8 @@
     },
     "deleteAccountDialog": {
       "title": "Delete your account?",
-      "description": "Your account and synchronized data will be permanently deleted. Your local habits will remain on this device"
+      "description": "Your account and synchronized data will be permanently deleted. Your local habits will remain on this device",
+      "resend": "Resend"
     },
     "errors": {
       "emailRequired": "Email is required",
